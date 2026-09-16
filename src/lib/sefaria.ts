@@ -145,6 +145,88 @@ export async function fetchMishnahChapter(
   };
 }
 
+// ── Talmud types ──────────────────────────────────────────────────────────────
+
+export interface TalmudAmudData {
+  amud: "a" | "b";
+  text: string[];          // each segment is one paragraph
+  rashi: string[];
+  tosafot: string[];
+}
+
+export interface TalmudDafData {
+  masechetName: string;
+  dafNumber: number;
+  amudAlef: TalmudAmudData;
+  amudBet: TalmudAmudData;
+}
+
+// Removes Hebrew cantillation / nikud (U+0591–U+05C7)
+export function stripTalmudPunctuation(text: string): string {
+  return text.replace(/[֑-ׇ]/g, "");
+}
+
+// ── Talmud fetch ──────────────────────────────────────────────────────────────
+
+export async function fetchTalmudDaf(
+  sefariaName: string,
+  dafNumber: number
+): Promise<TalmudDafData> {
+  const enc    = encodeURIComponent(sefariaName);
+  const daf    = dafNumber;
+  const rashiPfx  = encodeURIComponent(`Rashi on ${sefariaName}`);
+  const tosafPfx  = encodeURIComponent(`Tosafot on ${sefariaName}`);
+
+  const urls = [
+    `https://www.sefaria.org/api/texts/${enc}.${daf}a?context=0`,
+    `https://www.sefaria.org/api/texts/${enc}.${daf}b?context=0`,
+    `https://www.sefaria.org/api/texts/${rashiPfx}.${daf}a?context=0`,
+    `https://www.sefaria.org/api/texts/${rashiPfx}.${daf}b?context=0`,
+    `https://www.sefaria.org/api/texts/${tosafPfx}.${daf}a?context=0`,
+    `https://www.sefaria.org/api/texts/${tosafPfx}.${daf}b?context=0`,
+  ];
+
+  const settled = await Promise.allSettled(
+    urls.map((u) => fetch(u).then((r) => (r.ok ? r.json() : Promise.reject(new Error(`${r.status} ${u}`)))))
+  );
+
+  function heSegments(result: PromiseSettledResult<unknown>): string[] {
+    if (result.status !== "fulfilled") return [];
+    const data = result.value as Record<string, unknown>;
+    const raw = data.he;
+    if (Array.isArray(raw)) {
+      return (raw as unknown[])
+        .filter((s): s is string => typeof s === "string" && s.trim() !== "")
+        .map(stripHtml);
+    }
+    return [];
+  }
+
+  const [textA, textB, rashiA, rashiB, tosafA, tosafB] = settled;
+
+  const masechetName =
+    (settled[0].status === "fulfilled"
+      ? ((settled[0].value as Record<string, unknown>).index_title as string)
+      : undefined) ?? sefariaName;
+
+  return {
+    masechetName,
+    dafNumber,
+    amudAlef: {
+      amud: "a",
+      text:    heSegments(textA),
+      rashi:   heSegments(rashiA),
+      tosafot: heSegments(tosafA),
+    },
+    amudBet: {
+      amud: "b",
+      text:    heSegments(textB),
+      rashi:   heSegments(rashiB),
+      tosafot: heSegments(tosafB),
+    },
+  };
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function fetchChapterWithCommentaries(

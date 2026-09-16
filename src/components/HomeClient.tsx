@@ -12,10 +12,12 @@ import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { auth, db, googleProvider } from "@/lib/firebase";
 import { TOTAL_DAYS } from "@/lib/tanakhMapping";
 import { TOTAL_MISHNAH_DAYS } from "@/lib/mishnahStructure";
+import { TOTAL_TALMUD_DAYS, getCurrentDafYomiDay } from "@/lib/talmudStructure";
 
 interface UserProgress {
   tanakh929Day: number;
   mishnah525Day: number;
+  talmudDafYomiDay: number;
   createdAt: string;
 }
 
@@ -45,19 +47,25 @@ export default function HomeClient() {
       const defaultData: UserProgress = {
         tanakh929Day: 1,
         mishnah525Day: 1,
+        talmudDafYomiDay: getCurrentDafYomiDay(),
         createdAt: new Date().toISOString(),
       };
       await setDoc(ref, defaultData);
       setProgress(defaultData);
     } else {
       const data = snap.data() as Partial<UserProgress>;
-      // Migrate existing users who signed up before Mishnah track was added
-      if (data.mishnah525Day === undefined) {
-        await updateDoc(ref, { mishnah525Day: 1 });
-        setProgress({ tanakh929Day: 1, createdAt: "", ...data, mishnah525Day: 1 });
-      } else {
-        setProgress(data as UserProgress);
-      }
+      const patch: Partial<UserProgress> = {};
+      if (data.mishnah525Day === undefined) patch.mishnah525Day = 1;
+      if (data.talmudDafYomiDay === undefined) patch.talmudDafYomiDay = getCurrentDafYomiDay();
+      if (Object.keys(patch).length > 0) await updateDoc(ref, patch);
+      setProgress({
+        tanakh929Day: 1,
+        mishnah525Day: 1,
+        talmudDafYomiDay: getCurrentDafYomiDay(),
+        createdAt: "",
+        ...data,
+        ...patch,
+      });
     }
   }
 
@@ -126,7 +134,7 @@ export default function HomeClient() {
             </button>
 
             {/* Track previews for non-signed-in users */}
-            <div className="mt-2 grid w-full max-w-xl grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="mt-2 grid w-full max-w-2xl grid-cols-1 gap-3 sm:grid-cols-3">
               {TRACKS.map((t) => (
                 <div
                   key={t.id}
@@ -152,7 +160,7 @@ export default function HomeClient() {
             </div>
 
             {/* Study track cards */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <StudyCard
                 emoji="📖"
                 title='תנ"ך (929)'
@@ -168,6 +176,14 @@ export default function HomeClient() {
                 currentDay={progress?.mishnah525Day ?? 1}
                 totalDays={TOTAL_MISHNAH_DAYS}
                 href="/study/mishnah"
+              />
+              <StudyCard
+                emoji="🕯️"
+                title="דף יומי"
+                description='דף גמרא ביום עם רש"י ותוספות'
+                currentDay={progress?.talmudDafYomiDay ?? getCurrentDafYomiDay()}
+                totalDays={TOTAL_TALMUD_DAYS}
+                href="/study/talmud"
               />
             </div>
           </div>
@@ -245,6 +261,12 @@ const TRACKS = [
     emoji: "📜",
     title: "משנה יומית",
     description: 'פרק ביום עם ביאור ברטנורא ורמב"ם',
+  },
+  {
+    id: "talmud",
+    emoji: "🕯️",
+    title: "דף יומי",
+    description: 'דף גמרא ביום עם רש"י ותוספות',
   },
 ];
 
