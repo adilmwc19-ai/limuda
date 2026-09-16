@@ -18,6 +18,7 @@ interface UserProgress {
   tanakh929Day: number;
   mishnah525Day: number;
   talmudDafYomiDay: number;
+  talmudPersonalInitialized: boolean;
   createdAt: string;
 }
 
@@ -47,7 +48,8 @@ export default function HomeClient() {
       const defaultData: UserProgress = {
         tanakh929Day: 1,
         mishnah525Day: 1,
-        talmudDafYomiDay: getCurrentDafYomiDay(),
+        talmudDafYomiDay: 1,
+        talmudPersonalInitialized: true,
         createdAt: new Date().toISOString(),
       };
       await setDoc(ref, defaultData);
@@ -56,12 +58,18 @@ export default function HomeClient() {
       const data = snap.data() as Partial<UserProgress>;
       const patch: Partial<UserProgress> = {};
       if (data.mishnah525Day === undefined) patch.mishnah525Day = 1;
-      if (data.talmudDafYomiDay === undefined) patch.talmudDafYomiDay = getCurrentDafYomiDay();
+      // Always reset talmudDafYomiDay to 1 when not yet properly initialized
+      // (covers users who got getCurrentDafYomiDay() written by the old migration)
+      if (!data.talmudPersonalInitialized) {
+        patch.talmudDafYomiDay = 1;
+        patch.talmudPersonalInitialized = true;
+      }
       if (Object.keys(patch).length > 0) await updateDoc(ref, patch);
       setProgress({
         tanakh929Day: 1,
         mishnah525Day: 1,
-        talmudDafYomiDay: getCurrentDafYomiDay(),
+        talmudDafYomiDay: 1,
+        talmudPersonalInitialized: true,
         createdAt: "",
         ...data,
         ...patch,

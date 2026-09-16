@@ -161,9 +161,15 @@ export interface TalmudDafData {
   amudBet: TalmudAmudData;
 }
 
-// Removes Hebrew cantillation / nikud (U+0591–U+05C7)
+// "Vilna mode": remove nikud/cantillation AND modern punctuation added by editors.
+// Geresh ׳ (U+05F3) and gershayim ״ (U+05F4) lie outside the stripped range and
+// are preserved so abbreviations like רמב"ם / ר' remain readable.
 export function stripTalmudPunctuation(text: string): string {
-  return text.replace(/[֑-ׇ]/g, "");
+  return text
+    .replace(/[֑-ׇ]/g, "")              // nikud + cantillation marks
+    .replace(/[,\.?!:;–—\-–—()\[\]{}]/g, "") // modern punctuation
+    .replace(/\s{2,}/g, " ")
+    .trim();
 }
 
 // ── Talmud fetch ──────────────────────────────────────────────────────────────
