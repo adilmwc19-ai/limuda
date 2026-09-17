@@ -28,6 +28,12 @@ function stripHtml(html: string): string {
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    // Catch-all for any other HTML entity Sefaria's markup leaves behind
+    // (&thinsp;, &rlm;, &lrm;, etc. — typographic/directional artifacts with
+    // no Hebrew-text meaning), so raw entity text never reaches the page.
+    .replace(/&[a-zA-Z0-9#]+;/g, "")
+    .replace(/\s{2,}/g, " ")
     .trim();
 }
 

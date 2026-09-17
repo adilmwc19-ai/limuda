@@ -11,7 +11,31 @@ import {
   getTehillimDayInfo,
   getCurrentHebrewDayOfMonth,
 } from "@/lib/tehillimStructure";
-import { fetchTehillimDay, type TehillimDayData } from "@/lib/sefaria";
+import { fetchTehillimDay, type TehillimDayData, type TehillimVerse } from "@/lib/sefaria";
+
+// ─── Psalm 119 verse grouping (8 verses per letter of the alef-bet) ───────────
+
+const HEBREW_ALEFBET = ["א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט", "י", "כ", "ל", "מ", "נ", "ס", "ע", "פ", "צ", "ק", "ר", "ש", "ת"];
+
+interface Psalm119Group {
+  letter: string;
+  verses: TehillimVerse[];
+}
+
+// Psalm 119 is built as 8 verses per letter of the Hebrew alphabet (176 = 22 × 8).
+function groupPsalm119Verses(verses: TehillimVerse[]): Psalm119Group[] {
+  const groups: Psalm119Group[] = [];
+  for (const v of verses) {
+    const letter = HEBREW_ALEFBET[Math.floor((v.verse - 1) / 8)] ?? "";
+    const last = groups[groups.length - 1];
+    if (last && last.letter === letter) {
+      last.verses.push(v);
+    } else {
+      groups.push({ letter, verses: [v] });
+    }
+  }
+  return groups;
+}
 
 // ─── Segmented control helper (shared visual language with the other tracks) ─
 
@@ -233,6 +257,14 @@ export default function StudyTehillimClient() {
   const showDeficientNote =
     paceMode === "global" && viewingDay === 29 && currentHebrew.combineWithDay30;
 
+  // "בחודש העברי" when synced to (or coinciding with) today's real Hebrew date;
+  // "בסבב הלימוד החודשי" when browsing personal progress that doesn't match today.
+  const matchesHebrewToday = viewingDay === currentHebrew.day;
+  const dayModeLabel =
+    paceMode === "global" || matchesHebrewToday
+      ? `יום ${viewingDay} בחודש העברי`
+      : `יום ${viewingDay} בסבב הלימוד החודשי`;
+
   return (
     <main className="flex min-h-screen flex-col bg-slate-50" dir="rtl">
       {/* ── Header ── */}
@@ -246,7 +278,7 @@ export default function StudyTehillimClient() {
                 <span className="mr-2 rounded-full bg-blue-700 px-2 py-0.5 text-xs font-normal">לפי יום בחודש</span>
               )}
             </h1>
-            <p className="text-xs text-blue-300">יום {viewingDay} בחודש העברי</p>
+            <p className="text-xs text-blue-300">{dayModeLabel}</p>
           </div>
           <span className="w-[76px]" aria-hidden="true" />
         </div>
@@ -326,7 +358,7 @@ export default function StudyTehillimClient() {
 
         <div className="mb-6 text-center">
           <h2 className="text-2xl font-bold text-blue-950">{info.description}</h2>
-          <p className="mt-1 text-sm text-slate-400">יום {viewingDay} בחודש העברי</p>
+          <p className="mt-1 text-sm text-slate-400">{dayModeLabel}</p>
         </div>
 
         {showDeficientNote && (
@@ -359,14 +391,34 @@ export default function StudyTehillimClient() {
               dayData.psalms.map((psalm) => (
                 <article key={psalm.number} className="rounded-2xl border border-blue-100 bg-white p-5 shadow-sm">
                   <h3 className="mb-3 text-lg font-bold text-blue-900">תהלים פרק {psalm.number}</h3>
-                  <div className="space-y-2 leading-relaxed text-gray-800 text-base">
-                    {psalm.verses.map((v) => (
-                      <p key={v.verse}>
-                        <span className="ml-2 text-xs font-bold text-blue-500 align-super">{v.verse}</span>
-                        {v.text}
-                      </p>
-                    ))}
-                  </div>
+                  {psalm.number === 119 ? (
+                    <div className="space-y-6">
+                      {groupPsalm119Verses(psalm.verses).map((group, gi) => (
+                        <div key={`${group.letter}-${gi}`}>
+                          <h4 className="mb-2 text-center text-xs font-semibold tracking-wide text-blue-400">
+                            — אות {group.letter}׳ —
+                          </h4>
+                          <div className="space-y-2 leading-relaxed text-gray-800 text-base">
+                            {group.verses.map((v) => (
+                              <p key={v.verse}>
+                                <span className="ml-2 text-xs font-bold text-blue-500 align-super">{v.verse}</span>
+                                {v.text}
+                              </p>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="space-y-2 leading-relaxed text-gray-800 text-base">
+                      {psalm.verses.map((v) => (
+                        <p key={v.verse}>
+                          <span className="ml-2 text-xs font-bold text-blue-500 align-super">{v.verse}</span>
+                          {v.text}
+                        </p>
+                      ))}
+                    </div>
+                  )}
                 </article>
               ))
             )}
