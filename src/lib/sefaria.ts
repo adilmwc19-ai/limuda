@@ -1,4 +1,8 @@
 import { type Commentator, getCommentators } from "@/lib/commentators";
+import {
+  SEFER_HAMITZVOT_SECTIONS,
+  type SeferHaMitzvotSection,
+} from "@/lib/seferHaMitzvotStructure";
 
 export type { Commentator };
 
@@ -397,5 +401,97 @@ export async function getDailyRambamRef(): Promise<DailyRambamRef> {
   return {
     sefariaTreatise: match[1],
     chapter: parseInt(match[2], 10),
+  };
+}
+
+// ── Sefer HaMitzvot types ───────────────────────────────────────────────────
+
+export interface SeferHaMitzvotItemData {
+  sectionTitleHebrew: string;
+  number: number;
+  paragraphs: string[]; // flattened, HTML-stripped Seif paragraphs
+}
+
+// ── Sefer HaMitzvot fetch ────────────────────────────────────────────────────
+
+export async function fetchSeferHaMitzvot(
+  section: SeferHaMitzvotSection,
+  number: number
+): Promise<SeferHaMitzvotItemData> {
+  const sectionInfo = SEFER_HAMITZVOT_SECTIONS.find((s) => s.id === section);
+  if (!sectionInfo) {
+    throw new Error(`מקטע לא ידוע בספר המצוות: ${section}`);
+  }
+
+  const ref = `${sectionInfo.sefariaTreatise} ${number}`;
+  const res = await fetch(`https://www.sefaria.org/api/texts/${encodeURIComponent(ref)}?context=0`);
+  if (!res.ok) {
+    throw new Error(`שגיאה בטעינה מספריא: ${res.status} ${res.statusText}`);
+  }
+  const data = await res.json();
+  // Sefaria returns {"error":"..."} with HTTP 200 for missing refs
+  if (typeof data.error === "string") {
+    throw new Error(data.error as string);
+  }
+
+  return {
+    sectionTitleHebrew: sectionInfo.titleHebrew,
+    number,
+    paragraphs: flattenHeField(data.he),
+  };
+}
+
+// ── Daily Sefer HaMitzvot (global calendar sync, if Sefaria publishes one) ──
+
+export interface DailySeferHaMitzvotRef {
+  section: SeferHaMitzvotSection;
+  number: number;
+}
+
+const SEFER_HAMITZVOT_REF_TO_SECTION: Record<string, SeferHaMitzvotSection> = {
+  Shorashim: "shorashim",
+  "Positive Commandments": "positive",
+  "Negative Commandments": "negative",
+};
+
+// As of this writing, Sefaria's /api/calendars does not include a daily
+// Sefer HaMitzvot cycle (verified directly against the live endpoint — its
+// calendar_items cover Daf Yomi, Daily Mishnah, Daily Rambam, etc., but no
+// "Daily Sefer HaMitzvot"/"Daily Mitzvah" entry). This function still checks
+// for one defensively — by title (matching "Sefer HaMitzvot" or "Mitzvah")
+// rather than an exact string — so global-mode support activates
+// automatically if Sefaria ever adds that track, without a code change.
+// Returns null (not an error) when no such calendar entry exists.
+export async function getDailySeferHaMitzvotRef(): Promise<DailySeferHaMitzvotRef | null> {
+  const res = await fetch("https://www.sefaria.org/api/calendars");
+  if (!res.ok) {
+    throw new Error(`שגיאה בטעינת הלוח היומי מספריא: ${res.status} ${res.statusText}`);
+  }
+  const data = await res.json();
+  const items: unknown[] = Array.isArray(data.calendar_items) ? (data.calendar_items as unknown[]) : [];
+
+  const item = items.find((raw): raw is { ref: string } => {
+    if (typeof raw !== "object" || raw === null) return false;
+    const record = raw as Record<string, unknown>;
+    const title = record.title;
+    const titleEn =
+      typeof title === "object" && title !== null
+        ? (title as Record<string, unknown>).en
+        : undefined;
+    return (
+      typeof titleEn === "string" &&
+      /sefer hamitzvot|daily mitzvah/i.test(titleEn) &&
+      typeof record.ref === "string"
+    );
+  });
+
+  if (!item) return null;
+
+  const match = /^Sefer HaMitzvot, (Shorashim|Positive Commandments|Negative Commandments) (\d+)$/.exec(item.ref);
+  if (!match) return null;
+
+  return {
+    section: SEFER_HAMITZVOT_REF_TO_SECTION[match[1]],
+    number: parseInt(match[2], 10),
   };
 }

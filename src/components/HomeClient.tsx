@@ -14,6 +14,9 @@ import { TOTAL_DAYS } from "@/lib/tanakhMapping";
 import { TOTAL_MISHNAH_DAYS } from "@/lib/mishnahStructure";
 import { TOTAL_TALMUD_DAYS, getCurrentDafYomiDay } from "@/lib/talmudStructure";
 import { TOTAL_RAMBAM_CHAPTERS } from "@/lib/rambamStructure";
+import { TOTAL_SEFER_HAMITZVOT_ITEMS, getGlobalIndex } from "@/lib/seferHaMitzvotStructure";
+
+const SEFER_HAMITZVOT_DEFAULT_INDEX = getGlobalIndex("positive", 1); // 15
 
 interface UserProgress {
   tanakh929Day: number;
@@ -21,6 +24,7 @@ interface UserProgress {
   talmudDafYomiDay: number;
   talmudPersonalInitialized: boolean;
   rambamChapter: number;
+  seferHaMitzvotIndex: number;
   createdAt: string;
 }
 
@@ -53,6 +57,7 @@ export default function HomeClient() {
         talmudDafYomiDay: 1,
         talmudPersonalInitialized: true,
         rambamChapter: 1,
+        seferHaMitzvotIndex: SEFER_HAMITZVOT_DEFAULT_INDEX,
         createdAt: new Date().toISOString(),
       };
       await setDoc(ref, defaultData);
@@ -62,6 +67,7 @@ export default function HomeClient() {
       const patch: Partial<UserProgress> = {};
       if (data.mishnah525Day === undefined) patch.mishnah525Day = 1;
       if (data.rambamChapter === undefined) patch.rambamChapter = 1;
+      if (data.seferHaMitzvotIndex === undefined) patch.seferHaMitzvotIndex = SEFER_HAMITZVOT_DEFAULT_INDEX;
       // Always reset talmudDafYomiDay to 1 when not yet properly initialized
       // (covers users who got getCurrentDafYomiDay() written by the old migration)
       if (!data.talmudPersonalInitialized) {
@@ -75,6 +81,7 @@ export default function HomeClient() {
         talmudDafYomiDay: 1,
         talmudPersonalInitialized: true,
         rambamChapter: 1,
+        seferHaMitzvotIndex: SEFER_HAMITZVOT_DEFAULT_INDEX,
         createdAt: "",
         ...data,
         ...patch,
@@ -147,7 +154,7 @@ export default function HomeClient() {
             </button>
 
             {/* Track previews for non-signed-in users */}
-            <div className="mt-2 grid w-full max-w-3xl grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-2 grid w-full max-w-3xl grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {TRACKS.map((t) => (
                 <div
                   key={t.id}
@@ -173,7 +180,7 @@ export default function HomeClient() {
             </div>
 
             {/* Study track cards */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <StudyCard
                 emoji="📖"
                 title='תנ"ך (929)'
@@ -205,6 +212,14 @@ export default function HomeClient() {
                 currentDay={progress?.rambamChapter ?? 1}
                 totalDays={TOTAL_RAMBAM_CHAPTERS}
                 href="/study/rambam"
+              />
+              <StudyCard
+                emoji="📜"
+                title='ספר המצוות לרמב"ם'
+                description="י״ד השורשים ותרי״ג מצוות בקצב אישי"
+                currentDay={progress?.seferHaMitzvotIndex ?? SEFER_HAMITZVOT_DEFAULT_INDEX}
+                totalDays={TOTAL_SEFER_HAMITZVOT_ITEMS}
+                href="/study/sefer-hamitzvot"
               />
             </div>
           </div>
@@ -294,6 +309,12 @@ const TRACKS = [
     emoji: "⚖️",
     title: 'משנה תורה לרמב"ם',
     description: "פרק ביום מתוך י״ד ספרי הרמב״ם בקצב אישי",
+  },
+  {
+    id: "sefer-hamitzvot",
+    emoji: "📜",
+    title: 'ספר המצוות לרמב"ם',
+    description: "י״ד השורשים ותרי״ג מצוות בקצב אישי",
   },
 ];
 
