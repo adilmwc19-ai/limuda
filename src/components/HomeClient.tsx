@@ -13,12 +13,14 @@ import { auth, db, googleProvider } from "@/lib/firebase";
 import { TOTAL_DAYS } from "@/lib/tanakhMapping";
 import { TOTAL_MISHNAH_DAYS } from "@/lib/mishnahStructure";
 import { TOTAL_TALMUD_DAYS, getCurrentDafYomiDay } from "@/lib/talmudStructure";
+import { TOTAL_RAMBAM_CHAPTERS } from "@/lib/rambamStructure";
 
 interface UserProgress {
   tanakh929Day: number;
   mishnah525Day: number;
   talmudDafYomiDay: number;
   talmudPersonalInitialized: boolean;
+  rambamChapter: number;
   createdAt: string;
 }
 
@@ -50,6 +52,7 @@ export default function HomeClient() {
         mishnah525Day: 1,
         talmudDafYomiDay: 1,
         talmudPersonalInitialized: true,
+        rambamChapter: 1,
         createdAt: new Date().toISOString(),
       };
       await setDoc(ref, defaultData);
@@ -58,6 +61,7 @@ export default function HomeClient() {
       const data = snap.data() as Partial<UserProgress>;
       const patch: Partial<UserProgress> = {};
       if (data.mishnah525Day === undefined) patch.mishnah525Day = 1;
+      if (data.rambamChapter === undefined) patch.rambamChapter = 1;
       // Always reset talmudDafYomiDay to 1 when not yet properly initialized
       // (covers users who got getCurrentDafYomiDay() written by the old migration)
       if (!data.talmudPersonalInitialized) {
@@ -70,6 +74,7 @@ export default function HomeClient() {
         mishnah525Day: 1,
         talmudDafYomiDay: 1,
         talmudPersonalInitialized: true,
+        rambamChapter: 1,
         createdAt: "",
         ...data,
         ...patch,
@@ -142,7 +147,7 @@ export default function HomeClient() {
             </button>
 
             {/* Track previews for non-signed-in users */}
-            <div className="mt-2 grid w-full max-w-2xl grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="mt-2 grid w-full max-w-3xl grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {TRACKS.map((t) => (
                 <div
                   key={t.id}
@@ -168,7 +173,7 @@ export default function HomeClient() {
             </div>
 
             {/* Study track cards */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <StudyCard
                 emoji="📖"
                 title='תנ"ך (929)'
@@ -192,6 +197,14 @@ export default function HomeClient() {
                 currentDay={progress?.talmudDafYomiDay ?? getCurrentDafYomiDay()}
                 totalDays={TOTAL_TALMUD_DAYS}
                 href="/study/talmud"
+              />
+              <StudyCard
+                emoji="⚖️"
+                title='משנה תורה לרמב"ם'
+                description="פרק ביום מתוך י״ד ספרי הרמב״ם בקצב אישי"
+                currentDay={progress?.rambamChapter ?? 1}
+                totalDays={TOTAL_RAMBAM_CHAPTERS}
+                href="/study/rambam"
               />
             </div>
           </div>
@@ -275,6 +288,12 @@ const TRACKS = [
     emoji: "🕯️",
     title: "דף יומי",
     description: 'דף גמרא ביום עם רש"י ותוספות',
+  },
+  {
+    id: "rambam",
+    emoji: "⚖️",
+    title: 'משנה תורה לרמב"ם',
+    description: "פרק ביום מתוך י״ד ספרי הרמב״ם בקצב אישי",
   },
 ];
 

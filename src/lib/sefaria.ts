@@ -306,3 +306,96 @@ export async function fetchChapterWithCommentaries(
     commentators,
   };
 }
+
+// ── Rambam (Mishneh Torah) types ───────────────────────────────────────────────
+
+export interface RambamHalakha {
+  number: number; // 1-based halakhah number within the chapter (printed as א׳, ב׳...)
+  text: string;
+}
+
+export interface RambamChapterData {
+  bookName: string; // Sefaria's title for the treatise, e.g. "Mishneh Torah, Foundations of the Torah"
+  chapterNumber: number;
+  halakhot: RambamHalakha[];
+}
+
+// ── Rambam fetch ─────────────────────────────────────────────────────────────
+
+export async function fetchRambamChapter(
+  sefariaTreatise: string,
+  chapter: number
+): Promise<RambamChapterData> {
+  const ref = `Mishneh Torah, ${sefariaTreatise} ${chapter}`;
+  const res = await fetch(`https://www.sefaria.org/api/texts/${encodeURIComponent(ref)}?context=0`);
+  if (!res.ok) {
+    throw new Error(`שגיאה בטעינת הפרק מספריא: ${res.status} ${res.statusText}`);
+  }
+  const data = await res.json();
+  // Sefaria returns {"error":"..."} with HTTP 200 for missing refs
+  if (typeof data.error === "string") {
+    throw new Error(data.error as string);
+  }
+  const rawHe: unknown[] = Array.isArray(data.he) ? (data.he as unknown[]) : [];
+
+  // Each entry in `he` is one halakhah's text. Preserve the original 1-based
+  // position as the halakhah number *before* dropping empty entries, so
+  // numbering stays correct even if Sefaria has gaps in the array.
+  const halakhot: RambamHalakha[] = rawHe
+    .map((raw, i) => ({ number: i + 1, text: flattenHeField(raw).join(" ") }))
+    .filter((h) => h.text.trim().length > 0);
+
+  return {
+    // Sefaria's texts endpoint exposes this as `indexTitle` (camelCase), not `index_title`.
+    bookName: (data.indexTitle as string) || `Mishneh Torah, ${sefariaTreatise}`,
+    chapterNumber: chapter,
+    halakhot,
+  };
+}
+
+// ── Daily Rambam (global calendar sync) ─────────────────────────────────────
+
+export interface DailyRambamRef {
+  sefariaTreatise: string;
+  chapter: number;
+}
+
+// Sefaria's calendar API lists today's items across all daily-learning
+// tracks. We want the single-chapter-a-day cycle specifically — its
+// title.en is exactly "Daily Rambam" (as opposed to "Daily Rambam (3
+// Chapters)", the three-chapters-a-day cycle, which must NOT match).
+export async function getDailyRambamRef(): Promise<DailyRambamRef> {
+  const res = await fetch("https://www.sefaria.org/api/calendars");
+  if (!res.ok) {
+    throw new Error(`שגיאה בטעינת הלוח היומי מספריא: ${res.status} ${res.statusText}`);
+  }
+  const data = await res.json();
+  const items: unknown[] = Array.isArray(data.calendar_items) ? (data.calendar_items as unknown[]) : [];
+
+  const item = items.find((raw): raw is { ref: string } => {
+    if (typeof raw !== "object" || raw === null) return false;
+    const title = (raw as Record<string, unknown>).title;
+    const titleEn =
+      typeof title === "object" && title !== null
+        ? (title as Record<string, unknown>).en
+        : undefined;
+    return titleEn === "Daily Rambam" && typeof (raw as Record<string, unknown>).ref === "string";
+  });
+
+  if (!item) {
+    throw new Error('לא נמצא "רמב"ם היומי" בלוח השנה של ספריא');
+  }
+
+  // item.ref looks like "Mishneh Torah, Marriage 21" — treatise names can
+  // themselves contain commas (e.g. "Tefillin, Mezuzah and the Torah
+  // Scroll"), so match greedily and only peel off the trailing chapter number.
+  const match = /^Mishneh Torah, (.+) (\d+)$/.exec(item.ref);
+  if (!match) {
+    throw new Error(`תבנית ref לא צפויה עבור רמב"ם יומי: ${item.ref}`);
+  }
+
+  return {
+    sefariaTreatise: match[1],
+    chapter: parseInt(match[2], 10),
+  };
+}
