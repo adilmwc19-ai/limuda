@@ -19,6 +19,11 @@ import { TOTAL_TEHILLIM_DAYS, getCurrentHebrewDayOfMonth } from "@/lib/tehillimS
 
 const SEFER_HAMITZVOT_DEFAULT_INDEX = getGlobalIndex("positive", 1); // 15
 
+function todayDateString(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 interface UserProgress {
   tanakh929Day: number;
   mishnah525Day: number;
@@ -27,6 +32,8 @@ interface UserProgress {
   rambamChapter: number;
   seferHaMitzvotIndex: number;
   tehillimDay: number;
+  lastPerekShirahDate: string | null;
+  perekShirahStreak: number;
   createdAt: string;
 }
 
@@ -61,6 +68,8 @@ export default function HomeClient() {
         rambamChapter: 1,
         seferHaMitzvotIndex: SEFER_HAMITZVOT_DEFAULT_INDEX,
         tehillimDay: 1,
+        lastPerekShirahDate: null,
+        perekShirahStreak: 0,
         createdAt: new Date().toISOString(),
       };
       await setDoc(ref, defaultData);
@@ -72,6 +81,7 @@ export default function HomeClient() {
       if (data.rambamChapter === undefined) patch.rambamChapter = 1;
       if (data.seferHaMitzvotIndex === undefined) patch.seferHaMitzvotIndex = SEFER_HAMITZVOT_DEFAULT_INDEX;
       if (data.tehillimDay === undefined) patch.tehillimDay = 1;
+      if (data.perekShirahStreak === undefined) patch.perekShirahStreak = 0;
       // Always reset talmudDafYomiDay to 1 when not yet properly initialized
       // (covers users who got getCurrentDafYomiDay() written by the old migration)
       if (!data.talmudPersonalInitialized) {
@@ -87,6 +97,8 @@ export default function HomeClient() {
         rambamChapter: 1,
         seferHaMitzvotIndex: SEFER_HAMITZVOT_DEFAULT_INDEX,
         tehillimDay: 1,
+        lastPerekShirahDate: null,
+        perekShirahStreak: 0,
         createdAt: "",
         ...data,
         ...patch,
@@ -234,6 +246,10 @@ export default function HomeClient() {
                 totalDays={TOTAL_TEHILLIM_DAYS}
                 href="/study/tehillim"
               />
+              <PerekShirahCard
+                completedToday={progress?.lastPerekShirahDate === todayDateString()}
+                streak={progress?.perekShirahStreak ?? 0}
+              />
             </div>
           </div>
         )}
@@ -296,6 +312,54 @@ function StudyCard({ emoji, title, description, currentDay, totalDays, href }: S
   );
 }
 
+// ─── Perek Shirah card (status badge instead of a day-counter progress bar) ──
+
+interface PerekShirahCardProps {
+  completedToday: boolean;
+  streak: number;
+}
+
+function PerekShirahCard({ completedToday, streak }: PerekShirahCardProps) {
+  return (
+    <Link
+      href="/study/perek-shirah"
+      className="group flex flex-col rounded-2xl border border-blue-100 bg-white p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md"
+    >
+      {/* Icon + title */}
+      <div className="mb-3 flex items-center gap-3" dir="rtl">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-2xl">
+          🕊️
+        </span>
+        <div>
+          <h3 className="font-bold text-blue-950">פרק שירה יומי</h3>
+          <p className="text-xs text-slate-400">כל פרק שירה, מדי יום — ללא חלוקה לימים</p>
+        </div>
+      </div>
+
+      {/* Status */}
+      <div className="mt-auto space-y-2">
+        <div className="flex items-center justify-between" dir="rtl">
+          <span
+            className={`rounded-full px-3 py-1 text-xs font-semibold ${
+              completedToday ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-500"
+            }`}
+          >
+            {completedToday ? "נקרא היום ✓" : "טרם נקרא היום"}
+          </span>
+          {streak > 0 && <span className="text-xs text-slate-400">רצף {streak} ימים</span>}
+        </div>
+        <div
+          className="mt-3 flex items-center justify-center gap-1.5 rounded-xl bg-blue-950 py-2 text-sm font-semibold text-white transition group-hover:bg-blue-900"
+          dir="rtl"
+        >
+          המשך לימוד
+          <span aria-hidden="true">&larr;</span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 // ─── Track metadata (used in non-signed-in preview) ──────────────────────────
 
 const TRACKS = [
@@ -334,6 +398,12 @@ const TRACKS = [
     emoji: "📖",
     title: "תהלים יומי",
     description: "לפי חלוקת ל' ימי החודש העברי",
+  },
+  {
+    id: "perek-shirah",
+    emoji: "🕊️",
+    title: "פרק שירה יומי",
+    description: "כל פרק שירה, מדי יום",
   },
 ];
 

@@ -4,6 +4,7 @@ import {
   type SeferHaMitzvotSection,
 } from "@/lib/seferHaMitzvotStructure";
 import { getTehillimDayInfo } from "@/lib/tehillimStructure";
+import { PEREK_SHIRAH_SECTIONS } from "@/lib/perekShirahStructure";
 
 export type { Commentator };
 
@@ -577,4 +578,54 @@ export async function fetchTehillimDay(day: number): Promise<TehillimDayData> {
   }
 
   return { day: info.day, psalms };
+}
+
+// ── Perek Shirah types ──────────────────────────────────────────────────────
+
+export interface PerekShirahSectionData {
+  id: string;
+  title: string;
+  lines: string[]; // flattened, HTML-stripped paragraphs
+}
+
+export interface PerekShirahData {
+  sections: PerekShirahSectionData[];
+}
+
+// ── Perek Shirah fetch ───────────────────────────────────────────────────────
+
+export async function fetchFullPerekShirah(): Promise<PerekShirahData> {
+  const settled = await Promise.allSettled(
+    PEREK_SHIRAH_SECTIONS.map(async (section) => {
+      const res = await fetch(`https://www.sefaria.org/api/texts/${encodeURIComponent(section.ref)}?context=0`);
+      if (!res.ok) {
+        throw new Error(`שגיאה בטעינת "${section.title}" מספריא: ${res.status} ${res.statusText}`);
+      }
+      const data = await res.json();
+      if (typeof data.error === "string") {
+        throw new Error(data.error as string);
+      }
+      const sectionData: PerekShirahSectionData = {
+        id: section.id,
+        title: section.title,
+        lines: flattenHeField(data.he),
+      };
+      return sectionData;
+    })
+  );
+
+  const sections: PerekShirahSectionData[] = [];
+  for (const result of settled) {
+    if (result.status === "fulfilled") {
+      sections.push(result.value);
+    } else {
+      console.error("[sefaria] perek shirah section fetch failed:", result.reason);
+    }
+  }
+
+  if (sections.length === 0) {
+    throw new Error("שגיאה בטעינת פרק שירה מספריא");
+  }
+
+  return { sections };
 }
