@@ -15,6 +15,7 @@ import { TOTAL_MISHNAH_DAYS } from "@/lib/mishnahStructure";
 import { TOTAL_TALMUD_DAYS, getCurrentDafYomiDay } from "@/lib/talmudStructure";
 import { TOTAL_RAMBAM_CHAPTERS } from "@/lib/rambamStructure";
 import { TOTAL_SEFER_HAMITZVOT_ITEMS, getGlobalIndex } from "@/lib/seferHaMitzvotStructure";
+import { TOTAL_TEHILLIM_DAYS, getCurrentHebrewDayOfMonth } from "@/lib/tehillimStructure";
 
 const SEFER_HAMITZVOT_DEFAULT_INDEX = getGlobalIndex("positive", 1); // 15
 
@@ -25,6 +26,7 @@ interface UserProgress {
   talmudPersonalInitialized: boolean;
   rambamChapter: number;
   seferHaMitzvotIndex: number;
+  tehillimDay: number;
   createdAt: string;
 }
 
@@ -58,6 +60,7 @@ export default function HomeClient() {
         talmudPersonalInitialized: true,
         rambamChapter: 1,
         seferHaMitzvotIndex: SEFER_HAMITZVOT_DEFAULT_INDEX,
+        tehillimDay: 1,
         createdAt: new Date().toISOString(),
       };
       await setDoc(ref, defaultData);
@@ -68,6 +71,7 @@ export default function HomeClient() {
       if (data.mishnah525Day === undefined) patch.mishnah525Day = 1;
       if (data.rambamChapter === undefined) patch.rambamChapter = 1;
       if (data.seferHaMitzvotIndex === undefined) patch.seferHaMitzvotIndex = SEFER_HAMITZVOT_DEFAULT_INDEX;
+      if (data.tehillimDay === undefined) patch.tehillimDay = 1;
       // Always reset talmudDafYomiDay to 1 when not yet properly initialized
       // (covers users who got getCurrentDafYomiDay() written by the old migration)
       if (!data.talmudPersonalInitialized) {
@@ -82,6 +86,7 @@ export default function HomeClient() {
         talmudPersonalInitialized: true,
         rambamChapter: 1,
         seferHaMitzvotIndex: SEFER_HAMITZVOT_DEFAULT_INDEX,
+        tehillimDay: 1,
         createdAt: "",
         ...data,
         ...patch,
@@ -221,6 +226,14 @@ export default function HomeClient() {
                 totalDays={TOTAL_SEFER_HAMITZVOT_ITEMS}
                 href="/study/sefer-hamitzvot"
               />
+              <StudyCard
+                emoji="📖"
+                title="תהלים יומי"
+                description={`לפי חלוקת ל' ימי החודש העברי — היום יום ${getCurrentHebrewDayOfMonth().day} בחודש`}
+                currentDay={progress?.tehillimDay ?? 1}
+                totalDays={TOTAL_TEHILLIM_DAYS}
+                href="/study/tehillim"
+              />
             </div>
           </div>
         )}
@@ -315,6 +328,12 @@ const TRACKS = [
     emoji: "📜",
     title: 'ספר המצוות לרמב"ם',
     description: "י״ד השורשים ותרי״ג מצוות בקצב אישי",
+  },
+  {
+    id: "tehillim",
+    emoji: "📖",
+    title: "תהלים יומי",
+    description: "לפי חלוקת ל' ימי החודש העברי",
   },
 ];
 

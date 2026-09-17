@@ -3,6 +3,7 @@ import {
   SEFER_HAMITZVOT_SECTIONS,
   type SeferHaMitzvotSection,
 } from "@/lib/seferHaMitzvotStructure";
+import { getTehillimDayInfo } from "@/lib/tehillimStructure";
 
 export type { Commentator };
 
@@ -494,4 +495,80 @@ export async function getDailySeferHaMitzvotRef(): Promise<DailySeferHaMitzvotRe
     section: SEFER_HAMITZVOT_REF_TO_SECTION[match[1]],
     number: parseInt(match[2], 10),
   };
+}
+
+// ── Tehillim (daily, by Hebrew day-of-month) types ──────────────────────────
+
+export interface TehillimVerse {
+  verse: number; // verse number within the psalm (not the array position — matters for day 25/26)
+  text: string;
+}
+
+export interface TehillimPsalmData {
+  number: number;
+  verses: TehillimVerse[];
+}
+
+export interface TehillimDayData {
+  day: number;
+  psalms: TehillimPsalmData[];
+}
+
+// ── Tehillim fetch ───────────────────────────────────────────────────────────
+
+async function fetchPsalm(
+  psalmNumber: number,
+  fromVerse?: number,
+  toVerse?: number
+): Promise<TehillimPsalmData> {
+  const ref = fromVerse && toVerse ? `Psalms ${psalmNumber}:${fromVerse}-${toVerse}` : `Psalms ${psalmNumber}`;
+  const res = await fetch(`https://www.sefaria.org/api/texts/${encodeURIComponent(ref)}?context=0`);
+  if (!res.ok) {
+    throw new Error(`שגיאה בטעינת תהלים ${psalmNumber} מספריא: ${res.status} ${res.statusText}`);
+  }
+  const data = await res.json();
+  if (typeof data.error === "string") {
+    throw new Error(data.error as string);
+  }
+
+  // A single-chapter ref (with or without a verse range) returns a flat `he`
+  // array — one string per verse — so flattenHeField is safe here. (A
+  // multi-chapter range like "Psalms 1-3" would instead nest one array per
+  // chapter, which is why each psalm is fetched with its own ref.)
+  const texts = flattenHeField(data.he);
+  const startVerse = fromVerse ?? 1;
+
+  return {
+    number: psalmNumber,
+    verses: texts.map((text, i) => ({ verse: startVerse + i, text })),
+  };
+}
+
+export async function fetchTehillimDay(day: number): Promise<TehillimDayData> {
+  const info = getTehillimDayInfo(day);
+
+  // Days 25/26 are a single psalm (119) split by verse range.
+  if (info.verseFrom && info.verseTo) {
+    const psalm = await fetchPsalm(info.fromPsalm, info.verseFrom, info.verseTo);
+    return { day: info.day, psalms: [psalm] };
+  }
+
+  const psalmNumbers: number[] = [];
+  for (let p = info.fromPsalm; p <= info.toPsalm; p++) psalmNumbers.push(p);
+
+  const settled = await Promise.allSettled(psalmNumbers.map((n) => fetchPsalm(n)));
+  const psalms: TehillimPsalmData[] = [];
+  for (const result of settled) {
+    if (result.status === "fulfilled") {
+      psalms.push(result.value);
+    } else {
+      console.error("[sefaria] tehillim psalm fetch failed:", result.reason);
+    }
+  }
+
+  if (psalms.length === 0 && psalmNumbers.length > 0) {
+    throw new Error("שגיאה בטעינת תהלים מספריא");
+  }
+
+  return { day: info.day, psalms };
 }
