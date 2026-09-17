@@ -629,3 +629,55 @@ export async function fetchFullPerekShirah(): Promise<PerekShirahData> {
 
   return { sections };
 }
+
+// ── Kitzur Shulchan Aruch types ─────────────────────────────────────────────
+
+export interface KitzurSimanData {
+  siman: number;
+  titleHebrew: string; // e.g. "דיני נטילת ידים שחרית" — "" if Sefaria exposes none
+  paragraphs: string[]; // flattened, HTML-stripped seifim (nikud preserved)
+}
+
+// The siman's descriptive heading isn't always exposed via a dedicated
+// field — when Sefaria doesn't return `heTitle`, the Kitzur's own text often
+// carries it as a bolded first segment (e.g. "<b>דיני נטילת ידים...</b>").
+// Detect and peel that off so it renders as a title, not as seif א.
+function extractKitzurTitle(
+  data: Record<string, unknown>,
+  rawHe: unknown[]
+): { title: string; paragraphs: string[] } {
+  const heTitleRaw = data.heTitle;
+  if (typeof heTitleRaw === "string" && heTitleRaw.trim() !== "") {
+    return { title: stripHtml(heTitleRaw), paragraphs: flattenHeField(rawHe) };
+  }
+
+  const first = rawHe[0];
+  if (typeof first === "string" && /^\s*<(b|strong)>/i.test(first)) {
+    return { title: stripHtml(first), paragraphs: flattenHeField(rawHe.slice(1)) };
+  }
+
+  return { title: "", paragraphs: flattenHeField(rawHe) };
+}
+
+// ── Kitzur Shulchan Aruch fetch ─────────────────────────────────────────────
+
+export async function fetchKitzurSiman(siman: number): Promise<KitzurSimanData> {
+  const ref = `Kitzur Shulchan Aruch ${siman}`;
+  const res = await fetch(`https://www.sefaria.org/api/texts/${encodeURIComponent(ref)}?context=0`);
+  if (!res.ok) {
+    throw new Error(`שגיאה בטעינת הסימן מספריא: ${res.status} ${res.statusText}`);
+  }
+  const data = await res.json();
+  // Sefaria returns {"error":"..."} with HTTP 200 for missing refs
+  if (typeof data.error === "string") {
+    throw new Error(data.error as string);
+  }
+  const rawHe: unknown[] = Array.isArray(data.he) ? (data.he as unknown[]) : [];
+  const { title, paragraphs } = extractKitzurTitle(data, rawHe);
+
+  return {
+    siman,
+    titleHebrew: title,
+    paragraphs,
+  };
+}

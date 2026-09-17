@@ -16,6 +16,7 @@ import { TOTAL_TALMUD_DAYS, getCurrentDafYomiDay } from "@/lib/talmudStructure";
 import { TOTAL_RAMBAM_CHAPTERS } from "@/lib/rambamStructure";
 import { TOTAL_SEFER_HAMITZVOT_ITEMS, getGlobalIndex } from "@/lib/seferHaMitzvotStructure";
 import { TOTAL_TEHILLIM_DAYS, getCurrentHebrewDayOfMonth } from "@/lib/tehillimStructure";
+import { TOTAL_KITZUR_SIMANIM } from "@/lib/kitzurStructure";
 
 const SEFER_HAMITZVOT_DEFAULT_INDEX = getGlobalIndex("positive", 1); // 15
 
@@ -32,6 +33,7 @@ interface UserProgress {
   rambamChapter: number;
   seferHaMitzvotIndex: number;
   tehillimDay: number;
+  kitzurSiman: number;
   lastPerekShirahDate: string | null;
   perekShirahStreak: number;
   createdAt: string;
@@ -68,6 +70,7 @@ export default function HomeClient() {
         rambamChapter: 1,
         seferHaMitzvotIndex: SEFER_HAMITZVOT_DEFAULT_INDEX,
         tehillimDay: 1,
+        kitzurSiman: 1,
         lastPerekShirahDate: null,
         perekShirahStreak: 0,
         createdAt: new Date().toISOString(),
@@ -81,6 +84,7 @@ export default function HomeClient() {
       if (data.rambamChapter === undefined) patch.rambamChapter = 1;
       if (data.seferHaMitzvotIndex === undefined) patch.seferHaMitzvotIndex = SEFER_HAMITZVOT_DEFAULT_INDEX;
       if (data.tehillimDay === undefined) patch.tehillimDay = 1;
+      if (data.kitzurSiman === undefined) patch.kitzurSiman = 1;
       if (data.perekShirahStreak === undefined) patch.perekShirahStreak = 0;
       // Always reset talmudDafYomiDay to 1 when not yet properly initialized
       // (covers users who got getCurrentDafYomiDay() written by the old migration)
@@ -97,6 +101,7 @@ export default function HomeClient() {
         rambamChapter: 1,
         seferHaMitzvotIndex: SEFER_HAMITZVOT_DEFAULT_INDEX,
         tehillimDay: 1,
+        kitzurSiman: 1,
         lastPerekShirahDate: null,
         perekShirahStreak: 0,
         createdAt: "",
@@ -245,6 +250,14 @@ export default function HomeClient() {
                 currentDay={progress?.tehillimDay ?? 1}
                 totalDays={TOTAL_TEHILLIM_DAYS}
                 href="/study/tehillim"
+              />
+              <StudyCard
+                emoji="📚"
+                title="קיצור שולחן ערוך"
+                description="רכ״א סימנים — הלכות היום־יום בקצב אישי"
+                currentDay={progress?.kitzurSiman ?? 1}
+                totalDays={TOTAL_KITZUR_SIMANIM}
+                href="/study/kitzur-shulchan-aruch"
               />
               <PerekShirahCard
                 completedToday={progress?.lastPerekShirahDate === todayDateString()}
@@ -404,6 +417,12 @@ const TRACKS = [
     emoji: "🕊️",
     title: "פרק שירה יומי",
     description: "כל פרק שירה, מדי יום",
+  },
+  {
+    id: "kitzur-shulchan-aruch",
+    emoji: "📚",
+    title: "קיצור שולחן ערוך",
+    description: "רכ״א סימנים — הלכות היום־יום בקצב אישי",
   },
 ];
 
