@@ -26,19 +26,21 @@ function stripHtml(html: string): string {
     .trim();
 }
 
-function extractForVerse(raw: unknown): string[] {
+// Sefaria's `he` field is sometimes a flat string, sometimes string[], and
+// sometimes a nested array (string[][] or deeper) when a line has multiple
+// comments. Flatten fully regardless of depth, then drop empty/blank/null values.
+function flattenHeField(raw: unknown): string[] {
   if (!raw) return [];
-  if (Array.isArray(raw)) {
-    return (raw as unknown[])
-      .filter((s): s is string => typeof s === "string" && s.trim() !== "")
-      .map(stripHtml)
-      .filter((s) => s.length > 0);
-  }
-  if (typeof raw === "string" && raw.trim() !== "") {
-    const cleaned = stripHtml(raw);
-    return cleaned ? [cleaned] : [];
-  }
-  return [];
+  const arr = Array.isArray(raw) ? raw : [raw];
+  return (arr as unknown[])
+    .flat(Infinity)
+    .filter((s): s is string => typeof s === "string" && s.trim() !== "")
+    .map(stripHtml)
+    .filter((s) => s.length > 0);
+}
+
+function extractForVerse(raw: unknown): string[] {
+  return flattenHeField(raw);
 }
 
 async function fetchCommentatorChapter(
@@ -174,46 +176,65 @@ export function stripTalmudPunctuation(text: string): string {
 
 // ── Talmud fetch ──────────────────────────────────────────────────────────────
 
+// Rashi/Tosafot on Talmud are addressed 3 levels deep (Daf, Line, Comment) —
+// a Daf can have several comments per line. Fetching the bare daf ref
+// ("Rashi on Berakhot 3b") only resolves to line 1's comment(s); Sefaria does
+// NOT default to the full daf the way it does for the (2-level) Gemara text
+// itself. We must request an explicit line range ("...3b.1-{lineCount}") to
+// get every line's comments. Since we don't know the line count up front, we
+// first fetch the Gemara text (which does return in full) and use its
+// segment count to build the range for the commentary fetch.
+const MAX_TALMUD_LINES_FALLBACK = 100; // safety net if the Gemara fetch itself fails
+
 export async function fetchTalmudDaf(
   sefariaName: string,
   dafNumber: number
 ): Promise<TalmudDafData> {
-  const enc    = encodeURIComponent(sefariaName);
-  const daf    = dafNumber;
-  const rashiPfx  = encodeURIComponent(`Rashi on ${sefariaName}`);
-  const tosafPfx  = encodeURIComponent(`Tosafot on ${sefariaName}`);
-
-  const urls = [
-    `https://www.sefaria.org/api/texts/${enc}.${daf}a?context=0`,
-    `https://www.sefaria.org/api/texts/${enc}.${daf}b?context=0`,
-    `https://www.sefaria.org/api/texts/${rashiPfx}.${daf}a?context=0`,
-    `https://www.sefaria.org/api/texts/${rashiPfx}.${daf}b?context=0`,
-    `https://www.sefaria.org/api/texts/${tosafPfx}.${daf}a?context=0`,
-    `https://www.sefaria.org/api/texts/${tosafPfx}.${daf}b?context=0`,
-  ];
-
-  const settled = await Promise.allSettled(
-    urls.map((u) => fetch(u).then((r) => (r.ok ? r.json() : Promise.reject(new Error(`${r.status} ${u}`)))))
-  );
-
-  function heSegments(result: PromiseSettledResult<unknown>): string[] {
-    if (result.status !== "fulfilled") return [];
-    const data = result.value as Record<string, unknown>;
-    const raw = data.he;
-    if (Array.isArray(raw)) {
-      return (raw as unknown[])
-        .filter((s): s is string => typeof s === "string" && s.trim() !== "")
-        .map(stripHtml);
-    }
-    return [];
+  // Build a fully-encoded Sefaria ref URL: "Tosafot on Berakhot 2b" → %2F-safe
+  function refUrl(ref: string): string {
+    return `https://www.sefaria.org/api/texts/${encodeURIComponent(ref)}?context=0`;
   }
 
-  const [textA, textB, rashiA, rashiB, tosafA, tosafB] = settled;
+  async function fetchJson(url: string): Promise<Record<string, unknown>> {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`${res.status} ${url}`);
+    return res.json();
+  }
+
+  function heSegments(result: PromiseSettledResult<Record<string, unknown>>): string[] {
+    if (result.status !== "fulfilled") return [];
+    const data = result.value;
+    // Sefaria returns {"error":"..."} with HTTP 200 for missing refs
+    if (typeof data.error === "string") return [];
+    return flattenHeField(data.he);
+  }
+
+  // Phase 1: Gemara text for both amudim — this also tells us how many lines
+  // each amud has, which the commentary fetches in phase 2 need.
+  const [textA, textB] = await Promise.allSettled([
+    fetchJson(refUrl(`${sefariaName} ${dafNumber}a`)),
+    fetchJson(refUrl(`${sefariaName} ${dafNumber}b`)),
+  ]);
+
+  function lineCount(result: PromiseSettledResult<Record<string, unknown>>): number {
+    if (result.status !== "fulfilled") return MAX_TALMUD_LINES_FALLBACK;
+    const he = result.value.he;
+    return Array.isArray(he) && he.length > 0 ? he.length : MAX_TALMUD_LINES_FALLBACK;
+  }
+
+  const linesA = lineCount(textA);
+  const linesB = lineCount(textB);
+
+  // Phase 2: Rashi/Tosafot, requested across the full line range of their amud.
+  const [rashiA, rashiB, tosafA, tosafB] = await Promise.allSettled([
+    fetchJson(refUrl(`Rashi on ${sefariaName} ${dafNumber}a.1-${linesA}`)),
+    fetchJson(refUrl(`Rashi on ${sefariaName} ${dafNumber}b.1-${linesB}`)),
+    fetchJson(refUrl(`Tosafot on ${sefariaName} ${dafNumber}a.1-${linesA}`)),
+    fetchJson(refUrl(`Tosafot on ${sefariaName} ${dafNumber}b.1-${linesB}`)),
+  ]);
 
   const masechetName =
-    (settled[0].status === "fulfilled"
-      ? ((settled[0].value as Record<string, unknown>).index_title as string)
-      : undefined) ?? sefariaName;
+    (textA.status === "fulfilled" ? (textA.value.index_title as string) : undefined) ?? sefariaName;
 
   return {
     masechetName,

@@ -122,8 +122,10 @@ export default function StudyTalmudClient() {
   const [commentator, setCommentator] = useState<CommentatorKey>("rashi");
   const [displayMode, setDisplayMode] = useState<DisplayMode>("nikud");
   const [layoutMode, setLayoutMode] = useState<LayoutMode>("tabs");
-  const [isTocOpen, setIsTocOpen]   = useState(false);
-  const [finishing, setFinishing]   = useState(false);
+  const [isTocOpen, setIsTocOpen]     = useState(false);
+  const [finishing, setFinishing]     = useState(false);
+  const [settingDaf, setSettingDaf]   = useState(false);
+  const [setDafMsg, setSetDafMsg]     = useState<string | null>(null);
 
   // TOC accordion state
   const [openSeder, setOpenSeder]       = useState<string | null>(null);
@@ -192,6 +194,24 @@ export default function StudyTalmudClient() {
   useEffect(() => {
     if (!loading) loadDaf(viewingDay);
   }, [viewingDay, loading, loadDaf]);
+
+  // ── Set current daf as personal starting point ─────────────────────────────
+
+  async function handleSetAsDaf() {
+    if (!user || settingDaf) return;
+    setSettingDaf(true);
+    try {
+      await updateDoc(doc(db, "users", user.uid), {
+        talmudDafYomiDay: viewingDay,
+        talmudPersonalInitialized: true,
+      });
+      setPersonalDay(viewingDay);
+      setSetDafMsg("הדף עודכן כנקודת הלימוד שלך ✓");
+      setTimeout(() => setSetDafMsg(null), 3000);
+    } finally {
+      setSettingDaf(false);
+    }
+  }
 
   // ── Mark finished (personal mode only) ────────────────────────────────────
 
@@ -299,6 +319,16 @@ export default function StudyTalmudClient() {
             >
               ←
             </button>
+            {/* Set as personal daf — shown when browsing away from activeDay in personal mode */}
+            {user && paceMode === "personal" && !isToday && (
+              <button
+                onClick={handleSetAsDaf}
+                disabled={settingDaf}
+                className="rounded-lg border border-indigo-300 bg-indigo-50 px-2.5 py-1 text-xs text-indigo-800 transition hover:bg-indigo-100 disabled:opacity-60"
+              >
+                {settingDaf ? "שומר..." : "📌 קבע כנקודת הלימוד שלי"}
+              </button>
+            )}
             {!isToday && (
               <button
                 onClick={() => setViewingDay(activeDay)}
@@ -347,16 +377,23 @@ export default function StudyTalmudClient() {
               layoutMode={layoutMode}
             />
 
-            {/* Finish button — personal mode, signed in, viewing today */}
-            {user && paceMode === "personal" && isToday && viewingDay < TOTAL_TALMUD_DAYS && (
-              <div className="flex justify-center pt-2">
-                <button
-                  onClick={handleFinished}
-                  disabled={finishing}
-                  className="rounded-xl bg-blue-950 px-8 py-2.5 text-sm font-semibold text-white shadow transition hover:bg-blue-900 active:scale-95 disabled:opacity-60"
-                >
-                  {finishing ? "שומר..." : "סיימתי את הדף ←"}
-                </button>
+            {/* Action row — personal mode, signed in */}
+            {user && paceMode === "personal" && (
+              <div className="flex flex-col items-center gap-2 pt-2">
+                {isToday && viewingDay < TOTAL_TALMUD_DAYS && (
+                  <button
+                    onClick={handleFinished}
+                    disabled={finishing}
+                    className="rounded-xl bg-blue-950 px-8 py-2.5 text-sm font-semibold text-white shadow transition hover:bg-blue-900 active:scale-95 disabled:opacity-60"
+                  >
+                    {finishing ? "שומר..." : "סיימתי את הדף ←"}
+                  </button>
+                )}
+                {setDafMsg && (
+                  <p className="rounded-lg bg-green-50 px-4 py-2 text-sm font-medium text-green-700 border border-green-200">
+                    {setDafMsg}
+                  </p>
+                )}
               </div>
             )}
           </>
@@ -410,7 +447,7 @@ function AmudSection({ amud, label, commentator, displayMode, layoutMode }: Amud
     <div>
       <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-blue-700">{title}</h3>
       {comments.length === 0 ? (
-        <p className="text-sm text-slate-400">אין פירוש לאמוד זה</p>
+        <p className="text-sm text-slate-400">אין פירוש לעמוד זה</p>
       ) : (
         <ul className="space-y-2 text-sm leading-relaxed text-gray-700">
           {comments.map((c, i) => (
