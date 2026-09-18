@@ -17,6 +17,7 @@ import { TOTAL_RAMBAM_CHAPTERS } from "@/lib/rambamStructure";
 import { TOTAL_SEFER_HAMITZVOT_ITEMS, getGlobalIndex } from "@/lib/seferHaMitzvotStructure";
 import { TOTAL_TEHILLIM_DAYS, getCurrentHebrewDayOfMonth } from "@/lib/tehillimStructure";
 import { TOTAL_KITZUR_SIMANIM } from "@/lib/kitzurStructure";
+import { TOTAL_CHOFETZ_CHAIM_UNITS, getChofetzChaimDailyUnit } from "@/lib/chofetzChaimStructure";
 
 const SEFER_HAMITZVOT_DEFAULT_INDEX = getGlobalIndex("positive", 1); // 15
 
@@ -34,6 +35,7 @@ interface UserProgress {
   seferHaMitzvotIndex: number;
   tehillimDay: number;
   kitzurSiman: number;
+  chofetzChaimUnit: number;
   lastPerekShirahDate: string | null;
   perekShirahStreak: number;
   createdAt: string;
@@ -71,6 +73,7 @@ export default function HomeClient() {
         seferHaMitzvotIndex: SEFER_HAMITZVOT_DEFAULT_INDEX,
         tehillimDay: 1,
         kitzurSiman: 1,
+        chofetzChaimUnit: 1,
         lastPerekShirahDate: null,
         perekShirahStreak: 0,
         createdAt: new Date().toISOString(),
@@ -85,6 +88,7 @@ export default function HomeClient() {
       if (data.seferHaMitzvotIndex === undefined) patch.seferHaMitzvotIndex = SEFER_HAMITZVOT_DEFAULT_INDEX;
       if (data.tehillimDay === undefined) patch.tehillimDay = 1;
       if (data.kitzurSiman === undefined) patch.kitzurSiman = 1;
+      if (data.chofetzChaimUnit === undefined) patch.chofetzChaimUnit = 1;
       if (data.perekShirahStreak === undefined) patch.perekShirahStreak = 0;
       // Always reset talmudDafYomiDay to 1 when not yet properly initialized
       // (covers users who got getCurrentDafYomiDay() written by the old migration)
@@ -102,6 +106,7 @@ export default function HomeClient() {
         seferHaMitzvotIndex: SEFER_HAMITZVOT_DEFAULT_INDEX,
         tehillimDay: 1,
         kitzurSiman: 1,
+        chofetzChaimUnit: 1,
         lastPerekShirahDate: null,
         perekShirahStreak: 0,
         createdAt: "",
@@ -258,6 +263,14 @@ export default function HomeClient() {
                 currentDay={progress?.kitzurSiman ?? 1}
                 totalDays={TOTAL_KITZUR_SIMANIM}
                 href="/study/kitzur-shulchan-aruch"
+              />
+              <StudyCard
+                emoji="🕊️"
+                title="חפץ חיים"
+                description={`שתי הלכות ביום — היום יחידה ${getChofetzChaimDailyUnit()}`}
+                currentDay={progress?.chofetzChaimUnit ?? 1}
+                totalDays={TOTAL_CHOFETZ_CHAIM_UNITS}
+                href="/study/chofetz-chaim"
               />
               <PerekShirahCard
                 completedToday={progress?.lastPerekShirahDate === todayDateString()}
@@ -423,6 +436,12 @@ const TRACKS = [
     emoji: "📚",
     title: "קיצור שולחן ערוך",
     description: "רכ״א סימנים — הלכות היום־יום בקצב אישי",
+  },
+  {
+    id: "chofetz-chaim",
+    emoji: "🕊️",
+    title: "חפץ חיים",
+    description: "שתי הלכות ביום — הלכות לשון הרע ורכילות",
   },
 ];
 

@@ -5,6 +5,7 @@ import {
 } from "@/lib/seferHaMitzvotStructure";
 import { getTehillimDayInfo } from "@/lib/tehillimStructure";
 import { PEREK_SHIRAH_SECTIONS } from "@/lib/perekShirahStructure";
+import { getChofetzChaimUnitInfo, type ChofetzChaimGate } from "@/lib/chofetzChaimStructure";
 
 export type { Commentator };
 
@@ -680,4 +681,68 @@ export async function fetchKitzurSiman(siman: number): Promise<KitzurSimanData> 
     titleHebrew: title,
     paragraphs,
   };
+}
+
+// ── Chofetz Chaim types ──────────────────────────────────────────────────────
+
+export interface ChofetzChaimSeifData {
+  seif: number;          // real seif number within the כלל (not relative to the unit)
+  paragraphs: string[];  // flattened, HTML-stripped paragraphs within this seif
+}
+
+export interface ChofetzChaimUnitData {
+  index: number;
+  gate: ChofetzChaimGate;
+  klal?: number;
+  titleHebrew: string;
+  subtitleHebrew: string;
+  // Exactly one of these two is populated, depending on the unit's kind.
+  paragraphs?: string[];              // petichah parts / כלל opening comments
+  seifim?: ChofetzChaimSeifData[];    // seif-pair units, grouped by real seif number
+}
+
+// A single fully-addressed seif (from === to) comes back from Sefaria as a
+// flat array of that seif's own paragraphs. A range (from < to) comes back
+// one dimension higher: an array of per-seif arrays. Both shapes are
+// normalized here into one array-per-seif before flattening each seif's
+// paragraphs, so a multi-paragraph seif is never mistaken for multiple seifim.
+function toPerSeifRaw(he: unknown, seifCount: number): unknown[] {
+  if (seifCount <= 1) return [he];
+  return Array.isArray(he) ? he : [];
+}
+
+// ── Chofetz Chaim fetch ──────────────────────────────────────────────────────
+
+export async function fetchChofetzChaimUnit(unitIndex: number): Promise<ChofetzChaimUnitData> {
+  const unit = getChofetzChaimUnitInfo(unitIndex);
+  const res = await fetch(`https://www.sefaria.org/api/texts/${encodeURIComponent(unit.ref)}?context=0`);
+  if (!res.ok) {
+    throw new Error(`שגיאה בטעינה מספריא: ${res.status} ${res.statusText}`);
+  }
+  const data = await res.json();
+  // Sefaria returns {"error":"..."} with HTTP 200 for missing refs
+  if (typeof data.error === "string") {
+    throw new Error(data.error as string);
+  }
+
+  const base = {
+    index: unit.index,
+    gate: unit.gate,
+    klal: unit.klal,
+    titleHebrew: unit.titleHebrew,
+    subtitleHebrew: unit.subtitleHebrew,
+  };
+
+  if (unit.seifFrom === undefined) {
+    return { ...base, paragraphs: flattenHeField(data.he) };
+  }
+
+  const seifTo = unit.seifTo ?? unit.seifFrom;
+  const seifCount = seifTo - unit.seifFrom + 1;
+  const seifim: ChofetzChaimSeifData[] = toPerSeifRaw(data.he, seifCount).map((raw, i) => ({
+    seif: unit.seifFrom! + i,
+    paragraphs: flattenHeField(raw),
+  }));
+
+  return { ...base, seifim };
 }
