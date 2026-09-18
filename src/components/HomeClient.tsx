@@ -18,6 +18,7 @@ import { TOTAL_SEFER_HAMITZVOT_ITEMS, getGlobalIndex } from "@/lib/seferHaMitzvo
 import { TOTAL_TEHILLIM_DAYS, getCurrentHebrewDayOfMonth } from "@/lib/tehillimStructure";
 import { TOTAL_KITZUR_SIMANIM } from "@/lib/kitzurStructure";
 import { TOTAL_CHOFETZ_CHAIM_UNITS, getChofetzChaimDailyUnit } from "@/lib/chofetzChaimStructure";
+import { TOTAL_MB_SIMANIM, getMishnahBerurahSimanInfo } from "@/lib/mishnahBerurahStructure";
 
 const SEFER_HAMITZVOT_DEFAULT_INDEX = getGlobalIndex("positive", 1); // 15
 
@@ -36,6 +37,7 @@ interface UserProgress {
   tehillimDay: number;
   kitzurSiman: number;
   chofetzChaimUnit: number;
+  mishnahBerurahSiman: number;
   lastPerekShirahDate: string | null;
   perekShirahStreak: number;
   createdAt: string;
@@ -74,6 +76,7 @@ export default function HomeClient() {
         tehillimDay: 1,
         kitzurSiman: 1,
         chofetzChaimUnit: 1,
+        mishnahBerurahSiman: 1,
         lastPerekShirahDate: null,
         perekShirahStreak: 0,
         createdAt: new Date().toISOString(),
@@ -89,6 +92,7 @@ export default function HomeClient() {
       if (data.tehillimDay === undefined) patch.tehillimDay = 1;
       if (data.kitzurSiman === undefined) patch.kitzurSiman = 1;
       if (data.chofetzChaimUnit === undefined) patch.chofetzChaimUnit = 1;
+      if (data.mishnahBerurahSiman === undefined) patch.mishnahBerurahSiman = 1;
       if (data.perekShirahStreak === undefined) patch.perekShirahStreak = 0;
       // Always reset talmudDafYomiDay to 1 when not yet properly initialized
       // (covers users who got getCurrentDafYomiDay() written by the old migration)
@@ -107,6 +111,7 @@ export default function HomeClient() {
         tehillimDay: 1,
         kitzurSiman: 1,
         chofetzChaimUnit: 1,
+        mishnahBerurahSiman: 1,
         lastPerekShirahDate: null,
         perekShirahStreak: 0,
         createdAt: "",
@@ -271,6 +276,14 @@ export default function HomeClient() {
                 currentDay={progress?.chofetzChaimUnit ?? 1}
                 totalDays={TOTAL_CHOFETZ_CHAIM_UNITS}
                 href="/study/chofetz-chaim"
+              />
+              <StudyCard
+                emoji="📜"
+                title="משנה ברורה"
+                description={`${getMishnahBerurahSimanInfo(progress?.mishnahBerurahSiman ?? 1).volumeTitleHebrew} — שו״ע אורח חיים עם ביאור המשנה ברורה`}
+                currentDay={progress?.mishnahBerurahSiman ?? 1}
+                totalDays={TOTAL_MB_SIMANIM}
+                href="/study/mishnah-berurah"
               />
               <PerekShirahCard
                 completedToday={progress?.lastPerekShirahDate === todayDateString()}
@@ -442,6 +455,12 @@ const TRACKS = [
     emoji: "🕊️",
     title: "חפץ חיים",
     description: "שתי הלכות ביום — הלכות לשון הרע ורכילות",
+  },
+  {
+    id: "mishnah-berurah",
+    emoji: "📜",
+    title: "משנה ברורה",
+    description: "שו״ע אורח חיים עם ביאור המשנה ברורה, סעיף אחר סעיף",
   },
 ];
 
