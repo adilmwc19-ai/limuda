@@ -91,6 +91,7 @@ export default function StudyKitzurClient() {
   const [settingItem, setSettingItem]     = useState(false);
   const [setItemMsg, setSetItemMsg]       = useState<string | null>(null);
   const [tocOpen, setTocOpen]             = useState(false);
+  const [activeBookmark, setActiveBookmark] = useState<{ siman: number | string; seifIndex: number } | null>(null);
 
   // ── Auth + Firestore (personal progress) ────────────────────────────────────
 
@@ -101,25 +102,39 @@ export default function StudyKitzurClient() {
         const ref  = doc(db, "users", firebaseUser.uid);
         const snap = await getDoc(ref);
         let personalStart = DEFAULT_SIMAN;
+        let savedBookmark: { siman: number | string; seifIndex: number } | null = null;
         if (snap.exists()) {
           const data = snap.data() as Record<string, unknown>;
           personalStart = typeof data.kitzurSiman === "number" ? data.kitzurSiman : DEFAULT_SIMAN;
           if (typeof data.kitzurSiman !== "number") {
             await updateDoc(ref, { kitzurSiman: DEFAULT_SIMAN });
           }
+          savedBookmark = (data.kitzurBookmark as { siman: number | string; seifIndex: number } | undefined) ?? null;
         } else {
           await setDoc(ref, { kitzurSiman: DEFAULT_SIMAN }, { merge: true });
         }
         setPersonalSiman(personalStart);
         setViewingSiman(personalStart);
+        setActiveBookmark(savedBookmark);
       } else {
         setPersonalSiman(DEFAULT_SIMAN);
         setViewingSiman(DEFAULT_SIMAN);
+        setActiveBookmark(null);
       }
       setAuthLoading(false);
     });
     return () => unsub();
   }, []);
+
+  // Auto-scroll to the bookmarked seif once its siman has finished loading
+  useEffect(() => {
+    if (!simanData || itemLoading) return;
+    if (!activeBookmark) return;
+    const { siman: currentSiman } = getKitzurSimanInfo(viewingSiman);
+    if (activeBookmark.siman !== currentSiman) return;
+    const el = document.getElementById(`kitzur-seif-${activeBookmark.seifIndex}`);
+    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [simanData, itemLoading, activeBookmark, viewingSiman]);
 
   // ── Fetch siman on viewing index change ─────────────────────────────────────
 
@@ -154,6 +169,19 @@ export default function StudyKitzurClient() {
     } finally {
       setSettingItem(false);
     }
+  }
+
+  // ── Toggle bookmark on a seif ("עצרתי כאן") ──────────────────────────────────
+
+  function toggleBookmark(seifIndex: number) {
+    if (!user) return;
+    const { siman: currentSiman } = getKitzurSimanInfo(viewingSiman);
+    const isActive = activeBookmark?.siman === currentSiman && activeBookmark?.seifIndex === seifIndex;
+    const next = isActive ? null : { siman: currentSiman, seifIndex };
+    setActiveBookmark(next);
+    updateDoc(doc(db, "users", user.uid), { kitzurBookmark: next }).catch((err: unknown) => {
+      console.error("[study] kitzur bookmark save failed:", err instanceof Error ? err.message : err);
+    });
   }
 
   // ── Mark finished — advance personal progress ────────────────────────────────
@@ -276,12 +304,48 @@ export default function StudyKitzurClient() {
             {simanData.paragraphs.length === 0 ? (
               <p className="py-8 text-center text-sm text-slate-400">אין טקסט זמין עבור סימן זה</p>
             ) : (
-              <div className="space-y-4 leading-relaxed text-gray-800 text-base">
-                {simanData.paragraphs.map((p, i) => (
-                  <p key={i}>
-                    <span className="ml-1.5 font-bold text-blue-900">{i + 1}.</span> {p}
-                  </p>
-                ))}
+              <div className="space-y-3">
+                {simanData.paragraphs.map((p, i) => {
+                  const isBookmarked = activeBookmark?.siman === siman && activeBookmark?.seifIndex === i;
+                  return (
+                    <div
+                      key={i}
+                      id={`kitzur-seif-${i}`}
+                      className={`scroll-mt-20 flex items-start gap-2 rounded-xl border p-3 transition ${
+                        isBookmarked
+                          ? "border-slate-200 border-r-4 border-r-blue-600 bg-blue-50/40 dark:border-r-blue-400 dark:bg-blue-950/30"
+                          : "border-transparent"
+                      }`}
+                    >
+                      <p className="flex-1 leading-relaxed text-gray-800 text-base">
+                        <span className="ml-1.5 font-bold text-blue-900">{i + 1}.</span> {p}
+                      </p>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); toggleBookmark(i); }}
+                        title="עצרתי כאן"
+                        aria-label={isBookmarked ? "בטל סימנייה" : "סמן כמקום שעצרתי"}
+                        className={`mt-0.5 shrink-0 rounded-lg p-1 transition ${
+                          isBookmarked
+                            ? "text-blue-600 dark:text-blue-400"
+                            : "text-slate-300 hover:text-blue-400"
+                        }`}
+                      >
+                        <svg
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill={isBookmarked ? "currentColor" : "none"}
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M6 3.75A1.75 1.75 0 0 1 7.75 2h8.5A1.75 1.75 0 0 1 18 3.75V21l-6-3.6L6 21V3.75Z" />
+                        </svg>
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </article>
