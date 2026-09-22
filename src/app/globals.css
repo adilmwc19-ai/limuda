@@ -107,3 +107,14 @@ html[data-theme="dark"] [class*="border-blue-"],
 html[data-theme="dark"] [class*="border-indigo-"] {
   border-color: #1e3a8a !important;
 }
+
+/* ─── One-shot bookmark scroll highlight (fades out on its own) ─────────── */
+
+@keyframes study-highlight-fade {
+  0% { background-color: rgba(37, 99, 235, 0.22); }
+  100% { background-color: transparent; }
+}
+
+.study-highlight-pulse {
+  animation: study-highlight-fade 1.5s ease-out;
+}

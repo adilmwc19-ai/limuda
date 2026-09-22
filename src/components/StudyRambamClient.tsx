@@ -189,6 +189,12 @@ function TocModal({ currentGlobalIndex, initialBookId, initialTreatiseId, onSele
 
 type PaceMode = "global" | "personal";
 
+interface RambamBookmark {
+  bookId: "rambam";
+  chapterIndex: number;   // global chapter index (matches getRambamChapterByGlobalIndex)
+  halakhahNumber: number;
+}
+
 export default function StudyRambamClient() {
   const [user, setUser]                 = useState<User | null>(null);
   const [paceMode, setPaceMode]         = useState<PaceMode>("global");
@@ -201,6 +207,8 @@ export default function StudyRambamClient() {
   const [settingChapter, setSettingChapter] = useState(false);
   const [setChapterMsg, setSetChapterMsg]   = useState<string | null>(null);
   const [tocOpen, setTocOpen]           = useState(false);
+  const [activeBookmark, setActiveBookmark] = useState<RambamBookmark | null>(null);
+  const [highlightedHalakhah, setHighlightedHalakhah] = useState<number | null>(null);
 
   // Global "Daily Rambam" sync (Sefaria calendar API)
   const [dailyGlobalIndex, setDailyGlobalIndex] = useState<number | null>(null);
@@ -219,18 +227,22 @@ export default function StudyRambamClient() {
         const ref  = doc(db, "users", firebaseUser.uid);
         const snap = await getDoc(ref);
         let personalStart = 1;
+        let savedBookmark: RambamBookmark | null = null;
         if (snap.exists()) {
           const data = snap.data() as Record<string, unknown>;
           personalStart = typeof data.rambamChapter === "number" ? data.rambamChapter : 1;
           if (typeof data.rambamChapter !== "number") {
             await updateDoc(ref, { rambamChapter: 1 });
           }
+          savedBookmark = (data.rambamBookmark as RambamBookmark | undefined) ?? null;
         } else {
           await setDoc(ref, { rambamChapter: 1 }, { merge: true });
         }
         setPersonalIndex(personalStart);
+        setActiveBookmark(savedBookmark);
       } else {
         setPersonalIndex(1);
+        setActiveBookmark(null);
       }
       setAuthLoading(false);
     });
@@ -257,18 +269,35 @@ export default function StudyRambamClient() {
   }, []);
 
   // Resolve the initial viewingIndex once both auth + the daily calendar have
-  // settled, based on the default pace mode ("global"). If the calendar fetch
+  // settled. A saved bookmark takes priority — it's how "continue reading"
+  // from the home card lands the reader straight back on their halakhah,
+  // regardless of the global/personal pace default. If the calendar fetch
   // failed, fall back to personal mode so the page never gets stuck.
   useEffect(() => {
     if (initialized || authLoading || dailyLoading) return;
-    if (dailyGlobalIndex !== null) {
+    if (activeBookmark) {
+      setPaceMode("personal");
+      setViewingIndex(activeBookmark.chapterIndex);
+    } else if (dailyGlobalIndex !== null) {
       setViewingIndex(dailyGlobalIndex);
     } else {
       setPaceMode("personal");
       setViewingIndex(personalIndex);
     }
     setInitialized(true);
-  }, [initialized, authLoading, dailyLoading, dailyGlobalIndex, personalIndex]);
+  }, [initialized, authLoading, dailyLoading, dailyGlobalIndex, personalIndex, activeBookmark]);
+
+  // Auto-scroll to the bookmarked halakhah once its chapter has finished
+  // loading, with a brief fading highlight so the reader's eye lands on it.
+  useEffect(() => {
+    if (!chapterData || chapterLoading) return;
+    if (!activeBookmark || activeBookmark.chapterIndex !== viewingIndex) return;
+    const el = document.getElementById(`rambam-halakhah-${activeBookmark.halakhahNumber}`);
+    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+    setHighlightedHalakhah(activeBookmark.halakhahNumber);
+    const timer = setTimeout(() => setHighlightedHalakhah(null), 1500);
+    return () => clearTimeout(timer);
+  }, [chapterData, chapterLoading, activeBookmark, viewingIndex]);
 
   const activeIndex = paceMode === "global" ? (dailyGlobalIndex ?? personalIndex) : personalIndex;
 
@@ -316,6 +345,21 @@ export default function StudyRambamClient() {
     } finally {
       setSettingChapter(false);
     }
+  }
+
+  // ── Toggle bookmark on a halakhah ("עצרתי כאן") ──────────────────────────────
+
+  function toggleBookmark(halakhahNumber: number) {
+    if (!user) return;
+    const isActive =
+      activeBookmark?.chapterIndex === viewingIndex && activeBookmark?.halakhahNumber === halakhahNumber;
+    const next: RambamBookmark | null = isActive
+      ? null
+      : { bookId: "rambam", chapterIndex: viewingIndex, halakhahNumber };
+    setActiveBookmark(next);
+    updateDoc(doc(db, "users", user.uid), { rambamBookmark: next }).catch((err: unknown) => {
+      console.error("[rambam] bookmark save failed:", err instanceof Error ? err.message : err);
+    });
   }
 
   // ── Mark finished — advance personal progress (personal mode only) ─────────
@@ -459,13 +503,51 @@ export default function StudyRambamClient() {
             {chapterData.halakhot.length === 0 ? (
               <p className="py-8 text-center text-sm text-slate-400">אין טקסט זמין לפרק זה</p>
             ) : (
-              <div className="space-y-4 leading-relaxed text-gray-800 text-base">
-                {chapterData.halakhot.map((h) => (
-                  <p key={h.number}>
-                    <span className="ml-2 font-bold text-blue-700">{toHebrew(h.number)}.</span>
-                    {h.text}
-                  </p>
-                ))}
+              <div className="space-y-3">
+                {chapterData.halakhot.map((h) => {
+                  const isBookmarked =
+                    activeBookmark?.chapterIndex === viewingIndex && activeBookmark?.halakhahNumber === h.number;
+                  const isHighlighted = highlightedHalakhah === h.number;
+                  return (
+                    <div
+                      key={h.number}
+                      id={`rambam-halakhah-${h.number}`}
+                      className={`scroll-mt-24 flex items-start gap-2 rounded-xl border p-2 leading-relaxed text-base text-gray-800 transition-colors ${
+                        isBookmarked
+                          ? "border-slate-200 border-r-4 border-r-blue-600 bg-blue-50/40 dark:border-r-blue-400 dark:bg-blue-950/30"
+                          : "border-transparent"
+                      } ${isHighlighted ? "study-highlight-pulse" : ""}`}
+                    >
+                      <p className="flex-1">
+                        <span className="ml-2 font-bold text-blue-700 dark:text-blue-400">{toHebrew(h.number)}.</span>
+                        {h.text}
+                      </p>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); toggleBookmark(h.number); }}
+                        title="עצרתי כאן"
+                        aria-label={isBookmarked ? "בטל סימנייה" : "סמן כמקום שעצרתי"}
+                        className={`mt-0.5 shrink-0 rounded-lg p-1 transition ${
+                          isBookmarked
+                            ? "text-blue-600 dark:text-blue-400"
+                            : "text-slate-300 hover:text-blue-400"
+                        }`}
+                      >
+                        <svg
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill={isBookmarked ? "currentColor" : "none"}
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M6 3.75A1.75 1.75 0 0 1 7.75 2h8.5A1.75 1.75 0 0 1 18 3.75V21l-6-3.6L6 21V3.75Z" />
+                        </svg>
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </article>

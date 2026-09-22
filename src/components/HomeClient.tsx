@@ -43,6 +43,7 @@ interface UserProgress {
   tanakhBookmark?: { day: number; verse: number } | null;
   mishnahBookmark?: { day: number; mishnahIndex: number } | null;
   kitzurBookmark?: { siman: number | string; seifIndex: number } | null;
+  rambamBookmark?: { bookId: "rambam"; chapterIndex: number; halakhahNumber: number } | null;
 }
 
 // Small Hebrew-letter numeral, e.g. 1 -> "א׳", 15 -> "ט״ו" (used for verse labels only).
@@ -201,7 +202,8 @@ export default function HomeClient() {
             href="/study/talmud"
           />
         );
-      case "rambam":
+      case "rambam": {
+        const rambamBookmark = progress?.rambamBookmark;
         return (
           <StudyCard
             key={id}
@@ -211,8 +213,14 @@ export default function HomeClient() {
             currentDay={progress?.rambamChapter ?? 1}
             totalDays={TOTAL_RAMBAM_CHAPTERS}
             href="/study/rambam"
+            bookmarkLabel={
+              rambamBookmark
+                ? `המשך מהלכה ${toHebrewVerseNumeral(rambamBookmark.halakhahNumber)}`
+                : undefined
+            }
           />
         );
+      }
       case "sefer-hamitzvot":
         return (
           <StudyCard
