@@ -41,6 +41,7 @@ interface UserProgress {
   activeTracks: string[];
   createdAt: string;
   tanakhBookmark?: { day: number; verse: number } | null;
+  mishnahBookmark?: { day: number; mishnahIndex: number } | null;
 }
 
 // Small Hebrew-letter numeral, e.g. 1 -> "א׳", 15 -> "ט״ו" (used for verse labels only).
@@ -168,7 +169,8 @@ export default function HomeClient() {
           />
         );
       }
-      case "mishnah":
+      case "mishnah": {
+        const mishnahBookmark = progress?.mishnahBookmark;
         return (
           <StudyCard
             key={id}
@@ -178,8 +180,14 @@ export default function HomeClient() {
             currentDay={progress?.mishnah525Day ?? 1}
             totalDays={TOTAL_MISHNAH_DAYS}
             href="/study/mishnah"
+            bookmarkLabel={
+              mishnahBookmark
+                ? `המשך ממשנה ${toHebrewVerseNumeral(mishnahBookmark.mishnahIndex)}`
+                : undefined
+            }
           />
         );
+      }
       case "talmud":
         return (
           <StudyCard
