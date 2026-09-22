@@ -3,6 +3,9 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import ReadingSettingsButton from "@/components/ReadingSettingsModal";
+import { HEADER_BUTTON_CLASS } from "@/components/studyHeaderStyles";
+
+export { HEADER_BUTTON_CLASS, HEADER_ICON_BUTTON_CLASS, HEADER_BADGE_CLASS } from "@/components/studyHeaderStyles";
 
 interface StudyHeaderPagination {
   current: number;
@@ -18,7 +21,7 @@ interface StudyHeaderProps {
   unitLabel: string;
   /** Track/book name, e.g. "קיצור שולחן ערוך". Omit to show unitLabel alone. */
   bookLabel?: string;
-  /** Small tag rendered inside the pill, e.g. "עולמי" / "צפייה" */
+  /** Small tag rendered next to the title, e.g. "עולמי" / "צפייה" */
   badge?: ReactNode;
   backHref?: string;
   /** Extra buttons rendered left of the Aa button (e.g. a TOC toggle) */
@@ -32,7 +35,7 @@ interface StudyHeaderProps {
 }
 
 const NAV_BTN =
-  "flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg bg-white/10 text-sm text-white transition hover:bg-white/20 disabled:opacity-30 disabled:hover:bg-white/10";
+  "flex h-8 w-8 items-center justify-center rounded-lg text-sm text-white/90 transition hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:hover:bg-transparent";
 
 export default function StudyHeader({
   unitLabel,
@@ -50,26 +53,19 @@ export default function StudyHeader({
   return (
     <header className="sticky top-0 z-20 bg-blue-950 shadow-md" dir="rtl">
       <div className={`mx-auto flex ${maxWidthClassName} items-center justify-between gap-2 px-4 py-2.5`}>
-        <Link
-          href={backHref}
-          className="shrink-0 rounded-lg px-2.5 py-1.5 text-sm font-medium text-blue-200 transition hover:bg-white/10 hover:text-white"
-        >
+        <Link href={backHref} className={`shrink-0 ${HEADER_BUTTON_CLASS}`}>
           → ראשי
         </Link>
 
-        <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 md:flex-initial">
-          <span className="truncate text-sm font-medium text-white">
+        <div className="flex min-w-0 flex-1 items-center justify-center gap-2 px-2">
+          <span className="truncate text-base font-semibold text-white md:text-lg">
             {unitLabel}
-            {bookLabel && (
-              <>
-                {" "}<span className="text-blue-300">•</span> {bookLabel}
-              </>
-            )}
+            {bookLabel && <span className="font-normal text-blue-300"> · {bookLabel}</span>}
           </span>
           {badge}
         </div>
 
-        <div className="flex shrink-0 items-center gap-1.5">
+        <div className="flex shrink-0 items-center gap-1">
           {headerActions}
           <ReadingSettingsButton />
         </div>
@@ -82,7 +78,7 @@ export default function StudyHeader({
           <div className="flex flex-wrap items-center gap-2">
             {toolbar}
             {pagination && (
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1">
                 <button
                   onClick={pagination.onPrev}
                   disabled={pagination.prevDisabled}

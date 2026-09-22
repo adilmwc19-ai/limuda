@@ -5,6 +5,7 @@ import { onAuthStateChanged, type User } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import StudyHeader from "@/components/StudyHeader";
+import { HEADER_BADGE_CLASS } from "@/components/studyHeaderStyles";
 import {
   RAMBAM_BOOKS,
   TOTAL_RAMBAM_CHAPTERS,
@@ -396,9 +397,7 @@ export default function StudyRambamClient() {
         unitLabel={`${loc.treatise.nameHe} פרק ${toHebrew(loc.chapter)}`}
         bookLabel={loc.book.nameHe}
         badge={
-          paceMode === "global" && (
-            <span className="rounded-full bg-blue-700/70 px-2 py-0.5 text-[10px] font-normal text-blue-100">עולמי</span>
-          )
+          paceMode === "global" && <span className={HEADER_BADGE_CLASS}>עולמי</span>
         }
         toolbar={
           <SegControl<PaceMode>

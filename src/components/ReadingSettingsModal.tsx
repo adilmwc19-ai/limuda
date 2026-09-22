@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useReading, type FontSize } from "@/context/ReadingContext";
+import { HEADER_ICON_BUTTON_CLASS } from "@/components/studyHeaderStyles";
 
 const FONT_SIZE_OPTIONS: { value: FontSize; label: string; textClass: string }[] = [
   { value: "normal", label: "A-", textClass: "text-xs" },
@@ -43,7 +44,7 @@ export default function ReadingSettingsButton() {
         title="הגדרות תצוגה"
         aria-label="הגדרות תצוגה"
         aria-expanded={open}
-        className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg bg-blue-800 px-2.5 py-1.5 text-sm font-bold text-white transition hover:bg-blue-700"
+        className={`${HEADER_ICON_BUTTON_CLASS} text-sm font-bold`}
       >
         Aa
       </button>

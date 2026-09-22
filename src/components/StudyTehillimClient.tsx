@@ -5,6 +5,7 @@ import { onAuthStateChanged, type User } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import StudyHeader from "@/components/StudyHeader";
+import { HEADER_BADGE_CLASS } from "@/components/studyHeaderStyles";
 import {
   TEHILLIM_DAYS,
   TOTAL_TEHILLIM_DAYS,
@@ -326,9 +327,7 @@ export default function StudyTehillimClient() {
         unitLabel={info.description}
         bookLabel="תהלים יומי"
         badge={
-          paceMode === "global" && (
-            <span className="rounded-full bg-blue-700/70 px-2 py-0.5 text-[10px] font-normal text-blue-100">לפי יום בחודש</span>
-          )
+          paceMode === "global" && <span className={HEADER_BADGE_CLASS}>לפי יום בחודש</span>
         }
         toolbar={
           <SegControl<PaceMode>

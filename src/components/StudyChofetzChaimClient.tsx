@@ -5,6 +5,7 @@ import { onAuthStateChanged, type User } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import StudyHeader from "@/components/StudyHeader";
+import { HEADER_BADGE_CLASS } from "@/components/studyHeaderStyles";
 import {
   CHOFETZ_CHAIM_GATES,
   TOTAL_CHOFETZ_CHAIM_UNITS,
@@ -296,9 +297,7 @@ export default function StudyChofetzChaimClient() {
         unitLabel={unit.titleHebrew}
         bookLabel={gateTitle}
         badge={
-          paceMode === "daily" && (
-            <span className="rounded-full bg-blue-700/70 px-2 py-0.5 text-[10px] font-normal text-blue-100">יומי</span>
-          )
+          paceMode === "daily" && <span className={HEADER_BADGE_CLASS}>יומי</span>
         }
         toolbar={
           <SegControl<PaceMode>

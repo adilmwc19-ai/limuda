@@ -6,6 +6,7 @@ import { onAuthStateChanged, type User } from "firebase/auth";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import StudyHeader from "@/components/StudyHeader";
+import { HEADER_BUTTON_CLASS, HEADER_ICON_BUTTON_CLASS, HEADER_BADGE_CLASS } from "@/components/studyHeaderStyles";
 import { getDayInfo, getDayFromBookChapter, getNakhBooks, TOTAL_DAYS } from "@/lib/tanakhMapping";
 import { PARSHIYOT, getBookHebrewName } from "@/lib/tanakhStructure";
 import { fetchChapterWithCommentaries, type ChapterData } from "@/lib/sefaria";
@@ -398,16 +399,14 @@ export default function StudyTanakhClient() {
           unitLabel={`${dayInfo.book.hebrewName} · פרק ${dayInfo.chapter}`}
           bookLabel={`יום ${viewingDay} מתוך ${TOTAL_DAYS}`}
           badge={
-            !isCurrentDay && (
-              <span className="rounded-full bg-blue-700/70 px-2 py-0.5 text-[10px] font-normal text-blue-100">צפייה</span>
-            )
+            !isCurrentDay && <span className={HEADER_BADGE_CLASS}>צפייה</span>
           }
           headerActions={
             <>
               <button
                 onClick={handleOpenToc}
                 title="תוכן עניינים"
-                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg bg-white/10 p-2.5 text-white transition hover:bg-white/20"
+                className={HEADER_ICON_BUTTON_CLASS}
                 aria-label="תוכן עניינים"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -419,7 +418,7 @@ export default function StudyTanakhClient() {
                 onClick={() => setShowAllCommentaries((p) => !p)}
                 title={showAllCommentaries ? "הסתר פירושים" : "הצג פירושים"}
                 aria-label={showAllCommentaries ? "הסתר פירושים" : "הצג פירושים"}
-                className="flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg bg-white/10 px-2.5 py-2.5 text-xs text-white transition hover:bg-white/20 md:px-3"
+                className={HEADER_BUTTON_CLASS}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" />

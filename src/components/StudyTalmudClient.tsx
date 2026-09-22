@@ -5,6 +5,7 @@ import { onAuthStateChanged, type User } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import StudyHeader from "@/components/StudyHeader";
+import { HEADER_BUTTON_CLASS, HEADER_BADGE_CLASS } from "@/components/studyHeaderStyles";
 import {
   TALMUD_MASECHTOT,
   TALMUD_SEDARIM,
@@ -250,16 +251,14 @@ export default function StudyTalmudClient() {
         bookLabel="דף יומי"
         maxWidthClassName="max-w-5xl"
         badge={
-          paceMode === "global" && (
-            <span className="rounded-full bg-blue-700/70 px-2 py-0.5 text-[10px] font-normal text-blue-100">עולמי</span>
-          )
+          paceMode === "global" && <span className={HEADER_BADGE_CLASS}>עולמי</span>
         }
         headerActions={
           <button
             onClick={() => setIsTocOpen(true)}
             title="תוכן עניינים"
             aria-label="תוכן עניינים"
-            className="flex min-h-[44px] min-w-[44px] items-center justify-center gap-1.5 rounded-lg bg-white/10 px-2.5 py-2.5 text-sm text-white transition hover:bg-white/20 md:px-3"
+            className={HEADER_BUTTON_CLASS}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
               <line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" />

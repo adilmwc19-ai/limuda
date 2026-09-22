@@ -380,7 +380,7 @@ export default function HomeClient() {
         ) : (
           /* ── Signed in ── */
           <div className="flex w-full flex-col gap-8">
-            <div className="flex items-start justify-between gap-4" dir="rtl">
+            <div className="flex flex-col items-stretch gap-4 md:flex-row md:items-start md:justify-between" dir="rtl">
               <div>
                 <h2 className="text-2xl font-bold text-blue-950 dark:text-white">
                   שלום, {user.displayName?.split(" ")[0]}!
@@ -389,9 +389,10 @@ export default function HomeClient() {
               </div>
               <button
                 onClick={() => setShowTrackSelector(true)}
-                className="shrink-0 rounded-lg border border-blue-200 bg-white px-3 py-1.5 text-xs font-medium text-blue-900 transition hover:bg-blue-50 active:scale-95 dark:border-slate-600 dark:bg-slate-800 dark:text-blue-200 dark:hover:bg-slate-700"
+                className="flex shrink-0 items-center justify-center gap-2 rounded-xl border border-blue-200 bg-white px-4 py-2 text-sm font-medium text-blue-900 shadow-sm transition-all hover:bg-blue-50 hover:shadow-md active:scale-95 dark:border-slate-600 dark:bg-slate-800 dark:text-blue-200 dark:hover:bg-slate-700 md:px-8 md:py-3.5 md:text-lg md:font-semibold"
               >
-                ⚙️ התאמת המסלולים שלי
+                <span className="text-lg md:text-2xl" aria-hidden="true">⚙️</span>
+                התאמת המסלולים שלי
               </button>
             </div>
 

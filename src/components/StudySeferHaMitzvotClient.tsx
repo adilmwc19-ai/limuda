@@ -5,6 +5,7 @@ import { onAuthStateChanged, type User } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import StudyHeader from "@/components/StudyHeader";
+import { HEADER_BADGE_CLASS } from "@/components/studyHeaderStyles";
 import {
   SEFER_HAMITZVOT_SECTIONS,
   TOTAL_SEFER_HAMITZVOT_ITEMS,
@@ -288,9 +289,7 @@ export default function StudySeferHaMitzvotClient() {
         unitLabel={item.titleHebrew}
         bookLabel={SEFER_HAMITZVOT_SECTIONS.find((s) => s.id === item.section)?.titleHebrew}
         badge={
-          paceMode === "global" && (
-            <span className="rounded-full bg-blue-700/70 px-2 py-0.5 text-[10px] font-normal text-blue-100">עולמי</span>
-          )
+          paceMode === "global" && <span className={HEADER_BADGE_CLASS}>עולמי</span>
         }
         toolbar={
           dailyGlobalIndex !== null && (
