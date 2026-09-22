@@ -38,6 +38,7 @@ interface UserProgress {
   chofetzChaimUnit: number;
   lastPerekShirahDate: string | null;
   perekShirahStreak: number;
+  activeTracks: string[];
   createdAt: string;
 }
 
@@ -46,6 +47,7 @@ export default function HomeClient() {
   const [progress, setProgress] = useState<UserProgress | null>(null);
   const [loading, setLoading] = useState(true);
   const [signingIn, setSigningIn] = useState(false);
+  const [showTrackSelector, setShowTrackSelector] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -76,6 +78,7 @@ export default function HomeClient() {
         chofetzChaimUnit: 1,
         lastPerekShirahDate: null,
         perekShirahStreak: 0,
+        activeTracks: ALL_TRACK_IDS,
         createdAt: new Date().toISOString(),
       };
       await setDoc(ref, defaultData);
@@ -90,6 +93,7 @@ export default function HomeClient() {
       if (data.kitzurSiman === undefined) patch.kitzurSiman = 1;
       if (data.chofetzChaimUnit === undefined) patch.chofetzChaimUnit = 1;
       if (data.perekShirahStreak === undefined) patch.perekShirahStreak = 0;
+      if (data.activeTracks === undefined) patch.activeTracks = ALL_TRACK_IDS;
       // Always reset talmudDafYomiDay to 1 when not yet properly initialized
       // (covers users who got getCurrentDafYomiDay() written by the old migration)
       if (!data.talmudPersonalInitialized) {
@@ -109,10 +113,132 @@ export default function HomeClient() {
         chofetzChaimUnit: 1,
         lastPerekShirahDate: null,
         perekShirahStreak: 0,
+        activeTracks: ALL_TRACK_IDS,
         createdAt: "",
         ...data,
         ...patch,
       });
+    }
+  }
+
+  async function updateActiveTracks(newActiveTracks: string[]) {
+    if (!user || newActiveTracks.length === 0) return;
+    const ref = doc(db, "users", user.uid);
+    await updateDoc(ref, { activeTracks: newActiveTracks });
+    setProgress((prev) => (prev ? { ...prev, activeTracks: newActiveTracks } : prev));
+  }
+
+  const validActiveTracks = (progress?.activeTracks ?? []).filter((id) => VALID_TRACK_IDS.has(id));
+  const activeTrackIds = validActiveTracks.length > 0 ? validActiveTracks : ALL_TRACK_IDS;
+
+  function renderTrackCard(id: string) {
+    switch (id) {
+      case "tanakh":
+        return (
+          <StudyCard
+            key={id}
+            emoji="📖"
+            title='תנ"ך (929)'
+            description='פרק יומי עם שכבות מקראות גדולות ומפרשים'
+            currentDay={progress?.tanakh929Day ?? 1}
+            totalDays={TOTAL_DAYS}
+            href="/study/tanakh"
+          />
+        );
+      case "mishnah":
+        return (
+          <StudyCard
+            key={id}
+            emoji="📜"
+            title="משנה יומית"
+            description='פרק ביום מתוך ששת סדרי משנה עם ביאור ברטנורא ורמב"ם'
+            currentDay={progress?.mishnah525Day ?? 1}
+            totalDays={TOTAL_MISHNAH_DAYS}
+            href="/study/mishnah"
+          />
+        );
+      case "talmud":
+        return (
+          <StudyCard
+            key={id}
+            emoji="🕯️"
+            title="דף יומי"
+            description='דף גמרא ביום עם רש"י ותוספות'
+            currentDay={progress?.talmudDafYomiDay ?? getCurrentDafYomiDay()}
+            totalDays={TOTAL_TALMUD_DAYS}
+            href="/study/talmud"
+          />
+        );
+      case "rambam":
+        return (
+          <StudyCard
+            key={id}
+            emoji="⚖️"
+            title='משנה תורה לרמב"ם'
+            description="פרק ביום מתוך י״ד ספרי הרמב״ם בקצב אישי"
+            currentDay={progress?.rambamChapter ?? 1}
+            totalDays={TOTAL_RAMBAM_CHAPTERS}
+            href="/study/rambam"
+          />
+        );
+      case "sefer-hamitzvot":
+        return (
+          <StudyCard
+            key={id}
+            emoji="📜"
+            title='ספר המצוות לרמב"ם'
+            description="י״ד השורשים ותרי״ג מצוות בקצב אישי"
+            currentDay={progress?.seferHaMitzvotIndex ?? SEFER_HAMITZVOT_DEFAULT_INDEX}
+            totalDays={TOTAL_SEFER_HAMITZVOT_ITEMS}
+            href="/study/sefer-hamitzvot"
+          />
+        );
+      case "tehillim":
+        return (
+          <StudyCard
+            key={id}
+            emoji="📖"
+            title="תהלים יומי"
+            description={`לפי חלוקת ל' ימי החודש העברי — היום יום ${getCurrentHebrewDayOfMonth().day} בחודש`}
+            currentDay={progress?.tehillimDay ?? 1}
+            totalDays={TOTAL_TEHILLIM_DAYS}
+            href="/study/tehillim"
+          />
+        );
+      case "kitzur-shulchan-aruch":
+        return (
+          <StudyCard
+            key={id}
+            emoji="📚"
+            title="קיצור שולחן ערוך"
+            description="רכ״א סימנים — הלכות היום־יום בקצב אישי"
+            currentDay={progress?.kitzurSiman ?? 1}
+            totalDays={TOTAL_KITZUR_SIMANIM}
+            href="/study/kitzur-shulchan-aruch"
+          />
+        );
+      case "chofetz-chaim":
+        return (
+          <StudyCard
+            key={id}
+            emoji="🕊️"
+            title="חפץ חיים"
+            description={`שתי הלכות ביום — היום יחידה ${getChofetzChaimDailyUnit()}`}
+            currentDay={progress?.chofetzChaimUnit ?? 1}
+            totalDays={TOTAL_CHOFETZ_CHAIM_UNITS}
+            href="/study/chofetz-chaim"
+          />
+        );
+      case "perek-shirah":
+        return (
+          <PerekShirahCard
+            key={id}
+            completedToday={progress?.lastPerekShirahDate === todayDateString()}
+            streak={progress?.perekShirahStreak ?? 0}
+          />
+        );
+      default:
+        return null;
     }
   }
 
@@ -198,88 +324,56 @@ export default function HomeClient() {
           </div>
         ) : (
           /* ── Signed in ── */
-          <div className="flex w-full flex-col gap-6">
-            <div dir="rtl">
-              <h2 className="text-2xl font-bold text-blue-950">
-                שלום, {user.displayName?.split(" ")[0]}!
-              </h2>
-              <p className="text-slate-500">בחר מסלול לימוד להמשיך</p>
+          <div className="flex w-full flex-col gap-8">
+            <div className="flex items-start justify-between gap-4" dir="rtl">
+              <div>
+                <h2 className="text-2xl font-bold text-blue-950">
+                  שלום, {user.displayName?.split(" ")[0]}!
+                </h2>
+                <p className="text-slate-500">בחר מסלול לימוד להמשיך</p>
+              </div>
+              <button
+                onClick={() => setShowTrackSelector(true)}
+                className="shrink-0 rounded-lg border border-blue-200 bg-white px-3 py-1.5 text-xs font-medium text-blue-900 transition hover:bg-blue-50 active:scale-95"
+              >
+                ⚙️ התאמת המסלולים שלי
+              </button>
             </div>
 
-            {/* Study track cards */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <StudyCard
-                emoji="📖"
-                title='תנ"ך (929)'
-                description='פרק יומי עם שכבות מקראות גדולות ומפרשים'
-                currentDay={progress?.tanakh929Day ?? 1}
-                totalDays={TOTAL_DAYS}
-                href="/study/tanakh"
-              />
-              <StudyCard
-                emoji="📜"
-                title="משנה יומית"
-                description='פרק ביום מתוך ששת סדרי משנה עם ביאור ברטנורא ורמב"ם'
-                currentDay={progress?.mishnah525Day ?? 1}
-                totalDays={TOTAL_MISHNAH_DAYS}
-                href="/study/mishnah"
-              />
-              <StudyCard
-                emoji="🕯️"
-                title="דף יומי"
-                description='דף גמרא ביום עם רש"י ותוספות'
-                currentDay={progress?.talmudDafYomiDay ?? getCurrentDafYomiDay()}
-                totalDays={TOTAL_TALMUD_DAYS}
-                href="/study/talmud"
-              />
-              <StudyCard
-                emoji="⚖️"
-                title='משנה תורה לרמב"ם'
-                description="פרק ביום מתוך י״ד ספרי הרמב״ם בקצב אישי"
-                currentDay={progress?.rambamChapter ?? 1}
-                totalDays={TOTAL_RAMBAM_CHAPTERS}
-                href="/study/rambam"
-              />
-              <StudyCard
-                emoji="📜"
-                title='ספר המצוות לרמב"ם'
-                description="י״ד השורשים ותרי״ג מצוות בקצב אישי"
-                currentDay={progress?.seferHaMitzvotIndex ?? SEFER_HAMITZVOT_DEFAULT_INDEX}
-                totalDays={TOTAL_SEFER_HAMITZVOT_ITEMS}
-                href="/study/sefer-hamitzvot"
-              />
-              <StudyCard
-                emoji="📖"
-                title="תהלים יומי"
-                description={`לפי חלוקת ל' ימי החודש העברי — היום יום ${getCurrentHebrewDayOfMonth().day} בחודש`}
-                currentDay={progress?.tehillimDay ?? 1}
-                totalDays={TOTAL_TEHILLIM_DAYS}
-                href="/study/tehillim"
-              />
-              <StudyCard
-                emoji="📚"
-                title="קיצור שולחן ערוך"
-                description="רכ״א סימנים — הלכות היום־יום בקצב אישי"
-                currentDay={progress?.kitzurSiman ?? 1}
-                totalDays={TOTAL_KITZUR_SIMANIM}
-                href="/study/kitzur-shulchan-aruch"
-              />
-              <StudyCard
-                emoji="🕊️"
-                title="חפץ חיים"
-                description={`שתי הלכות ביום — היום יחידה ${getChofetzChaimDailyUnit()}`}
-                currentDay={progress?.chofetzChaimUnit ?? 1}
-                totalDays={TOTAL_CHOFETZ_CHAIM_UNITS}
-                href="/study/chofetz-chaim"
-              />
-              <PerekShirahCard
-                completedToday={progress?.lastPerekShirahDate === todayDateString()}
-                streak={progress?.perekShirahStreak ?? 0}
-              />
+            {/* Top: daily study hub — only the user's active tracks */}
+            <div dir="rtl">
+              <h3 className="mb-4 text-lg font-bold text-blue-950">הסדר היומי שלי</h3>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {activeTrackIds.map((id) => renderTrackCard(id))}
+              </div>
             </div>
+
+            {/* Bottom: quick access to all tracks, collapsed by default */}
+            <details className="border-t border-slate-200 pt-4">
+              <summary
+                className="cursor-pointer select-none text-sm font-semibold text-slate-500 transition hover:text-blue-900"
+                dir="rtl"
+              >
+                כל מסלולי הלימוד
+              </summary>
+              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" dir="rtl">
+                {TRACKS.map((t) => renderTrackCard(t.id))}
+              </div>
+            </details>
           </div>
         )}
       </section>
+
+      {showTrackSelector && progress && (
+        <TrackSelectorModal
+          activeTracks={activeTrackIds}
+          onSave={async (next) => {
+            await updateActiveTracks(next);
+            setShowTrackSelector(false);
+          }}
+          onClose={() => setShowTrackSelector(false)}
+        />
+      )}
     </main>
   );
 }
@@ -444,6 +538,97 @@ const TRACKS = [
     description: "שתי הלכות ביום — הלכות לשון הרע ורכילות",
   },
 ];
+
+const ALL_TRACK_IDS: string[] = TRACKS.map((t) => t.id);
+const VALID_TRACK_IDS = new Set(ALL_TRACK_IDS);
+
+// ─── Track selector modal ─────────────────────────────────────────────────────
+
+interface TrackSelectorModalProps {
+  activeTracks: string[];
+  onSave: (newActiveTracks: string[]) => void | Promise<void>;
+  onClose: () => void;
+}
+
+function TrackSelectorModal({ activeTracks, onSave, onClose }: TrackSelectorModalProps) {
+  const [selected, setSelected] = useState<string[]>(activeTracks);
+  const [saving, setSaving] = useState(false);
+
+  function toggle(id: string) {
+    setSelected((prev) => {
+      if (prev.includes(id)) {
+        if (prev.length === 1) return prev; // keep at least one active track
+        return prev.filter((t) => t !== id);
+      }
+      return [...prev, id];
+    });
+  }
+
+  async function handleSave() {
+    setSaving(true);
+    await onSave(selected);
+    setSaving(false);
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 px-4"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
+        dir="rtl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h3 className="text-lg font-bold text-blue-950">התאמת המסלולים שלי</h3>
+        <p className="mt-1 text-xs text-slate-500">
+          בחרי אילו מסלולים יופיעו ב&quot;הסדר היומי שלי&quot; בדף הבית (חובה לבחור לפחות מסלול אחד).
+        </p>
+
+        <div className="mt-4 flex max-h-80 flex-col gap-1 overflow-y-auto">
+          {TRACKS.map((t) => {
+            const checked = selected.includes(t.id);
+            const isLastChecked = checked && selected.length === 1;
+            return (
+              <label
+                key={t.id}
+                className={`flex items-center gap-3 rounded-lg px-2 py-2 transition ${
+                  isLastChecked ? "opacity-60" : "hover:bg-blue-50"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  disabled={isLastChecked}
+                  onChange={() => toggle(t.id)}
+                  className="h-4 w-4 accent-blue-900"
+                />
+                <span className="text-lg" aria-hidden="true">{t.emoji}</span>
+                <span className="text-sm font-medium text-blue-950">{t.title}</span>
+              </label>
+            );
+          })}
+        </div>
+
+        <div className="mt-6 flex justify-end gap-3">
+          <button
+            onClick={onClose}
+            className="rounded-lg px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100"
+          >
+            ביטול
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saving || selected.length === 0}
+            className="rounded-lg bg-blue-950 px-5 py-2 text-sm font-semibold text-white transition hover:bg-blue-900 active:scale-95 disabled:opacity-60"
+          >
+            {saving ? "שומר..." : "שמירה"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
