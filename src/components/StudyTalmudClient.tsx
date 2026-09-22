@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, type ReactNode } from "react";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
+import StudyHeader from "@/components/StudyHeader";
 import {
   TALMUD_MASECHTOT,
   TALMUD_SEDARIM,
@@ -244,32 +245,25 @@ export default function StudyTalmudClient() {
   return (
     <main className="flex min-h-screen flex-col bg-slate-50" dir="rtl">
       {/* ── Header ── */}
-      <header className="sticky top-0 z-10 bg-blue-950 px-4 py-3 shadow-md">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-2">
-          <a href="/" className="text-sm text-blue-300 transition hover:text-white">→ ראשי</a>
-          <div className="inline-flex items-center gap-2 rounded-full border border-blue-800/60 bg-blue-900/50 px-4 py-1.5">
-            <h1 className="text-lg font-bold tracking-wide text-white">
-              {info.masechetHe} {dafLabel(info.dafNumber)}
-            </h1>
-            {paceMode === "global" && (
-              <span className="rounded-full bg-blue-700 px-2 py-0.5 text-xs font-normal text-white">עולמי</span>
-            )}
-          </div>
+      <StudyHeader
+        unitLabel={`${info.masechetHe} ${dafLabel(info.dafNumber)}`}
+        bookLabel="דף יומי"
+        maxWidthClassName="max-w-5xl"
+        badge={
+          paceMode === "global" && (
+            <span className="rounded-full bg-blue-700/70 px-2 py-0.5 text-[10px] font-normal text-blue-100">עולמי</span>
+          )
+        }
+        headerActions={
           <button
             onClick={() => setIsTocOpen(true)}
-            className="flex min-h-[44px] items-center justify-center rounded-lg bg-blue-800 px-3 py-2.5 text-sm text-white transition hover:bg-blue-700"
+            className="flex min-h-[44px] items-center justify-center rounded-lg bg-white/10 px-3 py-2.5 text-sm text-white transition hover:bg-white/20"
           >
             תוכן עניינים
           </button>
-        </div>
-      </header>
-
-      {/* ── Toolbar ── */}
-      <div className="sticky top-[52px] z-10 border-b border-blue-100 bg-white/95 px-4 py-2 shadow-sm backdrop-blur-sm">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2">
-          {/* Row: pace + display + layout */}
-          <div className="flex flex-wrap gap-2">
-            {/* Pace mode */}
+        }
+        toolbar={
+          <>
             <SegControl<PaceMode>
               options={[
                 { value: "global",   label: "דף יומי עולמי" },
@@ -278,8 +272,6 @@ export default function StudyTalmudClient() {
               value={paceMode}
               onChange={handlePaceModeChange}
             />
-
-            {/* Text mode */}
             <SegControl<DisplayMode>
               options={[
                 { value: "nikud", label: "עם ניקוד" },
@@ -288,8 +280,6 @@ export default function StudyTalmudClient() {
               value={displayMode}
               onChange={setDisplayMode}
             />
-
-            {/* Layout mode */}
             <SegControl<LayoutMode>
               options={[
                 { value: "tabs",    label: "כרטיסיות" },
@@ -298,8 +288,6 @@ export default function StudyTalmudClient() {
               value={layoutMode}
               onChange={setLayoutMode}
             />
-
-            {/* Commentator — only in tabs mode */}
             {layoutMode === "tabs" && (
               <SegControl<CommentatorKey>
                 options={[
@@ -310,23 +298,23 @@ export default function StudyTalmudClient() {
                 onChange={setCommentator}
               />
             )}
-          </div>
-
-          {/* Navigation */}
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setViewingDay((d) => Math.max(1, d - 1))}
-              disabled={viewingDay <= 1}
-              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-sm text-blue-900 transition hover:bg-blue-50 disabled:opacity-40"
-            >
-              ←
-            </button>
-            {/* Set as personal daf — shown when browsing away from activeDay in personal mode */}
+          </>
+        }
+        pagination={{
+          current: viewingDay,
+          total: TOTAL_TALMUD_DAYS,
+          onPrev: () => setViewingDay((d) => Math.max(1, d - 1)),
+          onNext: () => setViewingDay((d) => Math.min(TOTAL_TALMUD_DAYS, d + 1)),
+          prevDisabled: viewingDay <= 1,
+          nextDisabled: viewingDay >= TOTAL_TALMUD_DAYS,
+        }}
+        chips={
+          <>
             {user && paceMode === "personal" && !isToday && (
               <button
                 onClick={handleSetAsDaf}
                 disabled={settingDaf}
-                className="rounded-lg border border-indigo-300 bg-indigo-50 px-2.5 py-1 text-xs text-indigo-800 transition hover:bg-indigo-100 disabled:opacity-60"
+                className="rounded-lg border border-indigo-400/40 bg-indigo-500/20 px-2.5 py-1 text-xs text-indigo-100 transition hover:bg-indigo-500/30 disabled:opacity-60"
               >
                 {settingDaf ? "שומר..." : "📌 קבע כנקודת הלימוד שלי"}
               </button>
@@ -334,21 +322,14 @@ export default function StudyTalmudClient() {
             {!isToday && (
               <button
                 onClick={() => setViewingDay(activeDay)}
-                className="rounded-lg border border-amber-300 bg-amber-100 px-2.5 py-1 text-xs text-amber-800 transition hover:bg-amber-200"
+                className="rounded-lg border border-amber-400/40 bg-amber-500/20 px-2.5 py-1 text-xs text-amber-100 transition hover:bg-amber-500/30"
               >
                 חזור להיום
               </button>
             )}
-            <button
-              onClick={() => setViewingDay((d) => Math.min(TOTAL_TALMUD_DAYS, d + 1))}
-              disabled={viewingDay >= TOTAL_TALMUD_DAYS}
-              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-sm text-blue-900 transition hover:bg-blue-50 disabled:opacity-40"
-            >
-              →
-            </button>
-          </div>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       {/* ── Content ── */}
       <section className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 space-y-8">

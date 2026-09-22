@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import Link from "next/link";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
+import StudyHeader from "@/components/StudyHeader";
 import { PEREK_SHIRAH_SECTIONS } from "@/lib/perekShirahStructure";
 import { fetchFullPerekShirah, type PerekShirahData } from "@/lib/sefaria";
 
@@ -144,28 +144,22 @@ export default function StudyPerekShirahClient() {
   return (
     <main className="flex min-h-screen flex-col bg-slate-50" dir="rtl">
       {/* ── Header ── */}
-      <header className="sticky top-0 z-20 bg-blue-950 px-4 py-3 shadow-md">
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-2">
-          <Link href="/" className="text-sm text-blue-300 transition hover:text-white">→ ראשי</Link>
-          <h1 className="text-base font-bold tracking-wide text-white">פרק שירה יומי</h1>
-          <span className="w-[76px]" aria-hidden="true" />
-        </div>
-      </header>
-
-      {/* ── Sticky sub-nav ── */}
-      <nav className="sticky top-[52px] z-10 border-b border-blue-100 bg-white/95 px-4 py-2 shadow-sm backdrop-blur-sm">
-        <div className="mx-auto flex max-w-3xl flex-wrap justify-center gap-1.5">
-          {PEREK_SHIRAH_SECTIONS.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => scrollToSection(s.id)}
-              className="flex min-h-[44px] items-center justify-center rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-xs font-medium text-blue-900 transition hover:bg-blue-50"
-            >
-              {NAV_LABELS[s.id] ?? s.title}
-            </button>
-          ))}
-        </div>
-      </nav>
+      <StudyHeader
+        unitLabel="פרק שירה יומי"
+        toolbar={
+          <div className="flex flex-wrap justify-center gap-1.5">
+            {PEREK_SHIRAH_SECTIONS.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => scrollToSection(s.id)}
+                className="flex min-h-[44px] items-center justify-center rounded-lg bg-white/10 px-2.5 py-1 text-xs font-medium text-white transition hover:bg-white/20"
+              >
+                {NAV_LABELS[s.id] ?? s.title}
+              </button>
+            ))}
+          </div>
+        }
+      />
 
       {/* ── Content ── */}
       <section className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">
@@ -197,7 +191,7 @@ export default function StudyPerekShirahClient() {
               <article
                 key={section.id}
                 id={`section-${section.id}`}
-                className="scroll-mt-[104px] rounded-2xl border border-blue-100 bg-white p-5 shadow-sm"
+                className="scroll-mt-32 rounded-2xl border border-blue-100 bg-white p-5 shadow-sm"
               >
                 <div className="mb-4 inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-lg font-bold text-blue-950 dark:border-slate-700 dark:bg-slate-800/60 dark:text-blue-100">
                   {section.title}

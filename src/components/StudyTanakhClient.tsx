@@ -2,10 +2,10 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
+import StudyHeader from "@/components/StudyHeader";
 import { getDayInfo, getDayFromBookChapter, getNakhBooks, TOTAL_DAYS } from "@/lib/tanakhMapping";
 import { PARSHIYOT, getBookHebrewName } from "@/lib/tanakhStructure";
 import { fetchChapterWithCommentaries, type ChapterData } from "@/lib/sefaria";
@@ -393,45 +393,38 @@ export default function StudyTanakhClient() {
   return (
     <main className="min-h-screen bg-slate-50">
       {/* Sticky header */}
-      <header className="sticky top-0 z-10 bg-blue-950 px-4 py-3 shadow-lg">
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-4">
-          <Link href="/" className="shrink-0 text-sm text-blue-300 hover:text-white transition">
-            &larr; בית
-          </Link>
-          {dayInfo && (
-            <div className="text-center">
-              <div className="text-base font-bold text-white">
-                {dayInfo.book.hebrewName} &middot; פרק {dayInfo.chapter}
-              </div>
-              <div className="text-xs text-blue-300">
-                יום {viewingDay} / {TOTAL_DAYS}
-                {!isCurrentDay && (
-                  <span className="mr-1 rounded bg-blue-800 px-1 py-px">צפייה</span>
-                )}
-              </div>
-            </div>
-          )}
-          <div className="flex shrink-0 items-center gap-2">
-            <button
-              onClick={handleOpenToc}
-              title="תוכן עניינים"
-              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg bg-blue-800 p-2.5 text-white transition hover:bg-blue-700"
-              aria-label="תוכן עניינים"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" />
-                <line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" />
-              </svg>
-            </button>
-            <button
-              onClick={() => setShowAllCommentaries((p) => !p)}
-              className="rounded-lg bg-blue-800 px-3 py-1 text-xs text-white hover:bg-blue-700 transition"
-            >
-              {showAllCommentaries ? "הסתר פירושים" : "הצג פירושים"}
-            </button>
-          </div>
-        </div>
-      </header>
+      {dayInfo && (
+        <StudyHeader
+          unitLabel={`${dayInfo.book.hebrewName} · פרק ${dayInfo.chapter}`}
+          bookLabel={`יום ${viewingDay} מתוך ${TOTAL_DAYS}`}
+          badge={
+            !isCurrentDay && (
+              <span className="rounded-full bg-blue-700/70 px-2 py-0.5 text-[10px] font-normal text-blue-100">צפייה</span>
+            )
+          }
+          headerActions={
+            <>
+              <button
+                onClick={handleOpenToc}
+                title="תוכן עניינים"
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg bg-white/10 p-2.5 text-white transition hover:bg-white/20"
+                aria-label="תוכן עניינים"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" />
+                  <line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" />
+                </svg>
+              </button>
+              <button
+                onClick={() => setShowAllCommentaries((p) => !p)}
+                className="rounded-lg bg-white/10 px-3 py-2.5 text-xs text-white transition hover:bg-white/20"
+              >
+                {showAllCommentaries ? "הסתר פירושים" : "הצג פירושים"}
+              </button>
+            </>
+          }
+        />
+      )}
 
       <div className="mx-auto max-w-3xl px-4 py-8">
         {/* Chapter title + TOC button */}

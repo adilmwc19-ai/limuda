@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
+import StudyHeader from "@/components/StudyHeader";
 import { TOTAL_KITZUR_SIMANIM, getKitzurSimanInfo } from "@/lib/kitzurStructure";
 import { fetchKitzurSiman, type KitzurSimanData } from "@/lib/sefaria";
 
@@ -214,46 +214,24 @@ export default function StudyKitzurClient() {
   return (
     <main className="flex min-h-screen flex-col bg-slate-50" dir="rtl">
       {/* ── Header ── */}
-      <header className="sticky top-0 z-10 bg-blue-950 px-4 py-3 shadow-md">
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-2">
-          <Link href="/" className="text-sm text-blue-300 transition hover:text-white">→ ראשי</Link>
-          <div className="text-center">
-            <h1 className="text-base font-bold tracking-wide text-white">{simanHebrewNumber}</h1>
-            <p className="text-xs text-blue-300">קיצור שולחן ערוך</p>
-          </div>
-          <span className="w-[76px]" aria-hidden="true" />
-        </div>
-      </header>
-
-      {/* ── Toolbar ── */}
-      <div className="sticky top-[52px] z-10 border-b border-blue-100 bg-white/95 px-4 py-2 shadow-sm backdrop-blur-sm">
-        <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setViewingSiman((d) => Math.max(1, d - 1))}
-              disabled={siman <= 1}
-              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-sm text-blue-900 transition hover:bg-blue-50 disabled:opacity-40"
-            >
-              ←
-            </button>
-            <button
-              onClick={() => setViewingSiman((d) => Math.min(TOTAL_KITZUR_SIMANIM, d + 1))}
-              disabled={siman >= TOTAL_KITZUR_SIMANIM}
-              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-sm text-blue-900 transition hover:bg-blue-50 disabled:opacity-40"
-            >
-              →
-            </button>
-            <span className="mr-1 text-xs text-slate-400">
-              {siman} מתוך {TOTAL_KITZUR_SIMANIM}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-1">
+      <StudyHeader
+        unitLabel={simanHebrewNumber}
+        bookLabel="קיצור שולחן ערוך"
+        pagination={{
+          current: siman,
+          total: TOTAL_KITZUR_SIMANIM,
+          onPrev: () => setViewingSiman((d) => Math.max(1, d - 1)),
+          onNext: () => setViewingSiman((d) => Math.min(TOTAL_KITZUR_SIMANIM, d + 1)),
+          prevDisabled: siman <= 1,
+          nextDisabled: siman >= TOTAL_KITZUR_SIMANIM,
+        }}
+        chips={
+          <>
             {user && !isCurrent && (
               <button
                 onClick={handleSetAsSiman}
                 disabled={settingItem}
-                className="rounded-lg border border-indigo-300 bg-indigo-50 px-2.5 py-1 text-xs text-indigo-800 transition hover:bg-indigo-100 disabled:opacity-60"
+                className="rounded-lg border border-indigo-400/40 bg-indigo-500/20 px-2.5 py-1 text-xs text-indigo-100 transition hover:bg-indigo-500/30 disabled:opacity-60"
               >
                 {settingItem ? "שומר..." : "📌 קבע כסימן הלימוד שלי"}
               </button>
@@ -261,14 +239,14 @@ export default function StudyKitzurClient() {
             {!isCurrent && (
               <button
                 onClick={() => setViewingSiman(personalSiman)}
-                className="rounded-lg border border-amber-300 bg-amber-100 px-2.5 py-1 text-xs text-amber-800 transition hover:bg-amber-200"
+                className="rounded-lg border border-amber-400/40 bg-amber-500/20 px-2.5 py-1 text-xs text-amber-100 transition hover:bg-amber-500/30"
               >
                 חזור לנקודת הלימוד שלי
               </button>
             )}
-          </div>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       {/* ── Content ── */}
       <section className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">

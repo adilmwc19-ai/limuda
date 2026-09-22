@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
+import StudyHeader from "@/components/StudyHeader";
 import {
   RAMBAM_BOOKS,
   TOTAL_RAMBAM_CHAPTERS,
@@ -392,67 +392,44 @@ export default function StudyRambamClient() {
   return (
     <main className="flex min-h-screen flex-col bg-slate-50" dir="rtl">
       {/* ── Header ── */}
-      <header className="sticky top-0 z-10 bg-blue-950 px-4 py-3 shadow-md">
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-2">
-          <Link href="/" className="text-sm text-blue-300 transition hover:text-white">→ ראשי</Link>
-          <div className="text-center">
-            <h1 className="text-base font-bold tracking-wide text-white">
-              {loc.treatise.nameHe} &middot; פרק {toHebrew(loc.chapter)}
-              {paceMode === "global" && (
-                <span className="mr-2 rounded-full bg-blue-700 px-2 py-0.5 text-xs font-normal">עולמי</span>
-              )}
-            </h1>
-            <p className="text-xs text-blue-300">{loc.book.nameHe}</p>
-          </div>
-          <span className="w-[76px]" aria-hidden="true" />
-        </div>
-      </header>
-
-      {/* ── Toolbar ── */}
-      <div className="sticky top-[52px] z-10 border-b border-blue-100 bg-white/95 px-4 py-2 shadow-sm backdrop-blur-sm">
-        <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <SegControl<PaceMode>
-              options={[
-                {
-                  value: "global",
-                  label: "רמב״ם יומי עולמי",
-                  disabled: dailyGlobalIndex === null,
-                  title: dailyGlobalIndex === null ? dailyError ?? "לא זמין" : undefined,
-                },
-                { value: "personal", label: "בקצב שלי" },
-              ]}
-              value={paceMode}
-              onChange={handlePaceModeChange}
-            />
-
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setViewingIndex((d) => Math.max(1, d - 1))}
-                disabled={viewingIndex <= 1}
-                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-sm text-blue-900 transition hover:bg-blue-50 disabled:opacity-40"
-              >
-                ←
-              </button>
-              <button
-                onClick={() => setViewingIndex((d) => Math.min(TOTAL_RAMBAM_CHAPTERS, d + 1))}
-                disabled={viewingIndex >= TOTAL_RAMBAM_CHAPTERS}
-                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-sm text-blue-900 transition hover:bg-blue-50 disabled:opacity-40"
-              >
-                →
-              </button>
-              <span className="mr-1 text-xs text-slate-400">
-                פרק {viewingIndex} מתוך {TOTAL_RAMBAM_CHAPTERS}
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1">
+      <StudyHeader
+        unitLabel={`${loc.treatise.nameHe} פרק ${toHebrew(loc.chapter)}`}
+        bookLabel={loc.book.nameHe}
+        badge={
+          paceMode === "global" && (
+            <span className="rounded-full bg-blue-700/70 px-2 py-0.5 text-[10px] font-normal text-blue-100">עולמי</span>
+          )
+        }
+        toolbar={
+          <SegControl<PaceMode>
+            options={[
+              {
+                value: "global",
+                label: "רמב״ם יומי עולמי",
+                disabled: dailyGlobalIndex === null,
+                title: dailyGlobalIndex === null ? dailyError ?? "לא זמין" : undefined,
+              },
+              { value: "personal", label: "בקצב שלי" },
+            ]}
+            value={paceMode}
+            onChange={handlePaceModeChange}
+          />
+        }
+        pagination={{
+          current: viewingIndex,
+          total: TOTAL_RAMBAM_CHAPTERS,
+          onPrev: () => setViewingIndex((d) => Math.max(1, d - 1)),
+          onNext: () => setViewingIndex((d) => Math.min(TOTAL_RAMBAM_CHAPTERS, d + 1)),
+          prevDisabled: viewingIndex <= 1,
+          nextDisabled: viewingIndex >= TOTAL_RAMBAM_CHAPTERS,
+        }}
+        chips={
+          <>
             {user && paceMode === "personal" && !isCurrent && (
               <button
                 onClick={handleSetAsChapter}
                 disabled={settingChapter}
-                className="rounded-lg border border-indigo-300 bg-indigo-50 px-2.5 py-1 text-xs text-indigo-800 transition hover:bg-indigo-100 disabled:opacity-60"
+                className="rounded-lg border border-indigo-400/40 bg-indigo-500/20 px-2.5 py-1 text-xs text-indigo-100 transition hover:bg-indigo-500/30 disabled:opacity-60"
               >
                 {settingChapter ? "שומר..." : "📌 קבע כפרק הלימוד שלי"}
               </button>
@@ -460,14 +437,14 @@ export default function StudyRambamClient() {
             {!isCurrent && (
               <button
                 onClick={() => setViewingIndex(activeIndex)}
-                className="rounded-lg border border-amber-300 bg-amber-100 px-2.5 py-1 text-xs text-amber-800 transition hover:bg-amber-200"
+                className="rounded-lg border border-amber-400/40 bg-amber-500/20 px-2.5 py-1 text-xs text-amber-100 transition hover:bg-amber-500/30"
               >
                 {paceMode === "global" ? "חזור להיום" : "חזור לנקודת הלימוד שלי"}
               </button>
             )}
-          </div>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       {/* ── Content ── */}
       <section className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">
