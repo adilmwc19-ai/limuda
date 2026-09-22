@@ -5,7 +5,7 @@ import {
 } from "@/lib/seferHaMitzvotStructure";
 import { getTehillimDayInfo } from "@/lib/tehillimStructure";
 import { PEREK_SHIRAH_SECTIONS } from "@/lib/perekShirahStructure";
-import { getChofetzChaimUnitInfo, type ChofetzChaimGate } from "@/lib/chofetzChaimStructure";
+import { getChofetzChaimUnitInfo, illustrationRef, type ChofetzChaimGate } from "@/lib/chofetzChaimStructure";
 
 export type { Commentator };
 
@@ -713,9 +713,8 @@ function toPerSeifRaw(he: unknown, seifCount: number): unknown[] {
 
 // ── Chofetz Chaim fetch ──────────────────────────────────────────────────────
 
-export async function fetchChofetzChaimUnit(unitIndex: number): Promise<ChofetzChaimUnitData> {
-  const unit = getChofetzChaimUnitInfo(unitIndex);
-  const res = await fetch(`https://www.sefaria.org/api/texts/${encodeURIComponent(unit.ref)}?context=0`);
+async function fetchSefariaHe(ref: string): Promise<unknown> {
+  const res = await fetch(`https://www.sefaria.org/api/texts/${encodeURIComponent(ref)}?context=0`);
   if (!res.ok) {
     throw new Error(`שגיאה בטעינה מספריא: ${res.status} ${res.statusText}`);
   }
@@ -724,6 +723,11 @@ export async function fetchChofetzChaimUnit(unitIndex: number): Promise<ChofetzC
   if (typeof data.error === "string") {
     throw new Error(data.error as string);
   }
+  return data.he;
+}
+
+export async function fetchChofetzChaimUnit(unitIndex: number): Promise<ChofetzChaimUnitData> {
+  const unit = getChofetzChaimUnitInfo(unitIndex);
 
   const base = {
     index: unit.index,
@@ -733,13 +737,27 @@ export async function fetchChofetzChaimUnit(unitIndex: number): Promise<ChofetzC
     subtitleHebrew: unit.subtitleHebrew,
   };
 
+  // Illustrations are separate top-level nodes, not a numeric sub-range of a
+  // shared parent, so a unit covering 2 of them needs 2 separate fetches.
+  if (unit.illustrationNumbers) {
+    const seifim: ChofetzChaimSeifData[] = await Promise.all(
+      unit.illustrationNumbers.map(async (n) => ({
+        seif: n,
+        paragraphs: flattenHeField(await fetchSefariaHe(illustrationRef(n))),
+      }))
+    );
+    return { ...base, seifim };
+  }
+
+  const he = await fetchSefariaHe(unit.ref);
+
   if (unit.seifFrom === undefined) {
-    return { ...base, paragraphs: flattenHeField(data.he) };
+    return { ...base, paragraphs: flattenHeField(he) };
   }
 
   const seifTo = unit.seifTo ?? unit.seifFrom;
   const seifCount = seifTo - unit.seifFrom + 1;
-  const seifim: ChofetzChaimSeifData[] = toPerSeifRaw(data.he, seifCount).map((raw, i) => ({
+  const seifim: ChofetzChaimSeifData[] = toPerSeifRaw(he, seifCount).map((raw, i) => ({
     seif: unit.seifFrom! + i,
     paragraphs: flattenHeField(raw),
   }));

@@ -11,6 +11,7 @@ import {
   getChofetzChaimUnitInfo,
   getChofetzChaimDailyUnit,
   getPetichahUnits,
+  getIllustrationUnits,
   getKlalGroups,
   getSeifHebrewLabel,
   type ChofetzChaimGate,
@@ -133,9 +134,9 @@ function TocModal({ currentUnitIndex, initialGate, onSelect, onClose }: TocModal
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 py-4" dir="rtl">
-          {tab === "petichah" ? (
+          {tab === "petichah" || tab === "illustrations" ? (
             <div className="flex flex-wrap gap-1.5">
-              {getPetichahUnits().map((unit) => (
+              {(tab === "petichah" ? getPetichahUnits() : getIllustrationUnits()).map((unit) => (
                 <UnitButton
                   key={unit.index}
                   unit={unit}
@@ -441,7 +442,7 @@ export default function StudyChofetzChaimClient() {
                 disabled={completing}
                 className="rounded-xl bg-blue-950 px-8 py-2.5 text-sm font-semibold text-white shadow transition hover:bg-blue-900 active:scale-95 disabled:opacity-60"
               >
-                {completing ? "שומר..." : "סיימתי שתי הלכות אלו ←"}
+                {completing ? "שומר..." : unit.gate === "illustrations" ? "סיימתי לימוד זה ←" : "סיימתי שתי הלכות אלו ←"}
               </button>
             )}
             {setItemMsg && (

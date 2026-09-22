@@ -4,9 +4,9 @@
 // so refs below use "Chofetz Chaim" to match this app's naming.
 //
 // Book structure (verified against Sefaria's /api/v2/index and /api/shape for
-// "Chofetz Chaim" — the standalone front-matter "Preface"/הקדמה, the
-// "Illustrations", and the Responsa appendices are haskamos/supplementary
-// material, not halachic content, and are intentionally excluded):
+// "Chofetz Chaim" — the standalone front-matter "Preface"/הקדמה and the
+// Responsa appendices are haskamos/supplementary material, not halachic
+// content, and are intentionally excluded):
 //
 //  1. Introduction to the Laws of the Prohibition of Lashon Hara and Rechilut
 //     ("פתיחה להלכות לשון הרע ורכילות") — 4 standalone parts: Opening
@@ -14,11 +14,14 @@
 //     (עשיין), Curses (ארורין). Each is one atomic unit.
 //  2. Part One, The Prohibition Against Lashon Hara — 10 כללים (Principles).
 //  3. Part Two, The Prohibition Against Rechilut — 9 כללים (Principles).
+//  4. Illustrations (ציורים) — 11 practical case studies closing the book,
+//     each its own top-level Sefaria node (not numerically sub-addressable,
+//     so each is fetched by its own ref). Paced 2/day, the last one alone.
 //
 // Each כלל has its own "Opening Comments" (הערות מקדימות, 1 unit) followed by
 // its seifim, paginated 2-per-unit (a trailing odd seif becomes a 1-seif unit).
 
-export type ChofetzChaimGate = "petichah" | "lashonHara" | "rechilut";
+export type ChofetzChaimGate = "petichah" | "lashonHara" | "rechilut" | "illustrations";
 
 export interface ChofetzChaimGateInfo {
   id: ChofetzChaimGate;
@@ -29,6 +32,7 @@ export const CHOFETZ_CHAIM_GATES: ChofetzChaimGateInfo[] = [
   { id: "petichah", titleHebrew: "פתיחה" },
   { id: "lashonHara", titleHebrew: "הלכות לשון הרע" },
   { id: "rechilut", titleHebrew: "הלכות רכילות" },
+  { id: "illustrations", titleHebrew: "ציורים" },
 ];
 
 interface PetichahPart {
@@ -57,6 +61,16 @@ function gateRefPrefix(gate: "lashonHara" | "rechilut"): string {
     ? "Chofetz Chaim, Part One, The Prohibition Against Lashon Hara"
     : "Chofetz Chaim, Part Two, The Prohibition Against Rechilut";
 }
+
+// Each ציור is its own top-level Sefaria node (not a numeric sub-range of a
+// shared parent), so it must be fetched by its own ref — verified against
+// /api/shape for "Chofetz Chaim, Illustrations" (11 total).
+export function illustrationRef(n: number): string {
+  return `Chofetz Chaim, Illustrations, Illustration ${n}`;
+}
+
+// Paced 2/day (days 1-5), the last (11th) illustration alone on day 6.
+const ILLUSTRATION_DAY_GROUPS: number[][] = [[1, 2], [3, 4], [5, 6], [7, 8], [9, 10], [11]];
 
 // ── Hebrew numerals (up to ~999, more than enough for a seif count of 17) ────
 // Mirrors the convention already used across the other structure files.
@@ -92,6 +106,7 @@ export interface ChofetzChaimUnit {
   ref: string;            // exact Sefaria ref to fetch
   seifFrom?: number;      // real seif number this unit starts at (seifim units only)
   seifTo?: number;        // real seif number this unit ends at (seifim units only)
+  illustrationNumbers?: number[]; // gate === "illustrations" only: the 1-2 ציורים (1-11) this unit covers
 }
 
 function buildUnits(): ChofetzChaimUnit[] {
@@ -143,11 +158,25 @@ function buildUnits(): ChofetzChaimUnit[] {
     });
   });
 
+  // Gate 4: Illustrations — paced 2/day, the last one alone.
+  for (const nums of ILLUSTRATION_DAY_GROUPS) {
+    units.push({
+      gate: "illustrations",
+      titleHebrew:
+        nums.length === 2
+          ? `ציורים ${toHebrewNumeral(nums[0])}–${toHebrewNumeral(nums[1])}`
+          : `ציור ${toHebrewNumeral(nums[0])}`,
+      subtitleHebrew: "",
+      ref: illustrationRef(nums[0]),
+      illustrationNumbers: nums,
+    });
+  }
+
   return units.map((u, i) => ({ ...u, index: i + 1 }));
 }
 
 export const CHOFETZ_CHAIM_UNITS: ChofetzChaimUnit[] = buildUnits();
-export const TOTAL_CHOFETZ_CHAIM_UNITS = CHOFETZ_CHAIM_UNITS.length; // 116
+export const TOTAL_CHOFETZ_CHAIM_UNITS = CHOFETZ_CHAIM_UNITS.length; // 122
 
 export function getChofetzChaimUnitInfo(unitIndex: number): ChofetzChaimUnit {
   const clamped = Math.max(1, Math.min(Math.trunc(unitIndex) || 1, TOTAL_CHOFETZ_CHAIM_UNITS));
@@ -164,6 +193,10 @@ export interface ChofetzChaimKlalGroup {
 
 export function getPetichahUnits(): ChofetzChaimUnit[] {
   return CHOFETZ_CHAIM_UNITS.filter((u) => u.gate === "petichah");
+}
+
+export function getIllustrationUnits(): ChofetzChaimUnit[] {
+  return CHOFETZ_CHAIM_UNITS.filter((u) => u.gate === "illustrations");
 }
 
 export function getKlalGroups(gate: "lashonHara" | "rechilut"): ChofetzChaimKlalGroup[] {

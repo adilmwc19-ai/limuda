@@ -46,8 +46,10 @@ export const TEHILLIM_DAYS: TehillimDayRange[] = [
 export const TOTAL_TEHILLIM_DAYS = TEHILLIM_DAYS.length; // 30
 
 // ── Hebrew numerals (up to 176, for Psalm 119's verse numbers) ────────────────
+// ט״ו/ט״ז (15/16) avoid spelling out God's name; the gershayim always sits
+// before the final letter, never appended after both (e.g. ט״ו, not טו׳).
 
-function toHebrewNumeral(n: number): string {
+export function toHebrewNumeral(n: number): string {
   if (n <= 0 || n > 999) return String(n);
   const hundreds = ["", "ק", "ר", "ש", "ת", "תק", "תר", "תש", "תת", "תתק"];
   const tens     = ["", "י", "כ", "ל", "מ", "נ", "ס", "ע", "פ", "צ"];
@@ -55,12 +57,13 @@ function toHebrewNumeral(n: number): string {
   const h = Math.floor(n / 100);
   const t = Math.floor((n % 100) / 10);
   const o = n % 10;
-  if (t === 1 && o === 5) return hundreds[h] + "טו" + (n > 15 ? "״" : "׳");
-  if (t === 1 && o === 6) return hundreds[h] + "טז" + (n > 16 ? "״" : "׳");
-  let result = hundreds[h] + tens[t] + ones[o];
-  if (result.length > 1) result = result.slice(0, -1) + "״" + result.slice(-1);
-  else result += "׳";
-  return result;
+  const letters =
+    t === 1 && o === 5 ? hundreds[h] + "טו" :
+    t === 1 && o === 6 ? hundreds[h] + "טז" :
+    hundreds[h] + tens[t] + ones[o];
+  return letters.length > 1
+    ? letters.slice(0, -1) + "״" + letters.slice(-1)
+    : letters + "׳";
 }
 
 function buildLabel(range: TehillimDayRange): string {

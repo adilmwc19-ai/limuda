@@ -10,6 +10,7 @@ import {
   TOTAL_TEHILLIM_DAYS,
   getTehillimDayInfo,
   getCurrentHebrewDayOfMonth,
+  toHebrewNumeral,
 } from "@/lib/tehillimStructure";
 import { fetchTehillimDay, type TehillimDayData, type TehillimVerse } from "@/lib/sefaria";
 
@@ -456,7 +457,7 @@ export default function StudyTehillimClient() {
                   } ${isHighlighted ? "study-highlight-pulse" : ""}`}
                 >
                   <div className="mb-3 flex items-center justify-between gap-2">
-                    <h3 className="text-lg font-bold text-blue-900">תהלים פרק {psalm.number}</h3>
+                    <h3 className="text-lg font-bold text-blue-900">תהלים פרק {toHebrewNumeral(psalm.number)}</h3>
                     {user && (
                       <button
                         onClick={() => toggleBookmark(psalm.number)}
