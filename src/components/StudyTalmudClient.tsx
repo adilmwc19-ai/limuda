@@ -257,9 +257,15 @@ export default function StudyTalmudClient() {
         headerActions={
           <button
             onClick={() => setIsTocOpen(true)}
-            className="flex min-h-[44px] items-center justify-center rounded-lg bg-white/10 px-3 py-2.5 text-sm text-white transition hover:bg-white/20"
+            title="תוכן עניינים"
+            aria-label="תוכן עניינים"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center gap-1.5 rounded-lg bg-white/10 px-2.5 py-2.5 text-sm text-white transition hover:bg-white/20 md:px-3"
           >
-            תוכן עניינים
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+              <line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" />
+              <line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" />
+            </svg>
+            <span className="hidden md:inline">תוכן עניינים</span>
           </button>
         }
         toolbar={

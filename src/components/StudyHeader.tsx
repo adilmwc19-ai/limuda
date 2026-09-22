@@ -57,7 +57,7 @@ export default function StudyHeader({
           → ראשי
         </Link>
 
-        <div className="inline-flex min-w-0 items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-4 py-1.5">
+        <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 md:flex-initial">
           <span className="truncate text-sm font-medium text-white">
             {unitLabel}
             {bookLabel && (

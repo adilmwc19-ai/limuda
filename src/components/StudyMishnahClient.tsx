@@ -394,9 +394,15 @@ export default function StudyMishnahClient() {
               </button>
               <button
                 onClick={() => setShowAllCommentaries((p) => !p)}
-                className="rounded-lg bg-white/10 px-3 py-2.5 text-xs text-white transition hover:bg-white/20"
+                title={showAllCommentaries ? "הסתר פירושים" : "הצג פירושים"}
+                aria-label={showAllCommentaries ? "הסתר פירושים" : "הצג פירושים"}
+                className="flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg bg-white/10 px-2.5 py-2.5 text-xs text-white transition hover:bg-white/20 md:px-3"
               >
-                {showAllCommentaries ? "הסתר פירושים" : "הצג פירושים"}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+                <span className="hidden md:inline">{showAllCommentaries ? "הסתר פירושים" : "הצג פירושים"}</span>
               </button>
             </>
           }

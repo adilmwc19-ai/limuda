@@ -312,17 +312,17 @@ export default function HomeClient() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-900 border-t-transparent" />
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-900 border-t-transparent dark:border-blue-300" />
       </div>
     );
   }
 
   return (
-    <main className="flex min-h-screen flex-col bg-slate-50">
+    <main className="flex min-h-screen flex-col bg-slate-50 dark:bg-slate-950">
       {/* Header */}
-      <header className="bg-blue-950 px-6 py-4 shadow-md">
-        <div className="mx-auto flex max-w-4xl items-center justify-between">
+      <header className="bg-blue-950 px-6 py-4 shadow-md dark:bg-slate-900">
+        <div className="mx-auto flex max-w-6xl items-center justify-between">
           <h1 className="text-2xl font-bold tracking-wide text-white">לימודא</h1>
           {user && (
             <div className="flex items-center gap-4">
@@ -339,13 +339,13 @@ export default function HomeClient() {
       </header>
 
       {/* Main content */}
-      <section className="mx-auto flex w-full max-w-4xl flex-1 flex-col items-center justify-center gap-10 px-6 py-16">
+      <section className="mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center gap-10 px-6 py-16">
         {!user ? (
           /* ── Not signed in ── */
           <div className="flex flex-col items-center gap-8 text-center">
             <div className="space-y-2">
-              <h2 className="text-4xl font-bold text-blue-950">ברוך הבא ללימודא</h2>
-              <p className="text-lg text-slate-500">פלטפורמה אישית ללימוד תורה יומי בקצב שלך</p>
+              <h2 className="text-4xl font-bold text-blue-950 dark:text-white">ברוך הבא ללימודא</h2>
+              <p className="text-lg text-slate-700 dark:text-slate-200">פלטפורמה אישית ללימוד תורה יומי בקצב שלך</p>
             </div>
 
             <button
@@ -362,16 +362,16 @@ export default function HomeClient() {
             </button>
 
             {/* Track previews for non-signed-in users */}
-            <div className="mt-2 grid w-full max-w-3xl grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-2 grid w-full max-w-5xl grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-6">
               {TRACKS.map((t) => (
                 <div
                   key={t.id}
-                  className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white/70 p-4 text-right"
+                  className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white/70 p-4 text-right dark:border-slate-700 dark:bg-slate-800/70"
                 >
                   <span className="mt-0.5 text-2xl" aria-hidden="true">{t.emoji}</span>
                   <div>
-                    <p className="font-semibold text-blue-950">{t.title}</p>
-                    <p className="text-xs text-slate-500">{t.description}</p>
+                    <p className="font-semibold text-blue-950 dark:text-white">{t.title}</p>
+                    <p className="text-xs text-slate-700 dark:text-slate-200">{t.description}</p>
                   </div>
                 </div>
               ))}
@@ -382,14 +382,14 @@ export default function HomeClient() {
           <div className="flex w-full flex-col gap-8">
             <div className="flex items-start justify-between gap-4" dir="rtl">
               <div>
-                <h2 className="text-2xl font-bold text-blue-950">
+                <h2 className="text-2xl font-bold text-blue-950 dark:text-white">
                   שלום, {user.displayName?.split(" ")[0]}!
                 </h2>
-                <p className="text-slate-500">בחר מסלול לימוד להמשיך</p>
+                <p className="text-slate-700 dark:text-slate-200">בחר מסלול לימוד להמשיך</p>
               </div>
               <button
                 onClick={() => setShowTrackSelector(true)}
-                className="shrink-0 rounded-lg border border-blue-200 bg-white px-3 py-1.5 text-xs font-medium text-blue-900 transition hover:bg-blue-50 active:scale-95"
+                className="shrink-0 rounded-lg border border-blue-200 bg-white px-3 py-1.5 text-xs font-medium text-blue-900 transition hover:bg-blue-50 active:scale-95 dark:border-slate-600 dark:bg-slate-800 dark:text-blue-200 dark:hover:bg-slate-700"
               >
                 ⚙️ התאמת המסלולים שלי
               </button>
@@ -397,21 +397,21 @@ export default function HomeClient() {
 
             {/* Top: daily study hub — only the user's active tracks */}
             <div dir="rtl">
-              <h3 className="mb-4 text-lg font-bold text-blue-950">הסדר היומי שלי</h3>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <h3 className="mb-4 text-lg font-bold text-blue-950 dark:text-white">הסדר היומי שלי</h3>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-6">
                 {activeTrackIds.map((id) => renderTrackCard(id))}
               </div>
             </div>
 
             {/* Bottom: quick access to all tracks, collapsed by default */}
-            <details className="border-t border-slate-200 pt-4">
+            <details className="border-t border-slate-200 pt-4 dark:border-slate-700">
               <summary
-                className="cursor-pointer select-none text-sm font-semibold text-slate-500 transition hover:text-blue-900"
+                className="cursor-pointer select-none text-sm font-semibold text-slate-700 transition hover:text-blue-900 dark:text-slate-200 dark:hover:text-white"
                 dir="rtl"
               >
                 כל מסלולי הלימוד
               </summary>
-              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" dir="rtl">
+              <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-6" dir="rtl">
                 {TRACKS.map((t) => renderTrackCard(t.id))}
               </div>
             </details>
@@ -451,28 +451,28 @@ function StudyCard({ emoji, title, description, currentDay, totalDays, href, boo
   return (
     <Link
       href={href}
-      className="group flex flex-col rounded-2xl border border-blue-100 bg-white p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md"
+      className="group flex flex-col rounded-2xl border border-blue-100 bg-white p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600"
     >
       {/* Icon + title */}
       <div className="mb-3 flex items-center gap-3" dir="rtl">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-2xl">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-2xl dark:bg-blue-900/40">
           {emoji}
         </span>
         <div>
-          <h3 className="font-bold text-blue-950">{title}</h3>
-          <p className="text-xs text-slate-400">{description}</p>
+          <h3 className="text-xl font-bold text-slate-900 dark:text-white">{title}</h3>
+          <p className="text-sm text-slate-700 dark:text-slate-200">{description}</p>
         </div>
       </div>
 
       {/* Progress */}
       <div className="mt-auto space-y-2">
         <div className="flex items-baseline justify-between" dir="rtl">
-          <span className="text-2xl font-bold text-blue-950">יום {currentDay}</span>
-          <span className="text-xs text-slate-400">מתוך {totalDays}</span>
+          <span className="text-2xl font-bold text-blue-950 dark:text-blue-200">יום {currentDay}</span>
+          <span className="text-sm text-slate-700 dark:text-slate-200">מתוך {totalDays}</span>
         </div>
         {bookmarkLabel && (
           <div
-            className="flex w-fit items-center gap-1.5 rounded-full bg-blue-50/80 px-2.5 py-1 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+            className="flex w-fit items-center gap-1.5 rounded-full bg-blue-100 px-2.5 py-1 text-sm font-medium text-blue-800 dark:bg-blue-900/50 dark:text-blue-200"
             dir="rtl"
           >
             <svg
@@ -521,16 +521,16 @@ function PerekShirahCard({ completedToday, streak }: PerekShirahCardProps) {
   return (
     <Link
       href="/study/perek-shirah"
-      className="group flex flex-col rounded-2xl border border-blue-100 bg-white p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md"
+      className="group flex flex-col rounded-2xl border border-blue-100 bg-white p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600"
     >
       {/* Icon + title */}
       <div className="mb-3 flex items-center gap-3" dir="rtl">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-2xl">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-2xl dark:bg-blue-900/40">
           🕊️
         </span>
         <div>
-          <h3 className="font-bold text-blue-950">פרק שירה יומי</h3>
-          <p className="text-xs text-slate-400">כל פרק שירה, מדי יום — ללא חלוקה לימים</p>
+          <h3 className="text-xl font-bold text-slate-900 dark:text-white">פרק שירה יומי</h3>
+          <p className="text-sm text-slate-700 dark:text-slate-200">כל פרק שירה, מדי יום — ללא חלוקה לימים</p>
         </div>
       </div>
 
@@ -538,13 +538,15 @@ function PerekShirahCard({ completedToday, streak }: PerekShirahCardProps) {
       <div className="mt-auto space-y-2">
         <div className="flex items-center justify-between" dir="rtl">
           <span
-            className={`rounded-full px-3 py-1 text-xs font-semibold ${
-              completedToday ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-500"
+            className={`rounded-full px-3 py-1 text-sm font-medium ${
+              completedToday
+                ? "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200"
+                : "bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200"
             }`}
           >
             {completedToday ? "נקרא היום ✓" : "טרם נקרא היום"}
           </span>
-          {streak > 0 && <span className="text-xs text-slate-400">רצף {streak} ימים</span>}
+          {streak > 0 && <span className="text-sm text-slate-700 dark:text-slate-200">רצף {streak} ימים</span>}
         </div>
         <div
           className="mt-3 flex items-center justify-center gap-1.5 rounded-xl bg-blue-950 py-2 text-sm font-semibold text-white transition group-hover:bg-blue-900"
