@@ -1,5 +1,109 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme inline {
+  --font-traditional: var(--font-frank-ruhl), "David", "Times New Roman", serif;
+  --font-modern: "Segoe UI", Arial, sans-serif;
+}
+
 body {
   font-family: "Segoe UI", Arial, sans-serif;
+}
+
+/* ─── Global reading settings overrides ──────────────────────────────── */
+
+html[data-font-size="normal"] {
+  font-size: 100%;
+}
+html[data-font-size="large"] {
+  font-size: 115%;
+}
+html[data-font-size="xlarge"] {
+  font-size: 130%;
+}
+
+html[data-font-family="traditional"] body,
+html[data-font-family="traditional"] p,
+html[data-font-family="traditional"] span,
+html[data-font-family="traditional"] div {
+  font-family: var(--font-frank-ruhl, "Frank Ruhl Libre", "David", serif) !important;
+}
+
+html[data-theme="dark"],
+html[data-theme="dark"] body,
+html[data-theme="dark"] p,
+html[data-theme="dark"] span,
+html[data-theme="dark"] div,
+html[data-theme="dark"] h1,
+html[data-theme="dark"] h2,
+html[data-theme="dark"] h3,
+html[data-theme="dark"] h4,
+html[data-theme="dark"] li {
+  color: #f1f5f9 !important;
+}
+html[data-theme="dark"] body {
+  background-color: #090d16 !important;
+}
+html[data-theme="dark"] .bg-white,
+html[data-theme="dark"] [class*="bg-white"] {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+html[data-theme="dark"] .bg-amber-50,
+html[data-theme="dark"] .bg-yellow-50,
+html[data-theme="dark"] .bg-blue-50,
+html[data-theme="dark"] .bg-gray-50,
+html[data-theme="dark"] .bg-slate-50 {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+}
+html[data-theme="dark"] .text-gray-900,
+html[data-theme="dark"] .text-gray-800,
+html[data-theme="dark"] .text-gray-700 {
+  color: #e2e8f0 !important;
+}
+html[data-theme="dark"] .border-gray-100,
+html[data-theme="dark"] .border-gray-200,
+html[data-theme="dark"] .border-gray-300 {
+  border-color: #1e293b !important;
+}
+
+html[data-theme="dark"] [class*="hover:bg-"]:hover,
+html[data-theme="dark"] .hover\:bg-white:hover,
+html[data-theme="dark"] .hover\:bg-gray-50:hover,
+html[data-theme="dark"] .hover\:bg-slate-50:hover,
+html[data-theme="dark"] .hover\:bg-gray-100:hover {
+  background-color: #334155 !important;
+  color: #f1f5f9 !important;
+}
+
+html[data-theme="dark"] .text-blue-600,
+html[data-theme="dark"] .text-blue-700,
+html[data-theme="dark"] .text-blue-800 {
+  color: #93c5fd !important;
+}
+html[data-theme="dark"] button {
+  border-color: #334155 !important;
+}
+
+html[data-theme="dark"] [class*="text-blue-"],
+html[data-theme="dark"] [class*="text-indigo-"],
+html[data-theme="dark"] [class*="text-sky-"] {
+  color: #93c5fd !important;
+}
+
+html[data-theme="dark"] button [class*="text-blue-"],
+html[data-theme="dark"] button [class*="text-indigo-"] {
+  color: #bfdbfe !important;
+}
+
+html[data-theme="dark"] button svg,
+html[data-theme="dark"] button svg path {
+  stroke: #93c5fd !important;
+}
+
+html[data-theme="dark"] [class*="border-blue-"],
+html[data-theme="dark"] [class*="border-indigo-"] {
+  border-color: #1e3a8a !important;
 }
