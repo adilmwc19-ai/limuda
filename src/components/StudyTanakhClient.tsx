@@ -272,6 +272,7 @@ export default function StudyTanakhClient() {
   const [tocInitialTab, setTocInitialTab] = useState<"torah" | "nakh">("torah");
   const [tocInitialParasha, setTocInitialParasha] = useState<string | null>(null);
   const [tocInitialBook, setTocInitialBook] = useState<string | null>(null);
+  const [activeBookmark, setActiveBookmark] = useState<{ day: number; verse: number } | null>(null);
 
   // Auth + load user day
   useEffect(() => {
@@ -281,13 +282,23 @@ export default function StudyTanakhClient() {
       const snap = await getDoc(doc(db, "users", fbUser.uid));
       if (cancelled) return;
       const userDay = (snap.data()?.tanakh929Day as number | undefined) ?? 1;
+      const savedBookmark = snap.data()?.tanakhBookmark as { day: number; verse: number } | undefined;
       setUser(fbUser);
       setActiveDay(userDay);
       setViewingDay(userDay);
+      setActiveBookmark(savedBookmark ?? null);
       setPageLoading(false);
     });
     return () => { cancelled = true; unsub(); };
   }, [router]);
+
+  // Auto-scroll to the bookmarked verse once its chapter has finished loading
+  useEffect(() => {
+    if (!chapterData || chapterLoading) return;
+    if (!activeBookmark || activeBookmark.day !== viewingDay) return;
+    const el = document.getElementById(`tanakh-verse-${activeBookmark.verse}`);
+    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [chapterData, chapterLoading, activeBookmark, viewingDay]);
 
   // Fetch chapter on viewing day change
   useEffect(() => {
@@ -323,6 +334,16 @@ export default function StudyTanakhClient() {
       const next = new Set(prev);
       next.has(num) ? next.delete(num) : next.add(num);
       return next;
+    });
+  }
+
+  function toggleBookmark(verseNumber: number) {
+    if (!user) return;
+    const isActive = activeBookmark?.day === viewingDay && activeBookmark?.verse === verseNumber;
+    const next = isActive ? null : { day: viewingDay, verse: verseNumber };
+    setActiveBookmark(next);
+    updateDoc(doc(db, "users", user.uid), { tanakhBookmark: next }).catch((err: unknown) => {
+      console.error("[study] bookmark save failed:", err instanceof Error ? err.message : err);
     });
   }
 
@@ -451,8 +472,17 @@ export default function StudyTanakhClient() {
             {chapterData.verses.map((verse) => {
               const hasAnyContent = Object.values(verse.commentaries).some((a) => a.length > 0);
               const commentaryOpen = hasAnyContent && (showAllCommentaries || expandedVerses.has(verse.verseNumber));
+              const isBookmarked = activeBookmark?.day === viewingDay && activeBookmark?.verse === verse.verseNumber;
               return (
-                <div key={verse.verseNumber} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div
+                  key={verse.verseNumber}
+                  id={`tanakh-verse-${verse.verseNumber}`}
+                  className={`scroll-mt-20 overflow-hidden rounded-2xl border shadow-sm transition ${
+                    isBookmarked
+                      ? "border-slate-200 border-r-4 border-r-blue-600 bg-blue-50/40 dark:border-r-blue-400 dark:bg-blue-950/30"
+                      : "border-slate-200 bg-white"
+                  }`}
+                >
                   <div
                     className={`p-4 ${hasAnyContent ? "cursor-pointer hover:bg-slate-50 active:bg-slate-100" : ""}`}
                     onClick={() => hasAnyContent && toggleVerse(verse.verseNumber)}
@@ -466,6 +496,29 @@ export default function StudyTanakhClient() {
                         dir="rtl"
                         dangerouslySetInnerHTML={{ __html: verse.text }}
                       />
+                      <button
+                        onClick={(e) => { e.stopPropagation(); toggleBookmark(verse.verseNumber); }}
+                        title="עצרתי כאן"
+                        aria-label={isBookmarked ? "בטל סימנייה" : "סמן כמקום שעצרתי"}
+                        className={`mt-1.5 shrink-0 rounded-lg p-1 transition ${
+                          isBookmarked
+                            ? "text-blue-600 dark:text-blue-400"
+                            : "text-slate-300 hover:text-blue-400"
+                        }`}
+                      >
+                        <svg
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill={isBookmarked ? "currentColor" : "none"}
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M6 3.75A1.75 1.75 0 0 1 7.75 2h8.5A1.75 1.75 0 0 1 18 3.75V21l-6-3.6L6 21V3.75Z" />
+                        </svg>
+                      </button>
                     </div>
                     {hasAnyContent && (
                       <div className="mt-1 text-left">
