@@ -100,7 +100,7 @@ function TocModal({ currentDay, onSelect, onClose }: TocModalProps) {
           <h2 className="text-lg font-bold text-blue-950">תוכן עניינים — תהלים יומי</h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
           >
             ✕
           </button>
@@ -355,14 +355,14 @@ export default function StudyTehillimClient() {
               <button
                 onClick={() => setViewingDay((d) => Math.max(1, d - 1))}
                 disabled={viewingDay <= 1}
-                className="rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-sm text-blue-900 transition hover:bg-blue-50 disabled:opacity-40"
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-sm text-blue-900 transition hover:bg-blue-50 disabled:opacity-40"
               >
                 ←
               </button>
               <button
                 onClick={() => setViewingDay((d) => Math.min(TOTAL_TEHILLIM_DAYS, d + 1))}
                 disabled={viewingDay >= TOTAL_TEHILLIM_DAYS}
-                className="rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-sm text-blue-900 transition hover:bg-blue-50 disabled:opacity-40"
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-sm text-blue-900 transition hover:bg-blue-50 disabled:opacity-40"
               >
                 →
               </button>
@@ -411,8 +411,10 @@ export default function StudyTehillimClient() {
         </div>
 
         <div className="mb-6 text-center">
-          <h2 className="text-2xl font-bold text-blue-950">{info.description}</h2>
-          <p className="mt-1 text-sm text-slate-400">{dayModeLabel}</p>
+          <div className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-2xl font-bold text-blue-950 dark:border-slate-700 dark:bg-slate-800/60 dark:text-blue-100">
+            {info.description}
+          </div>
+          <p className="mt-2 text-sm text-slate-400">{dayModeLabel}</p>
         </div>
 
         {showDeficientNote && (
@@ -463,7 +465,7 @@ export default function StudyTehillimClient() {
                         onClick={() => toggleBookmark(psalm.number)}
                         title="עצרתי כאן"
                         aria-label={isBookmarked ? "בטל סימנייה" : "סמן כמקום שעצרתי"}
-                        className={`shrink-0 rounded-lg p-1 transition ${
+                        className={`flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-lg p-2.5 transition ${
                           isBookmarked
                             ? "text-blue-600 dark:text-blue-400"
                             : "text-slate-300 hover:text-blue-400"
@@ -491,7 +493,7 @@ export default function StudyTehillimClient() {
                           <h4 className="mb-2 text-center text-xs font-semibold tracking-wide text-blue-400">
                             — אות {group.letter}׳ —
                           </h4>
-                          <div className="space-y-2 leading-relaxed text-gray-800 text-base">
+                          <div className="space-y-2 text-lg font-medium leading-relaxed text-gray-800 lg:text-xl">
                             {group.verses.map((v) => (
                               <p key={v.verse}>
                                 <span className="ml-2 text-xs font-bold text-blue-500 align-super">{v.verse}</span>
@@ -503,7 +505,7 @@ export default function StudyTehillimClient() {
                       ))}
                     </div>
                   ) : (
-                    <div className="space-y-2 leading-relaxed text-gray-800 text-base">
+                    <div className="space-y-2 text-lg font-medium leading-relaxed text-gray-800 lg:text-xl">
                       {psalm.verses.map((v) => (
                         <p key={v.verse}>
                           <span className="ml-2 text-xs font-bold text-blue-500 align-super">{v.verse}</span>

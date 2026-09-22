@@ -43,7 +43,7 @@ export default function ReadingSettingsButton() {
         title="הגדרות תצוגה"
         aria-label="הגדרות תצוגה"
         aria-expanded={open}
-        className="rounded-lg bg-blue-800 px-2.5 py-1.5 text-sm font-bold text-white transition hover:bg-blue-700"
+        className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg bg-blue-800 px-2.5 py-1.5 text-sm font-bold text-white transition hover:bg-blue-700"
       >
         Aa
       </button>

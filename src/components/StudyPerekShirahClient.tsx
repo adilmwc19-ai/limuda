@@ -159,7 +159,7 @@ export default function StudyPerekShirahClient() {
             <button
               key={s.id}
               onClick={() => scrollToSection(s.id)}
-              className="rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-xs font-medium text-blue-900 transition hover:bg-blue-50"
+              className="flex min-h-[44px] items-center justify-center rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-xs font-medium text-blue-900 transition hover:bg-blue-50"
             >
               {NAV_LABELS[s.id] ?? s.title}
             </button>
@@ -199,11 +199,13 @@ export default function StudyPerekShirahClient() {
                 id={`section-${section.id}`}
                 className="scroll-mt-[104px] rounded-2xl border border-blue-100 bg-white p-5 shadow-sm"
               >
-                <h2 className="mb-4 text-lg font-bold text-blue-950">{section.title}</h2>
+                <div className="mb-4 inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-lg font-bold text-blue-950 dark:border-slate-700 dark:bg-slate-800/60 dark:text-blue-100">
+                  {section.title}
+                </div>
                 {section.lines.length === 0 ? (
                   <p className="py-4 text-center text-sm text-slate-400">אין טקסט זמין</p>
                 ) : (
-                  <div className="space-y-4 leading-relaxed text-gray-800 text-base">
+                  <div className="space-y-4 text-lg font-medium leading-relaxed text-gray-800 lg:text-xl">
                     {section.lines.map((line, i) => (
                       <p key={i}>{formatPerekLine(line)}</p>
                     ))}
@@ -220,7 +222,7 @@ export default function StudyPerekShirahClient() {
             <button
               onClick={handleMarkComplete}
               disabled={completing}
-              className="rounded-xl bg-blue-950 px-8 py-3 text-base font-semibold text-white shadow transition hover:bg-blue-900 active:scale-95 disabled:opacity-60"
+              className="flex min-h-[44px] items-center justify-center rounded-xl bg-blue-950 px-8 py-3 text-base font-semibold text-white shadow transition hover:bg-blue-900 active:scale-95 disabled:opacity-60"
             >
               {completing ? "שומר..." : "סיימתי לקרוא פרק שירה היום ✨"}
             </button>

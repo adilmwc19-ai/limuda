@@ -106,7 +106,7 @@ function TocModal({ currentGlobalIndex, initialBookId, initialTreatiseId, onSele
           <h2 className="text-lg font-bold text-blue-950">תוכן עניינים — משנה תורה</h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
           >
             ✕
           </button>
@@ -430,14 +430,14 @@ export default function StudyRambamClient() {
               <button
                 onClick={() => setViewingIndex((d) => Math.max(1, d - 1))}
                 disabled={viewingIndex <= 1}
-                className="rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-sm text-blue-900 transition hover:bg-blue-50 disabled:opacity-40"
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-sm text-blue-900 transition hover:bg-blue-50 disabled:opacity-40"
               >
                 ←
               </button>
               <button
                 onClick={() => setViewingIndex((d) => Math.min(TOTAL_RAMBAM_CHAPTERS, d + 1))}
                 disabled={viewingIndex >= TOTAL_RAMBAM_CHAPTERS}
-                className="rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-sm text-blue-900 transition hover:bg-blue-50 disabled:opacity-40"
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-sm text-blue-900 transition hover:bg-blue-50 disabled:opacity-40"
               >
                 →
               </button>
@@ -512,7 +512,7 @@ export default function StudyRambamClient() {
                     <div
                       key={h.number}
                       id={`rambam-halakhah-${h.number}`}
-                      className={`scroll-mt-24 flex items-start gap-2 rounded-xl border p-2 leading-relaxed text-base text-gray-800 transition-colors ${
+                      className={`scroll-mt-24 flex items-start gap-2 rounded-xl border p-2 text-lg font-medium leading-relaxed text-gray-800 transition-colors lg:text-xl ${
                         isBookmarked
                           ? "border-slate-200 border-r-4 border-r-blue-600 bg-blue-50/40 dark:border-r-blue-400 dark:bg-blue-950/30"
                           : "border-transparent"
@@ -526,7 +526,7 @@ export default function StudyRambamClient() {
                         onClick={(e) => { e.stopPropagation(); toggleBookmark(h.number); }}
                         title="עצרתי כאן"
                         aria-label={isBookmarked ? "בטל סימנייה" : "סמן כמקום שעצרתי"}
-                        className={`mt-0.5 shrink-0 rounded-lg p-1 transition ${
+                        className={`flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-lg p-2.5 transition ${
                           isBookmarked
                             ? "text-blue-600 dark:text-blue-400"
                             : "text-slate-300 hover:text-blue-400"
@@ -605,9 +605,11 @@ export default function StudyRambamClient() {
 function SegSummary({ loc }: { loc: RambamLocation }) {
   return (
     <div>
-      <h2 className="text-2xl font-bold text-blue-950">{loc.treatise.nameHe}</h2>
-      <p className="mt-1 text-lg text-blue-700">פרק {toHebrew(loc.chapter)}</p>
-      <p className="mt-1 text-sm text-slate-400">{loc.book.nameHe}</p>
+      <h2 className="text-2xl font-bold text-blue-950 dark:text-blue-100">{loc.treatise.nameHe}</h2>
+      <div className="mt-3 inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-lg font-semibold text-blue-700 dark:border-slate-700 dark:bg-slate-800/60 dark:text-blue-300">
+        פרק {toHebrew(loc.chapter)}
+      </div>
+      <p className="mt-2 text-sm text-slate-400">{loc.book.nameHe}</p>
     </div>
   );
 }

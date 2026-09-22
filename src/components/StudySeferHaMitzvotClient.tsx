@@ -87,7 +87,7 @@ function TocModal({ currentGlobalIndex, initialSection, onSelect, onClose }: Toc
           <h2 className="text-lg font-bold text-blue-950">תוכן עניינים — ספר המצוות</h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
           >
             ✕
           </button>
@@ -321,14 +321,14 @@ export default function StudySeferHaMitzvotClient() {
               <button
                 onClick={() => setViewingIndex((d) => Math.max(1, d - 1))}
                 disabled={viewingIndex <= 1}
-                className="rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-sm text-blue-900 transition hover:bg-blue-50 disabled:opacity-40"
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-sm text-blue-900 transition hover:bg-blue-50 disabled:opacity-40"
               >
                 ←
               </button>
               <button
                 onClick={() => setViewingIndex((d) => Math.min(TOTAL_SEFER_HAMITZVOT_ITEMS, d + 1))}
                 disabled={viewingIndex >= TOTAL_SEFER_HAMITZVOT_ITEMS}
-                className="rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-sm text-blue-900 transition hover:bg-blue-50 disabled:opacity-40"
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-sm text-blue-900 transition hover:bg-blue-50 disabled:opacity-40"
               >
                 →
               </button>
@@ -378,8 +378,10 @@ export default function StudySeferHaMitzvotClient() {
         </div>
 
         <div className="mb-6 text-center">
-          <h2 className="text-2xl font-bold text-blue-950">{item.titleHebrew}</h2>
-          <p className="mt-1 text-sm text-slate-400">
+          <div className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-2xl font-bold text-blue-950 dark:border-slate-700 dark:bg-slate-800/60 dark:text-blue-100">
+            {item.titleHebrew}
+          </div>
+          <p className="mt-2 text-sm text-slate-400">
             {SEFER_HAMITZVOT_SECTIONS.find((s) => s.id === item.section)?.titleHebrew}
           </p>
         </div>
@@ -397,7 +399,7 @@ export default function StudySeferHaMitzvotClient() {
             {itemData.paragraphs.length === 0 ? (
               <p className="py-8 text-center text-sm text-slate-400">אין טקסט זמין עבור פריט זה</p>
             ) : (
-              <div className="space-y-4 leading-relaxed text-gray-800 text-base">
+              <div className="space-y-4 text-lg font-medium leading-relaxed text-gray-800 lg:text-xl">
                 {itemData.paragraphs.map((p, i) => (
                   <p key={i}>{p}</p>
                 ))}

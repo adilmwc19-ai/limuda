@@ -161,7 +161,7 @@ function TocModal({ viewingDay, initialTab, initialParasha, initialBook, onSelec
           <h2 className="text-lg font-bold text-blue-950">תוכן עניינים</h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
             aria-label="סגור"
           >
             ✕
@@ -415,7 +415,7 @@ export default function StudyTanakhClient() {
             <button
               onClick={handleOpenToc}
               title="תוכן עניינים"
-              className="rounded-lg bg-blue-800 p-1.5 text-white hover:bg-blue-700 transition"
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg bg-blue-800 p-2.5 text-white transition hover:bg-blue-700"
               aria-label="תוכן עניינים"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -437,9 +437,11 @@ export default function StudyTanakhClient() {
         {/* Chapter title + TOC button */}
         {dayInfo && (
           <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold text-blue-950">{dayInfo.book.hebrewName}</h1>
-            <p className="mt-1 text-xl text-blue-700">פרק {dayInfo.chapter}</p>
-            <p className="mt-1 text-sm text-slate-400">
+            <h1 className="text-3xl font-bold text-blue-950 dark:text-blue-100">{dayInfo.book.hebrewName}</h1>
+            <div className="mt-3 inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-xl font-semibold text-blue-700 dark:border-slate-700 dark:bg-slate-800/60 dark:text-blue-300">
+              פרק {dayInfo.chapter}
+            </div>
+            <p className="mt-2 text-sm text-slate-400">
               {dayInfo.book.sefariaName} {dayInfo.chapter} &bull; יום {viewingDay} מתוך {TOTAL_DAYS}
             </p>
             <button
@@ -492,7 +494,7 @@ export default function StudyTanakhClient() {
                         {toHebrew(verse.verseNumber)}
                       </span>
                       <p
-                        className="flex-1 text-right text-lg leading-10 text-slate-800"
+                        className="flex-1 text-right text-lg font-medium leading-relaxed text-slate-800 lg:text-xl"
                         dir="rtl"
                         dangerouslySetInnerHTML={{ __html: verse.text }}
                       />
@@ -500,7 +502,7 @@ export default function StudyTanakhClient() {
                         onClick={(e) => { e.stopPropagation(); toggleBookmark(verse.verseNumber); }}
                         title="עצרתי כאן"
                         aria-label={isBookmarked ? "בטל סימנייה" : "סמן כמקום שעצרתי"}
-                        className={`mt-1.5 shrink-0 rounded-lg p-1 transition ${
+                        className={`flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-lg p-2.5 transition ${
                           isBookmarked
                             ? "text-blue-600 dark:text-blue-400"
                             : "text-slate-300 hover:text-blue-400"
@@ -602,7 +604,7 @@ export default function StudyTanakhClient() {
               <button
                 onClick={() => setViewingDay((d) => Math.max(1, d - 1))}
                 disabled={viewingDay <= 1}
-                className="rounded-xl border border-blue-200 bg-white px-5 py-2 text-sm font-medium text-blue-950 shadow-sm transition hover:bg-blue-50 disabled:opacity-40"
+                className="flex min-h-[44px] items-center justify-center rounded-xl border border-blue-200 bg-white px-5 py-2.5 text-sm font-medium text-blue-950 shadow-sm transition hover:bg-blue-50 disabled:opacity-40"
               >
                 &larr; היום הקודם
               </button>
@@ -610,7 +612,7 @@ export default function StudyTanakhClient() {
               <button
                 onClick={() => setViewingDay((d) => Math.min(TOTAL_DAYS, d + 1))}
                 disabled={viewingDay >= TOTAL_DAYS}
-                className="rounded-xl border border-blue-200 bg-white px-5 py-2 text-sm font-medium text-blue-950 shadow-sm transition hover:bg-blue-50 disabled:opacity-40"
+                className="flex min-h-[44px] items-center justify-center rounded-xl border border-blue-200 bg-white px-5 py-2.5 text-sm font-medium text-blue-950 shadow-sm transition hover:bg-blue-50 disabled:opacity-40"
               >
                 היום הבא &rarr;
               </button>

@@ -247,15 +247,17 @@ export default function StudyTalmudClient() {
       <header className="sticky top-0 z-10 bg-blue-950 px-4 py-3 shadow-md">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-2">
           <a href="/" className="text-sm text-blue-300 transition hover:text-white">→ ראשי</a>
-          <h1 className="text-lg font-bold tracking-wide text-white">
-            {info.masechetHe} {dafLabel(info.dafNumber)}
+          <div className="inline-flex items-center gap-2 rounded-full border border-blue-800/60 bg-blue-900/50 px-4 py-1.5">
+            <h1 className="text-lg font-bold tracking-wide text-white">
+              {info.masechetHe} {dafLabel(info.dafNumber)}
+            </h1>
             {paceMode === "global" && (
-              <span className="mr-2 rounded-full bg-blue-700 px-2 py-0.5 text-xs font-normal">עולמי</span>
+              <span className="rounded-full bg-blue-700 px-2 py-0.5 text-xs font-normal text-white">עולמי</span>
             )}
-          </h1>
+          </div>
           <button
             onClick={() => setIsTocOpen(true)}
-            className="rounded-lg bg-blue-800 px-3 py-1.5 text-sm text-white transition hover:bg-blue-700"
+            className="flex min-h-[44px] items-center justify-center rounded-lg bg-blue-800 px-3 py-2.5 text-sm text-white transition hover:bg-blue-700"
           >
             תוכן עניינים
           </button>
@@ -315,7 +317,7 @@ export default function StudyTalmudClient() {
             <button
               onClick={() => setViewingDay((d) => Math.max(1, d - 1))}
               disabled={viewingDay <= 1}
-              className="rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-sm text-blue-900 transition hover:bg-blue-50 disabled:opacity-40"
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-sm text-blue-900 transition hover:bg-blue-50 disabled:opacity-40"
             >
               ←
             </button>
@@ -340,7 +342,7 @@ export default function StudyTalmudClient() {
             <button
               onClick={() => setViewingDay((d) => Math.min(TOTAL_TALMUD_DAYS, d + 1))}
               disabled={viewingDay >= TOTAL_TALMUD_DAYS}
-              className="rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-sm text-blue-900 transition hover:bg-blue-50 disabled:opacity-40"
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-sm text-blue-900 transition hover:bg-blue-50 disabled:opacity-40"
             >
               →
             </button>
@@ -434,7 +436,7 @@ function AmudSection({ amud, label, commentator, displayMode, layoutMode }: Amud
   const tosafotComments = displayMode === "vilna" ? amud.tosafot.map(stripTalmudPunctuation) : amud.tosafot;
 
   const GemaraBlock = () => (
-    <div className="leading-relaxed text-gray-800 text-base space-y-2">
+    <div className="space-y-2 text-lg font-medium leading-relaxed text-gray-800 lg:text-xl">
       {gemara.length === 0 ? (
         <p className="text-sm text-slate-400 text-center">הטקסט לא זמין</p>
       ) : (
@@ -541,7 +543,7 @@ function TocModal({
           <h2 className="text-lg font-bold text-blue-950">תוכן עניינים</h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
           >
             ✕
           </button>

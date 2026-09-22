@@ -111,7 +111,7 @@ function TocModal({ currentUnitIndex, initialGate, onSelect, onClose }: TocModal
           <h2 className="text-lg font-bold text-blue-950">תוכן עניינים — חפץ חיים</h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
           >
             ✕
           </button>
@@ -327,14 +327,14 @@ export default function StudyChofetzChaimClient() {
               <button
                 onClick={() => setViewingUnit((d) => Math.max(1, d - 1))}
                 disabled={viewingUnit <= 1}
-                className="rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-sm text-blue-900 transition hover:bg-blue-50 disabled:opacity-40"
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-sm text-blue-900 transition hover:bg-blue-50 disabled:opacity-40"
               >
                 ←
               </button>
               <button
                 onClick={() => setViewingUnit((d) => Math.min(TOTAL_CHOFETZ_CHAIM_UNITS, d + 1))}
                 disabled={viewingUnit >= TOTAL_CHOFETZ_CHAIM_UNITS}
-                className="rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-sm text-blue-900 transition hover:bg-blue-50 disabled:opacity-40"
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-sm text-blue-900 transition hover:bg-blue-50 disabled:opacity-40"
               >
                 →
               </button>
@@ -384,9 +384,11 @@ export default function StudyChofetzChaimClient() {
 
         <div className="mb-6 text-center">
           <p className="text-sm font-medium text-blue-500">{gateTitle}</p>
-          <h2 className="text-2xl font-bold text-blue-950">{unit.titleHebrew}</h2>
+          <div className="mt-2 inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-2xl font-bold text-blue-950 dark:border-slate-700 dark:bg-slate-800/60 dark:text-blue-100">
+            {unit.titleHebrew}
+          </div>
           {unit.subtitleHebrew && (
-            <p className="mt-1 text-sm text-slate-400">{unit.subtitleHebrew}</p>
+            <p className="mt-2 text-sm text-slate-400">{unit.subtitleHebrew}</p>
           )}
         </div>
 
@@ -406,7 +408,7 @@ export default function StudyChofetzChaimClient() {
               ) : (
                 <div className="space-y-5">
                   {unitData.seifim.map((seif) => (
-                    <div key={seif.seif} className="space-y-2 leading-relaxed text-gray-800 text-base">
+                    <div key={seif.seif} className="space-y-2 text-lg font-medium leading-relaxed text-gray-800 lg:text-xl">
                       {seif.paragraphs.map((p, i) => (
                         <p key={i}>
                           {i === 0 && (
@@ -424,7 +426,7 @@ export default function StudyChofetzChaimClient() {
             ) : !unitData.paragraphs || unitData.paragraphs.length === 0 ? (
               <p className="py-8 text-center text-sm text-slate-400">אין טקסט זמין עבור יחידה זו</p>
             ) : (
-              <div className="space-y-4 leading-relaxed text-gray-800 text-base">
+              <div className="space-y-4 text-lg font-medium leading-relaxed text-gray-800 lg:text-xl">
                 {unitData.paragraphs.map((p, i) => (
                   <p key={i}>{p}</p>
                 ))}
