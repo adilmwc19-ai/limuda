@@ -40,6 +40,24 @@ interface UserProgress {
   perekShirahStreak: number;
   activeTracks: string[];
   createdAt: string;
+  tanakhBookmark?: { day: number; verse: number } | null;
+}
+
+// Small Hebrew-letter numeral, e.g. 1 -> "א׳", 15 -> "ט״ו" (used for verse labels only).
+function toHebrewVerseNumeral(n: number): string {
+  if (n <= 0 || n > 999) return String(n);
+  const hundreds = ["", "ק", "ר", "ש", "ת", "תק", "תר", "תש", "תת", "תתק"];
+  const tens = ["", "י", "כ", "ל", "מ", "נ", "ס", "ע", "פ", "צ"];
+  const ones = ["", "א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט"];
+  const h = Math.floor(n / 100);
+  const t = Math.floor((n % 100) / 10);
+  const o = n % 10;
+  if (t === 1 && o === 5) return hundreds[h] + "ט״ו";
+  if (t === 1 && o === 6) return hundreds[h] + "ט״ז";
+  let result = hundreds[h] + tens[t] + ones[o];
+  if (result.length > 1) result = result.slice(0, -1) + "״" + result.slice(-1);
+  else result += "׳";
+  return result;
 }
 
 export default function HomeClient() {
@@ -133,7 +151,8 @@ export default function HomeClient() {
 
   function renderTrackCard(id: string) {
     switch (id) {
-      case "tanakh":
+      case "tanakh": {
+        const bookmark = progress?.tanakhBookmark;
         return (
           <StudyCard
             key={id}
@@ -143,8 +162,12 @@ export default function HomeClient() {
             currentDay={progress?.tanakh929Day ?? 1}
             totalDays={TOTAL_DAYS}
             href="/study/tanakh"
+            bookmarkLabel={
+              bookmark ? `המשך מפסוק ${toHebrewVerseNumeral(bookmark.verse)}` : undefined
+            }
           />
         );
+      }
       case "mishnah":
         return (
           <StudyCard
@@ -387,9 +410,10 @@ interface StudyCardProps {
   currentDay: number;
   totalDays: number;
   href: string;
+  bookmarkLabel?: string;
 }
 
-function StudyCard({ emoji, title, description, currentDay, totalDays, href }: StudyCardProps) {
+function StudyCard({ emoji, title, description, currentDay, totalDays, href, bookmarkLabel }: StudyCardProps) {
   const pct = Math.round((currentDay / totalDays) * 100);
 
   return (
@@ -414,6 +438,28 @@ function StudyCard({ emoji, title, description, currentDay, totalDays, href }: S
           <span className="text-2xl font-bold text-blue-950">יום {currentDay}</span>
           <span className="text-xs text-slate-400">מתוך {totalDays}</span>
         </div>
+        {bookmarkLabel && (
+          <div
+            className="flex w-fit items-center gap-1.5 rounded-full bg-blue-50/80 px-2.5 py-1 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+            dir="rtl"
+          >
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+              className="shrink-0"
+            >
+              <path d="M6 3.75A1.75 1.75 0 0 1 7.75 2h8.5A1.75 1.75 0 0 1 18 3.75V21l-6-3.6L6 21V3.75Z" />
+            </svg>
+            <span>{bookmarkLabel}</span>
+          </div>
+        )}
         <div className="h-1.5 w-full overflow-hidden rounded-full bg-blue-100">
           <div
             className="h-full rounded-full bg-blue-700 transition-all duration-500"
