@@ -141,6 +141,12 @@ function TocModal({ currentDay, onSelect, onClose }: TocModalProps) {
 
 type PaceMode = "global" | "personal";
 
+interface TehillimBookmark {
+  bookId: "tehillim";
+  day: number;          // day-in-month the bookmark was saved from
+  psalmNumber: number;  // whole psalm/chapter — never a verse
+}
+
 export default function StudyTehillimClient() {
   const [user, setUser]             = useState<User | null>(null);
   const [paceMode, setPaceMode]     = useState<PaceMode>("global");
@@ -154,39 +160,71 @@ export default function StudyTehillimClient() {
   const [settingDay, setSettingDay] = useState(false);
   const [setDayMsg, setSetDayMsg]   = useState<string | null>(null);
   const [tocOpen, setTocOpen]       = useState(false);
+  const [activeBookmark, setActiveBookmark] = useState<TehillimBookmark | null>(null);
+  const [highlightedPsalm, setHighlightedPsalm] = useState<number | null>(null);
+  const [initialized, setInitialized] = useState(false);
 
   // Derived "today" based on the Hebrew calendar (pure/synchronous — no network call)
   const currentHebrew = getCurrentHebrewDayOfMonth();
   const activeDay = paceMode === "global" ? currentHebrew.day : personalDay;
 
-  // ── Auth + Firestore ────────────────────────────────────────────────────────
+  // ── Auth + Firestore (personal progress + saved bookmark) ──────────────────
 
   useEffect(() => {
-    const globalNow = getCurrentHebrewDayOfMonth().day;
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
       if (firebaseUser) {
         const ref  = doc(db, "users", firebaseUser.uid);
         const snap = await getDoc(ref);
         let personalStart = 1;
+        let savedBookmark: TehillimBookmark | null = null;
         if (snap.exists()) {
           const data = snap.data() as Record<string, unknown>;
           personalStart = typeof data.tehillimDay === "number" ? data.tehillimDay : 1;
           if (typeof data.tehillimDay !== "number") {
             await updateDoc(ref, { tehillimDay: 1 });
           }
+          savedBookmark = (data.tehillimBookmark as TehillimBookmark | undefined) ?? null;
         } else {
           await setDoc(ref, { tehillimDay: 1 }, { merge: true });
         }
         setPersonalDay(personalStart);
+        setActiveBookmark(savedBookmark);
       } else {
         setPersonalDay(1);
+        setActiveBookmark(null);
       }
-      setViewingDay(globalNow);
       setLoading(false);
     });
     return () => unsub();
   }, []);
+
+  // Resolve the initial viewingDay once auth has settled. A saved bookmark
+  // takes priority — it's how "continue reading" from the home card lands
+  // the reader straight back on their psalm, regardless of the global/
+  // personal pace default.
+  useEffect(() => {
+    if (initialized || loading) return;
+    if (activeBookmark) {
+      setPaceMode("personal");
+      setViewingDay(activeBookmark.day);
+    } else {
+      setViewingDay(getCurrentHebrewDayOfMonth().day);
+    }
+    setInitialized(true);
+  }, [initialized, loading, activeBookmark]);
+
+  // Auto-scroll to the bookmarked psalm once its day has finished loading,
+  // with a brief fading highlight so the reader's eye lands on it.
+  useEffect(() => {
+    if (!dayData || dayLoading) return;
+    if (!activeBookmark || activeBookmark.day !== viewingDay) return;
+    const el = document.getElementById(`psalm-${activeBookmark.psalmNumber}`);
+    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+    setHighlightedPsalm(activeBookmark.psalmNumber);
+    const timer = setTimeout(() => setHighlightedPsalm(null), 1500);
+    return () => clearTimeout(timer);
+  }, [dayData, dayLoading, activeBookmark, viewingDay]);
 
   // Explicit handler: set both states synchronously so no stale-closure issue
   function handlePaceModeChange(mode: PaceMode) {
@@ -197,7 +235,7 @@ export default function StudyTehillimClient() {
   // ── Fetch day on viewing day change ─────────────────────────────────────────
 
   useEffect(() => {
-    if (loading) return;
+    if (!initialized) return;
     let cancelled = false;
     setDayData(null);
     setFetchError(null);
@@ -211,7 +249,7 @@ export default function StudyTehillimClient() {
       .finally(() => { if (!cancelled) setDayLoading(false); });
 
     return () => { cancelled = true; };
-  }, [viewingDay, loading]);
+  }, [viewingDay, initialized]);
 
   // ── Set current day as personal starting point ──────────────────────────────
 
@@ -226,6 +264,21 @@ export default function StudyTehillimClient() {
     } finally {
       setSettingDay(false);
     }
+  }
+
+  // ── Toggle bookmark on a psalm/chapter ("עצרתי כאן") ────────────────────────
+
+  function toggleBookmark(psalmNumber: number) {
+    if (!user) return;
+    const isActive =
+      activeBookmark?.day === viewingDay && activeBookmark?.psalmNumber === psalmNumber;
+    const next: TehillimBookmark | null = isActive
+      ? null
+      : { bookId: "tehillim", day: viewingDay, psalmNumber };
+    setActiveBookmark(next);
+    updateDoc(doc(db, "users", user.uid), { tehillimBookmark: next }).catch((err: unknown) => {
+      console.error("[tehillim] bookmark save failed:", err instanceof Error ? err.message : err);
+    });
   }
 
   // ── Mark finished — advance personal progress (wraps monthly: 30 → 1) ──────
@@ -244,7 +297,7 @@ export default function StudyTehillimClient() {
     }
   }
 
-  if (loading) {
+  if (!initialized) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-900 border-t-transparent" />
@@ -388,9 +441,48 @@ export default function StudyTehillimClient() {
                 <p className="py-8 text-center text-sm text-slate-400">אין טקסט זמין ליום זה</p>
               </article>
             ) : (
-              dayData.psalms.map((psalm) => (
-                <article key={psalm.number} className="rounded-2xl border border-blue-100 bg-white p-5 shadow-sm">
-                  <h3 className="mb-3 text-lg font-bold text-blue-900">תהלים פרק {psalm.number}</h3>
+              dayData.psalms.map((psalm) => {
+                const isBookmarked =
+                  activeBookmark?.day === viewingDay && activeBookmark?.psalmNumber === psalm.number;
+                const isHighlighted = highlightedPsalm === psalm.number;
+                return (
+                <article
+                  key={psalm.number}
+                  id={`psalm-${psalm.number}`}
+                  className={`scroll-mt-24 rounded-2xl border p-5 shadow-sm transition-colors ${
+                    isBookmarked
+                      ? "border-slate-200 border-r-4 border-r-blue-600 bg-blue-50/40 dark:border-r-blue-400 dark:bg-blue-950/30"
+                      : "border-blue-100 bg-white"
+                  } ${isHighlighted ? "study-highlight-pulse" : ""}`}
+                >
+                  <div className="mb-3 flex items-center justify-between gap-2">
+                    <h3 className="text-lg font-bold text-blue-900">תהלים פרק {psalm.number}</h3>
+                    {user && (
+                      <button
+                        onClick={() => toggleBookmark(psalm.number)}
+                        title="עצרתי כאן"
+                        aria-label={isBookmarked ? "בטל סימנייה" : "סמן כמקום שעצרתי"}
+                        className={`shrink-0 rounded-lg p-1 transition ${
+                          isBookmarked
+                            ? "text-blue-600 dark:text-blue-400"
+                            : "text-slate-300 hover:text-blue-400"
+                        }`}
+                      >
+                        <svg
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill={isBookmarked ? "currentColor" : "none"}
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M6 3.75A1.75 1.75 0 0 1 7.75 2h8.5A1.75 1.75 0 0 1 18 3.75V21l-6-3.6L6 21V3.75Z" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
                   {psalm.number === 119 ? (
                     <div className="space-y-6">
                       {groupPsalm119Verses(psalm.verses).map((group, gi) => (
@@ -420,7 +512,8 @@ export default function StudyTehillimClient() {
                     </div>
                   )}
                 </article>
-              ))
+                );
+              })
             )}
           </div>
         )}

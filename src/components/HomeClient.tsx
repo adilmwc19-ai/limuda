@@ -44,6 +44,7 @@ interface UserProgress {
   mishnahBookmark?: { day: number; mishnahIndex: number } | null;
   kitzurBookmark?: { siman: number | string; seifIndex: number } | null;
   rambamBookmark?: { bookId: "rambam"; chapterIndex: number; halakhahNumber: number } | null;
+  tehillimBookmark?: { bookId: "tehillim"; day: number; psalmNumber: number } | null;
 }
 
 // Small Hebrew-letter numeral, e.g. 1 -> "א׳", 15 -> "ט״ו" (used for verse labels only).
@@ -233,7 +234,8 @@ export default function HomeClient() {
             href="/study/sefer-hamitzvot"
           />
         );
-      case "tehillim":
+      case "tehillim": {
+        const tehillimBookmark = progress?.tehillimBookmark;
         return (
           <StudyCard
             key={id}
@@ -243,8 +245,14 @@ export default function HomeClient() {
             currentDay={progress?.tehillimDay ?? 1}
             totalDays={TOTAL_TEHILLIM_DAYS}
             href="/study/tehillim"
+            bookmarkLabel={
+              tehillimBookmark
+                ? `המשך ממזמור ${toHebrewVerseNumeral(tehillimBookmark.psalmNumber)}`
+                : undefined
+            }
           />
         );
+      }
       case "kitzur-shulchan-aruch": {
         const kitzurBookmark = progress?.kitzurBookmark;
         return (
