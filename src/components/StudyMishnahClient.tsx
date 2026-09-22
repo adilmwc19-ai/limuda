@@ -262,6 +262,7 @@ export default function StudyMishnahClient() {
   const [tocOpen, setTocOpen] = useState(false);
   const [tocInitialSeder, setTocInitialSeder] = useState<string | null>(null);
   const [tocInitialMasechet, setTocInitialMasechet] = useState<string | null>(null);
+  const [activeBookmark, setActiveBookmark] = useState<{ day: number; mishnahIndex: number } | null>(null);
 
   // Auth + load user day
   useEffect(() => {
@@ -271,13 +272,23 @@ export default function StudyMishnahClient() {
       const snap = await getDoc(doc(db, "users", fbUser.uid));
       if (cancelled) return;
       const userDay = (snap.data()?.mishnah525Day as number | undefined) ?? 1;
+      const savedBookmark = snap.data()?.mishnahBookmark as { day: number; mishnahIndex: number } | undefined;
       setUser(fbUser);
       setActiveDay(userDay);
       setViewingDay(userDay);
+      setActiveBookmark(savedBookmark ?? null);
       setPageLoading(false);
     });
     return () => { cancelled = true; unsub(); };
   }, [router]);
+
+  // Auto-scroll to the bookmarked mishnah once its chapter has finished loading
+  useEffect(() => {
+    if (!chapterData || chapterLoading) return;
+    if (!activeBookmark || activeBookmark.day !== viewingDay) return;
+    const el = document.getElementById(`mishnah-${activeBookmark.mishnahIndex}`);
+    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [chapterData, chapterLoading, activeBookmark, viewingDay]);
 
   // Fetch chapter on viewing day change
   useEffect(() => {
@@ -313,6 +324,16 @@ export default function StudyMishnahClient() {
       const next = new Set(prev);
       next.has(num) ? next.delete(num) : next.add(num);
       return next;
+    });
+  }
+
+  function toggleBookmark(mishnahIndex: number) {
+    if (!user) return;
+    const isActive = activeBookmark?.day === viewingDay && activeBookmark?.mishnahIndex === mishnahIndex;
+    const next = isActive ? null : { day: viewingDay, mishnahIndex };
+    setActiveBookmark(next);
+    updateDoc(doc(db, "users", user.uid), { mishnahBookmark: next }).catch((err: unknown) => {
+      console.error("[mishnah] bookmark save failed:", err instanceof Error ? err.message : err);
     });
   }
 
@@ -432,11 +453,18 @@ export default function StudyMishnahClient() {
               const commentaryOpen =
                 hasAnyContent &&
                 (showAllCommentaries || expandedMishnahs.has(mishnah.mishnahNumber));
+              const isBookmarked =
+                activeBookmark?.day === viewingDay && activeBookmark?.mishnahIndex === mishnah.mishnahNumber;
 
               return (
                 <div
                   key={mishnah.mishnahNumber}
-                  className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+                  id={`mishnah-${mishnah.mishnahNumber}`}
+                  className={`scroll-mt-20 overflow-hidden rounded-2xl border shadow-sm transition ${
+                    isBookmarked
+                      ? "border-slate-200 border-r-4 border-r-blue-600 bg-blue-50/40 dark:border-r-blue-400 dark:bg-blue-950/30"
+                      : "border-slate-200 bg-white"
+                  }`}
                 >
                   {/* Mishnah text */}
                   <div
@@ -452,6 +480,29 @@ export default function StudyMishnahClient() {
                         dir="rtl"
                         dangerouslySetInnerHTML={{ __html: mishnah.text }}
                       />
+                      <button
+                        onClick={(e) => { e.stopPropagation(); toggleBookmark(mishnah.mishnahNumber); }}
+                        title="עצרתי כאן"
+                        aria-label={isBookmarked ? "בטל סימנייה" : "סמן כמקום שעצרתי"}
+                        className={`mt-1.5 shrink-0 rounded-lg p-1 transition ${
+                          isBookmarked
+                            ? "text-blue-600 dark:text-blue-400"
+                            : "text-slate-300 hover:text-blue-400"
+                        }`}
+                      >
+                        <svg
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill={isBookmarked ? "currentColor" : "none"}
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M6 3.75A1.75 1.75 0 0 1 7.75 2h8.5A1.75 1.75 0 0 1 18 3.75V21l-6-3.6L6 21V3.75Z" />
+                        </svg>
+                      </button>
                     </div>
                     {hasAnyContent && (
                       <div className="mt-1 text-left">
