@@ -465,18 +465,19 @@ function AmudSection({ amud, label, commentator, displayMode, layoutMode }: Amud
         <div className="bg-blue-900 px-5 py-2.5">
           <h2 className="text-sm font-semibold tracking-wide text-white">{label}</h2>
         </div>
-        {/* On lg+: 3-column Vilna layout. Below lg: stacked sections */}
-        <div className="lg:grid lg:grid-cols-12 divide-y divide-blue-50 lg:divide-y-0 lg:divide-x lg:divide-x-reverse lg:divide-blue-100">
-          {/* Right: Rashi (3/12) */}
-          <div className="px-4 py-4 lg:col-span-3 bg-amber-50/40">
+        {/* On lg+: 3-column Vilna layout (original order: Rashi | Gemara | Tosafot).
+            Below lg: stacked sections, reordered so Gemara appears first. */}
+        <div className="flex flex-col lg:grid lg:grid-cols-12 lg:divide-x lg:divide-x-reverse lg:divide-blue-100">
+          {/* Right: Rashi (3/12) — mobile order-2 */}
+          <div className="order-2 lg:order-none border-t border-blue-50 lg:border-t-0 px-4 py-4 lg:col-span-3 bg-amber-50/40">
             <CommentBlock comments={rashiComments} title='רש"י' />
           </div>
-          {/* Center: Gemara (6/12) */}
-          <div className="px-5 py-4 lg:col-span-6">
+          {/* Center: Gemara (6/12) — mobile order-1 */}
+          <div className="order-1 lg:order-none px-5 py-4 lg:col-span-6">
             <GemaraBlock />
           </div>
-          {/* Left: Tosafot (3/12) */}
-          <div className="px-4 py-4 lg:col-span-3 bg-sky-50/40">
+          {/* Left: Tosafot (3/12) — mobile order-3 */}
+          <div className="order-3 lg:order-none border-t border-blue-50 lg:border-t-0 px-4 py-4 lg:col-span-3 bg-sky-50/40">
             <CommentBlock comments={tosafotComments} title="תוספות" />
           </div>
         </div>
