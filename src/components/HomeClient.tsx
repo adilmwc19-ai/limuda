@@ -336,7 +336,7 @@ export default function HomeClient() {
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between md:h-16">
           <div className="flex items-baseline gap-2.5 md:gap-3">
             <h1 className="text-xl font-bold tracking-tight text-white md:text-2xl">לימודא</h1>
-            <span className="whitespace-nowrap border-r border-blue-400/30 pr-2.5 font-sans text-[11px] font-normal tracking-normal text-sky-200/85 antialiased select-none sm:text-xs md:pr-3 md:text-sm">
+            <span className="whitespace-nowrap border-r border-white/20 pr-2.5 font-study text-xs italic font-normal tracking-wide text-white antialiased select-none sm:text-sm md:pr-3 md:text-base">
               ללמוד בקצב שלך
             </span>
           </div>
