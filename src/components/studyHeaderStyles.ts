@@ -1,10 +1,10 @@
 /** Shared look for the sticky top bar's buttons (back link, Aa, TOC). */
 export const HEADER_BUTTON_CLASS =
-  "flex min-h-[40px] items-center justify-center gap-1.5 rounded-xl px-3 text-sm font-medium text-white/90 transition hover:bg-white/10 hover:text-white";
+  "inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl px-3 py-1.5 text-base font-semibold text-slate-100 antialiased transition hover:bg-white/10 hover:text-white";
 
 /** Square variant for icon-only side buttons. */
 export const HEADER_ICON_BUTTON_CLASS =
-  "flex min-h-[40px] min-w-[40px] items-center justify-center rounded-xl text-white/90 transition hover:bg-white/10 hover:text-white";
+  "inline-flex min-h-[40px] min-w-[40px] items-center justify-center rounded-xl text-slate-100 antialiased transition hover:bg-white/10 hover:text-white";
 
 /** Refined pace/status tag rendered next to the in-page title (e.g. "עולמי" / "צפייה"). */
 export const HEADER_BADGE_CLASS =

@@ -44,7 +44,7 @@ export default function ReadingSettingsButton() {
         title="הגדרות תצוגה"
         aria-label="הגדרות תצוגה"
         aria-expanded={open}
-        className={`${HEADER_ICON_BUTTON_CLASS} text-sm font-bold`}
+        className={`${HEADER_ICON_BUTTON_CLASS} text-base font-bold`}
       >
         Aa
       </button>
