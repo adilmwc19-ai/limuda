@@ -22,6 +22,15 @@ export interface ChapterData {
   commentators: Commentator[];
 }
 
+// Sefaria's Tanakh-sourced text (Torah, Nakh, Tehillim, Perek Shirah, ...)
+// includes cantillation marks (טעמי מקרא, U+0591–U+05AF). Rendered alongside
+// nikud, these collide visually into clutter that reads as corrupted letters.
+// Strip only that range so nikud (vowel points, U+05B0–U+05C7) stays intact —
+// unlike stripTalmudPunctuation, which removes nikud too for "Vilna mode".
+export function stripCantillation(text: string): string {
+  return text.replace(/[֑-֯]/g, "");
+}
+
 function stripHtml(html: string): string {
   return html
     .replace(/<[^>]*>/g, "")
@@ -49,6 +58,7 @@ function flattenHeField(raw: unknown): string[] {
     .flat(Infinity)
     .filter((s): s is string => typeof s === "string" && s.trim() !== "")
     .map(stripHtml)
+    .map(stripCantillation)
     .filter((s) => s.length > 0);
 }
 
@@ -114,7 +124,9 @@ export async function fetchMishnahChapter(
     throw new Error(`שגיאה בטעינת פרק משנה: ${textRes.status} ${textRes.statusText}`);
   }
   const textData = await textRes.json();
-  const rawMishnahs: string[] = Array.isArray(textData.he) ? (textData.he as string[]) : [];
+  const rawMishnahs: string[] = Array.isArray(textData.he)
+    ? (textData.he as string[]).map(stripCantillation)
+    : [];
   const mishnahCount = rawMishnahs.length;
 
   const COMMS_WITH_PREFIX = [
@@ -283,7 +295,9 @@ export async function fetchChapterWithCommentaries(
     throw new Error(`שגיאה בטעינת הפרק מספריא: ${textRes.status} ${textRes.statusText}`);
   }
   const textData = await textRes.json();
-  const rawVerses: string[] = Array.isArray(textData.he) ? (textData.he as string[]) : [];
+  const rawVerses: string[] = Array.isArray(textData.he)
+    ? (textData.he as string[]).map(stripCantillation)
+    : [];
   const verseCount = rawVerses.length;
 
   // 2. Resolve commentators for this book

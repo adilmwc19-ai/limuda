@@ -491,7 +491,7 @@ export default function StudyRambamClient() {
                     <div
                       key={h.number}
                       id={`rambam-halakhah-${h.number}`}
-                      className={`scroll-mt-24 flex items-start gap-2 rounded-xl border p-2 text-lg font-medium leading-relaxed text-gray-800 transition-colors lg:text-xl ${
+                      className={`scroll-mt-24 flex items-start gap-2 rounded-xl border p-2 font-serif text-lg font-medium leading-loose text-gray-800 transition-colors lg:text-xl ${
                         isBookmarked
                           ? "border-slate-200 border-r-4 border-r-blue-600 bg-blue-50/40 dark:border-r-blue-400 dark:bg-blue-950/30"
                           : "border-transparent"

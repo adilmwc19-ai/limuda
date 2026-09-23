@@ -474,7 +474,7 @@ export default function StudyMishnahClient() {
                         {toHebrew(mishnah.mishnahNumber)}
                       </span>
                       <p
-                        className="flex-1 text-right text-lg font-medium leading-relaxed text-slate-800 lg:text-xl"
+                        className="flex-1 text-right font-serif text-lg font-medium leading-loose text-slate-800 lg:text-xl"
                         dir="rtl"
                         dangerouslySetInnerHTML={{ __html: mishnah.text }}
                       />
