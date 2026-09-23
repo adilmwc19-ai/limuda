@@ -27,6 +27,7 @@ import {
   type TalmudDafData,
   type TalmudAmudData,
 } from "@/lib/sefaria";
+import { useScrollPositionRestore } from "@/hooks/useScrollPositionRestore";
 
 // ─── Hebrew numerals ──────────────────────────────────────────────────────────
 
@@ -204,6 +205,23 @@ export default function StudyTalmudClient() {
     if (!loading) loadDaf(viewingDay);
   }, [viewingDay, loading, loadDaf]);
 
+  // Silently remember/restore scroll position within each daf.
+  const { resetScroll } = useScrollPositionRestore({
+    trackId: "talmud",
+    itemId: viewingDay,
+    ready: !loading && !!dafData,
+  });
+
+  function goToPrevDay() {
+    resetScroll();
+    setViewingDay((d) => Math.max(1, d - 1));
+  }
+
+  function goToNextDay() {
+    resetScroll();
+    setViewingDay((d) => Math.min(TOTAL_TALMUD_DAYS, d + 1));
+  }
+
   // ── Set current daf as personal starting point ─────────────────────────────
 
   async function handleSetAsDaf() {
@@ -232,6 +250,7 @@ export default function StudyTalmudClient() {
       await updateDoc(doc(db, "users", user.uid), { talmudDafYomiDay: nextDay, talmudPersonalInitialized: true });
       setPersonalDay(nextDay);
       setViewingDay(nextDay);
+      resetScroll("smooth");
     } finally {
       setFinishing(false);
     }
@@ -321,8 +340,8 @@ export default function StudyTalmudClient() {
           pagination={{
             current: viewingDay,
             total: TOTAL_TALMUD_DAYS,
-            onPrev: () => setViewingDay((d) => Math.max(1, d - 1)),
-            onNext: () => setViewingDay((d) => Math.min(TOTAL_TALMUD_DAYS, d + 1)),
+            onPrev: goToPrevDay,
+            onNext: goToNextDay,
             prevDisabled: viewingDay <= 1,
             nextDisabled: viewingDay >= TOTAL_TALMUD_DAYS,
           }}
@@ -398,8 +417,8 @@ export default function StudyTalmudClient() {
               pagination={{
                 current: viewingDay,
                 total: TOTAL_TALMUD_DAYS,
-                onPrev: () => setViewingDay((d) => Math.max(1, d - 1)),
-                onNext: () => setViewingDay((d) => Math.min(TOTAL_TALMUD_DAYS, d + 1)),
+                onPrev: goToPrevDay,
+                onNext: goToNextDay,
                 prevDisabled: viewingDay <= 1,
                 nextDisabled: viewingDay >= TOTAL_TALMUD_DAYS,
               }}

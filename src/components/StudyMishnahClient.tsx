@@ -22,6 +22,7 @@ import {
   type MishnahChapterData,
   type MishnahCommentator,
 } from "@/lib/sefaria";
+import { useScrollPositionRestore } from "@/hooks/useScrollPositionRestore";
 
 // ─── Hebrew numeral helper ────────────────────────────────────────────────────
 
@@ -322,6 +323,15 @@ export default function StudyMishnahClient() {
     if (!ids.has(activeCommentator)) setActiveCommentator("bartenura");
   }, [chapterData, activeCommentator]);
 
+  // Silently remember/restore scroll position within each chapter. An
+  // explicit "עצרתי כאן" bookmark takes priority when one targets this chapter.
+  const { resetScroll } = useScrollPositionRestore({
+    trackId: "mishnah",
+    itemId: viewingDay > 0 ? viewingDay : null,
+    ready: !!chapterData && !chapterLoading,
+    skipRestore: !!activeBookmark && activeBookmark.day === viewingDay,
+  });
+
   function toggleMishnah(num: number) {
     setExpandedMishnahs((prev) => {
       const next = new Set(prev);
@@ -348,7 +358,7 @@ export default function StudyMishnahClient() {
     setActiveDay(nextDay);
     setViewingDay(nextDay);
     setCompleting(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    resetScroll("smooth");
   }
 
   const dayInfo: MishnahDayInfo | null = viewingDay > 0 ? getMishnahDayInfo(viewingDay) : null;
@@ -584,7 +594,7 @@ export default function StudyMishnahClient() {
 
             <div className="flex items-center gap-3">
               <button
-                onClick={() => setViewingDay((d) => Math.max(1, d - 1))}
+                onClick={() => { resetScroll(); setViewingDay((d) => Math.max(1, d - 1)); }}
                 disabled={viewingDay <= 1}
                 className="flex min-h-[44px] items-center justify-center rounded-xl border border-blue-200 bg-white px-5 py-2.5 text-sm font-medium text-blue-950 shadow-sm transition hover:bg-blue-50 disabled:opacity-40"
               >
@@ -594,7 +604,7 @@ export default function StudyMishnahClient() {
                 יום {viewingDay}
               </span>
               <button
-                onClick={() => setViewingDay((d) => Math.min(TOTAL_MISHNAH_DAYS, d + 1))}
+                onClick={() => { resetScroll(); setViewingDay((d) => Math.min(TOTAL_MISHNAH_DAYS, d + 1)); }}
                 disabled={viewingDay >= TOTAL_MISHNAH_DAYS}
                 className="flex min-h-[44px] items-center justify-center rounded-xl border border-blue-200 bg-white px-5 py-2.5 text-sm font-medium text-blue-950 shadow-sm transition hover:bg-blue-50 disabled:opacity-40"
               >

@@ -13,6 +13,7 @@ import { getDayInfo, getDayFromBookChapter, getNakhBooks, TOTAL_DAYS } from "@/l
 import { PARSHIYOT, getBookHebrewName } from "@/lib/tanakhStructure";
 import { fetchChapterWithCommentaries, type ChapterData } from "@/lib/sefaria";
 import { getCommentators } from "@/lib/commentators";
+import { useScrollPositionRestore } from "@/hooks/useScrollPositionRestore";
 
 // ─── Hebrew numeral helper ────────────────────────────────────────────────────
 
@@ -332,6 +333,15 @@ export default function StudyTanakhClient() {
     if (!ids.has(activeCommentator)) setActiveCommentator("rashi");
   }, [chapterData, activeCommentator]);
 
+  // Silently remember/restore scroll position within each chapter. An
+  // explicit "עצרתי כאן" bookmark takes priority when one targets this chapter.
+  const { resetScroll } = useScrollPositionRestore({
+    trackId: "tanakh",
+    itemId: viewingDay > 0 ? viewingDay : null,
+    ready: !!chapterData && !chapterLoading,
+    skipRestore: !!activeBookmark && activeBookmark.day === viewingDay,
+  });
+
   function toggleVerse(num: number) {
     setExpandedVerses((prev) => {
       const next = new Set(prev);
@@ -358,7 +368,7 @@ export default function StudyTanakhClient() {
     setActiveDay(nextDay);
     setViewingDay(nextDay);
     setCompleting(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    resetScroll("smooth");
   }
 
   function handleOpenToc() {
@@ -587,7 +597,7 @@ export default function StudyTanakhClient() {
 
             <div className="flex items-center gap-3">
               <button
-                onClick={() => setViewingDay((d) => Math.max(1, d - 1))}
+                onClick={() => { resetScroll(); setViewingDay((d) => Math.max(1, d - 1)); }}
                 disabled={viewingDay <= 1}
                 className="flex min-h-[44px] items-center justify-center rounded-xl border border-blue-200 bg-white px-5 py-2.5 text-sm font-medium text-blue-950 shadow-sm transition hover:bg-blue-50 disabled:opacity-40"
               >
@@ -595,7 +605,7 @@ export default function StudyTanakhClient() {
               </button>
               <span className="min-w-[4rem] text-center text-sm text-slate-400">יום {viewingDay}</span>
               <button
-                onClick={() => setViewingDay((d) => Math.min(TOTAL_DAYS, d + 1))}
+                onClick={() => { resetScroll(); setViewingDay((d) => Math.min(TOTAL_DAYS, d + 1)); }}
                 disabled={viewingDay >= TOTAL_DAYS}
                 className="flex min-h-[44px] items-center justify-center rounded-xl border border-blue-200 bg-white px-5 py-2.5 text-sm font-medium text-blue-950 shadow-sm transition hover:bg-blue-50 disabled:opacity-40"
               >
