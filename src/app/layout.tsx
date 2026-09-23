@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Heebo, Frank_Ruhl_Libre } from "next/font/google";
+import { Heebo } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { ReadingProvider, READING_PREFS_STORAGE_KEY } from "@/context/ReadingContext";
 
@@ -10,10 +11,20 @@ const heebo = Heebo({
   display: "swap",
 });
 
-const frankRuhl = Frank_Ruhl_Libre({
-  subsets: ["hebrew", "latin"],
-  weight: "variable",
-  variable: "--font-frank-ruhl",
+const taameyFrank = localFont({
+  src: [
+    {
+      path: "../../public/fonts/TaameyFrankCLM.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/TaameyFrankCLM-Bold.woff2",
+      weight: "700",
+      style: "normal",
+    },
+  ],
+  variable: "--font-taamey-frank",
   display: "swap",
 });
 
@@ -35,7 +46,7 @@ export default function RootLayout({
     <html
       lang="he"
       dir="rtl"
-      className={`h-full ${heebo.variable} ${frankRuhl.variable}`}
+      className={`h-full ${heebo.variable} ${taameyFrank.variable}`}
       data-theme="light"
       suppressHydrationWarning
     >

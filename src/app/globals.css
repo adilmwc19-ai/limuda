@@ -4,9 +4,9 @@
 
 @theme inline {
   --font-sans: var(--font-heebo), "Segoe UI", Arial, sans-serif;
-  --font-serif: var(--font-frank-ruhl), "David", "Times New Roman", serif;
-  --font-study: var(--font-frank-ruhl), "David", "Times New Roman", serif;
-  --font-traditional: var(--font-frank-ruhl), "David", "Times New Roman", serif;
+  --font-serif: var(--font-taamey-frank), "David", "Times New Roman", serif;
+  --font-study: var(--font-taamey-frank), "David", "Times New Roman", serif;
+  --font-traditional: var(--font-taamey-frank), "David", "Times New Roman", serif;
   --font-modern: "Segoe UI", Arial, sans-serif;
 }
 
@@ -30,7 +30,7 @@ html[data-font-family="traditional"] body,
 html[data-font-family="traditional"] p,
 html[data-font-family="traditional"] span,
 html[data-font-family="traditional"] div {
-  font-family: var(--font-frank-ruhl, "Frank Ruhl Libre", "David", serif) !important;
+  font-family: var(--font-taamey-frank, "Taamey Frank CLM", "David", serif) !important;
 }
 
 html[data-theme="dark"],
