@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { ChevronDown } from "lucide-react";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
@@ -520,8 +521,11 @@ export default function StudyTanakhClient() {
                     </div>
                     {hasAnyContent && (
                       <div className="mt-1 text-left">
-                        <span className="text-xs text-blue-400">
-                          {commentaryOpen ? "▲ הסתר פירוש" : "▼ פירוש"}
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/60 bg-slate-100 px-2.5 py-1 text-xs font-medium font-sans text-slate-600 transition-all duration-150 hover:bg-slate-200/80 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white">
+                          {commentaryOpen ? "הסתר פירוש" : "פירוש"}
+                          <ChevronDown
+                            className={`h-3.5 w-3.5 transition-transform duration-200 ${commentaryOpen ? "rotate-180" : ""}`}
+                          />
                         </span>
                       </div>
                     )}
