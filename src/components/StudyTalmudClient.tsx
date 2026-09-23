@@ -28,6 +28,7 @@ import {
   type TalmudAmudData,
 } from "@/lib/sefaria";
 import { useScrollPositionRestore } from "@/hooks/useScrollPositionRestore";
+import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 
 // ─── Hebrew numerals ──────────────────────────────────────────────────────────
 
@@ -222,6 +223,12 @@ export default function StudyTalmudClient() {
     setViewingDay((d) => Math.min(TOTAL_TALMUD_DAYS, d + 1));
   }
 
+  const swipeHandlers = useSwipeNavigation({
+    onSwipeNext: goToNextDay,
+    onSwipePrev: goToPrevDay,
+    enabled: !isTocOpen,
+  });
+
   // ── Set current daf as personal starting point ─────────────────────────────
 
   async function handleSetAsDaf() {
@@ -270,7 +277,13 @@ export default function StudyTalmudClient() {
   const isToday = viewingDay === activeDay;
 
   return (
-    <main className="flex min-h-screen flex-col bg-slate-50" dir="rtl">
+    <main
+      className="flex min-h-screen flex-col bg-slate-50"
+      dir="rtl"
+      onTouchStart={swipeHandlers.onTouchStart}
+      onTouchEnd={swipeHandlers.onTouchEnd}
+      onTouchCancel={swipeHandlers.onTouchCancel}
+    >
       {/* ── Header ── */}
       <StudyHeader
         maxWidthClassName="max-w-5xl"
