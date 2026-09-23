@@ -20,6 +20,7 @@ import { TOTAL_SEFER_HAMITZVOT_ITEMS, getGlobalIndex } from "@/lib/seferHaMitzvo
 import { TOTAL_TEHILLIM_DAYS, getCurrentHebrewDayOfMonth } from "@/lib/tehillimStructure";
 import { TOTAL_KITZUR_SIMANIM } from "@/lib/kitzurStructure";
 import { TOTAL_CHOFETZ_CHAIM_UNITS, getChofetzChaimDailyUnit } from "@/lib/chofetzChaimStructure";
+import { useAutoHideHeader } from "@/hooks/useAutoHideHeader";
 
 const SEFER_HAMITZVOT_DEFAULT_INDEX = getGlobalIndex("positive", 1); // 15
 
@@ -68,6 +69,7 @@ export default function HomeClient() {
   const [signingIn, setSigningIn] = useState(false);
   const [showTrackSelector, setShowTrackSelector] = useState(false);
   const [completedToday, setCompletedToday] = useState<Set<string>>(new Set());
+  const headerHidden = useAutoHideHeader();
 
   // Check LocalStorage on the client only, to avoid SSR hydration mismatch.
   useEffect(() => {
@@ -332,7 +334,11 @@ export default function HomeClient() {
   return (
     <main className="flex min-h-screen flex-col bg-slate-50 dark:bg-slate-950">
       {/* Header */}
-      <header className="bg-blue-950 px-6 shadow-md dark:bg-slate-900">
+      <header
+        className={`sticky top-0 z-50 bg-blue-950 px-6 shadow-md transition-transform duration-300 ease-in-out dark:bg-slate-900 ${
+          headerHidden ? "-translate-y-full" : "translate-y-0"
+        }`}
+      >
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between md:h-16">
           <h1 className="text-xl font-bold tracking-tight text-white md:text-2xl">לימודא</h1>
           {user && (

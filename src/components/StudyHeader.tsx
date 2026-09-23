@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import ReadingSettingsButton from "@/components/ReadingSettingsModal";
 import { HEADER_BUTTON_CLASS } from "@/components/studyHeaderStyles";
+import { useAutoHideHeader } from "@/hooks/useAutoHideHeader";
 
 export {
   HEADER_BUTTON_CLASS,
@@ -30,9 +31,13 @@ export default function StudyHeader({
   headerActions,
   maxWidthClassName = "max-w-3xl",
 }: StudyHeaderProps) {
+  const hidden = useAutoHideHeader();
+
   return (
     <header
-      className="sticky top-0 z-20 h-12 bg-blue-900 text-white shadow-md dark:bg-slate-950"
+      className={`sticky top-0 z-50 h-12 bg-blue-900 text-white shadow-md transition-transform duration-300 ease-in-out dark:bg-slate-950 ${
+        hidden ? "-translate-y-full" : "translate-y-0"
+      }`}
       dir="rtl"
     >
       <div className={`mx-auto flex h-full ${maxWidthClassName} items-center justify-between px-3`}>
