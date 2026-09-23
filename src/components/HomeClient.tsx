@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { SlidersHorizontal } from "lucide-react";
-import CalendarReminderButton from "@/components/CalendarReminderModal";
+import CalendarReminderModal, { CalendarReminderButton } from "@/components/CalendarReminderModal";
 import {
   signInWithPopup,
   signOut,
@@ -69,6 +69,7 @@ export default function HomeClient() {
   const [loading, setLoading] = useState(true);
   const [signingIn, setSigningIn] = useState(false);
   const [showTrackSelector, setShowTrackSelector] = useState(false);
+  const [reminderOpen, setReminderOpen] = useState(false);
   const [completedToday, setCompletedToday] = useState<Set<string>>(new Set());
   const headerHidden = useAutoHideHeader();
 
@@ -344,7 +345,7 @@ export default function HomeClient() {
           <h1 className="text-xl font-bold tracking-tight text-white md:text-2xl">לימודא</h1>
           {user && (
             <div className="flex items-center gap-3">
-              <CalendarReminderButton />
+              <CalendarReminderButton onClick={() => setReminderOpen(true)} />
               <span className="text-sm text-blue-200">{user.displayName}</span>
               <button
                 onClick={handleSignOut}
@@ -449,6 +450,8 @@ export default function HomeClient() {
           onClose={() => setShowTrackSelector(false)}
         />
       )}
+
+      <CalendarReminderModal open={reminderOpen} onClose={() => setReminderOpen(false)} />
     </main>
   );
 }
