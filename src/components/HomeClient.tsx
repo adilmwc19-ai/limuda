@@ -334,12 +334,7 @@ export default function HomeClient() {
       {/* Header */}
       <header className="bg-blue-950 px-6 shadow-md dark:bg-slate-900">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between md:h-16">
-          <div className="flex items-baseline gap-2.5 md:gap-3">
-            <h1 className="text-xl font-bold tracking-tight text-white md:text-2xl">לימודא</h1>
-            <span className="whitespace-nowrap border-r border-white/20 pr-2.5 font-study text-xs italic font-normal tracking-wide text-white antialiased select-none sm:text-sm md:pr-3 md:text-base">
-              ללמוד בקצב שלך
-            </span>
-          </div>
+          <h1 className="text-xl font-bold tracking-tight text-white md:text-2xl">לימודא</h1>
           {user && (
             <div className="flex items-center gap-4">
               <span className="text-sm text-blue-200">{user.displayName}</span>
