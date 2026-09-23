@@ -553,6 +553,8 @@ export default function StudyRambamClient() {
           </div>
         )}
 
+        <DailyCompletionButton trackId="rambam" />
+
         <StudyBottomNav
           pagination={{
             current: viewingIndex,
@@ -563,8 +565,6 @@ export default function StudyRambamClient() {
             nextDisabled: viewingIndex >= TOTAL_RAMBAM_CHAPTERS,
           }}
         />
-
-        <DailyCompletionButton trackId="rambam" />
 
         <footer className="mt-6 border-t border-slate-200 py-6 text-center">
           <p className="text-sm text-slate-400">

@@ -353,6 +353,8 @@ export default function StudyKitzurClient() {
           </div>
         )}
 
+        <DailyCompletionButton trackId="kitzur-shulchan-aruch" />
+
         <StudyBottomNav
           pagination={{
             current: siman,
@@ -363,8 +365,6 @@ export default function StudyKitzurClient() {
             nextDisabled: siman >= TOTAL_KITZUR_SIMANIM,
           }}
         />
-
-        <DailyCompletionButton trackId="kitzur-shulchan-aruch" />
 
         <footer className="mt-6 border-t border-slate-200 py-6 text-center">
           <p className="text-sm text-slate-400">

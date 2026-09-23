@@ -581,20 +581,13 @@ export default function StudyMishnahClient() {
               <button
                 onClick={handleComplete}
                 disabled={completing}
-                className="rounded-2xl bg-blue-950 px-10 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-blue-900 active:scale-95 disabled:opacity-60"
+                className="rounded-xl bg-blue-950 px-8 py-2.5 text-sm font-semibold text-white shadow transition hover:bg-blue-900 active:scale-95 disabled:opacity-60"
               >
-                {completing ? (
-                  <span className="flex items-center gap-2">
-                    <span className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                    שומר התקדמות...
-                  </span>
-                ) : activeDay >= TOTAL_MISHNAH_DAYS ? (
-                  "סיימתי את כל המשנה!"
-                ) : (
-                  "סיימתי את הלימוד היומי"
-                )}
+                {completing ? "שומר..." : activeDay >= TOTAL_MISHNAH_DAYS ? "סיימתי את כל המשנה!" : "סיימתי יום זה ←"}
               </button>
             )}
+
+            <DailyCompletionButton trackId="mishnah" />
 
             <div className="flex items-center gap-3">
               <button
@@ -617,8 +610,6 @@ export default function StudyMishnahClient() {
             </div>
           </div>
         )}
-
-        <DailyCompletionButton trackId="mishnah" />
 
         <footer className="mt-4 border-t border-slate-200 py-6 text-center">
           <p className="text-sm text-slate-400">

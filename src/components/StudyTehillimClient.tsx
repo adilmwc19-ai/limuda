@@ -521,6 +521,8 @@ export default function StudyTehillimClient() {
           </div>
         )}
 
+        <DailyCompletionButton trackId="tehillim" />
+
         <StudyBottomNav
           pagination={{
             current: viewingDay,
@@ -531,8 +533,6 @@ export default function StudyTehillimClient() {
             nextDisabled: viewingDay >= TOTAL_TEHILLIM_DAYS,
           }}
         />
-
-        <DailyCompletionButton trackId="tehillim" />
 
         <footer className="mt-6 border-t border-slate-200 py-6 text-center">
           <p className="text-sm text-slate-400">

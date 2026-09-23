@@ -432,6 +432,8 @@ export default function StudyChofetzChaimClient() {
           </div>
         )}
 
+        <DailyCompletionButton trackId="chofetz-chaim" />
+
         <StudyBottomNav
           pagination={{
             current: viewingUnit,
@@ -442,8 +444,6 @@ export default function StudyChofetzChaimClient() {
             nextDisabled: viewingUnit >= TOTAL_CHOFETZ_CHAIM_UNITS,
           }}
         />
-
-        <DailyCompletionButton trackId="chofetz-chaim" />
 
         <footer className="mt-6 border-t border-slate-200 py-6 text-center">
           <p className="text-sm text-slate-400">

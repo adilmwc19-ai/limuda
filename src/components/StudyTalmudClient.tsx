@@ -396,6 +396,8 @@ export default function StudyTalmudClient() {
               </div>
             )}
 
+            <DailyCompletionButton trackId="talmud" />
+
             <StudyBottomNav
               pagination={{
                 current: viewingDay,
@@ -408,8 +410,6 @@ export default function StudyTalmudClient() {
             />
           </>
         )}
-
-        <DailyCompletionButton trackId="talmud" />
       </section>
 
       {/* ── TOC Modal ── */}

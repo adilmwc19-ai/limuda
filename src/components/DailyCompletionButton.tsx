@@ -20,7 +20,7 @@ export default function DailyCompletionButton({ trackId }: DailyCompletionButton
   }
 
   return (
-    <div className="mt-8 flex justify-center border-t border-slate-200 pt-8 dark:border-slate-700" dir="rtl">
+    <div className="my-6 flex justify-center" dir="rtl">
       <button
         onClick={handleToggle}
         className={`flex min-h-[44px] items-center justify-center rounded-2xl px-10 py-4 text-lg font-bold shadow-sm transition active:scale-95 ${
