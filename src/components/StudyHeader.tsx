@@ -32,7 +32,7 @@ export default function StudyHeader({
 }: StudyHeaderProps) {
   return (
     <header
-      className="sticky top-0 z-20 h-12 border-b border-slate-200 bg-white/90 text-slate-900 backdrop-blur-md dark:border-slate-800 dark:bg-slate-950/90 dark:text-slate-100"
+      className="sticky top-0 z-20 h-12 bg-blue-900 text-white shadow-md dark:bg-slate-950"
       dir="rtl"
     >
       <div className={`mx-auto flex h-full ${maxWidthClassName} items-center justify-between px-3`}>

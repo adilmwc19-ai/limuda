@@ -53,7 +53,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
-      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-zinc-100">
+      <body className="min-h-full flex flex-col bg-slate-50 font-sans text-slate-800 dark:bg-slate-900 dark:text-zinc-100">
         <ReadingProvider>{children}</ReadingProvider>
       </body>
     </html>
