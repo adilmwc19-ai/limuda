@@ -443,7 +443,7 @@ function AmudSection({ amud, label, commentator, displayMode, layoutMode }: Amud
   const tosafotComments = displayMode === "vilna" ? amud.tosafot.map(stripTalmudPunctuation) : amud.tosafot;
 
   const GemaraBlock = () => (
-    <div className="space-y-2 text-lg font-medium leading-relaxed text-gray-800 lg:text-xl">
+    <div className="space-y-2 font-study text-2xl font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-3xl">
       {gemara.length === 0 ? (
         <p className="text-sm text-slate-400 text-center">הטקסט לא זמין</p>
       ) : (

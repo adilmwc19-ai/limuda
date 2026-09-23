@@ -298,7 +298,7 @@ export default function StudyKitzurClient() {
                           : "border-transparent"
                       }`}
                     >
-                      <p className="flex-1 text-lg font-medium leading-relaxed text-gray-800 lg:text-xl">
+                      <p className="flex-1 font-study text-2xl font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-3xl">
                         <span className="ml-1.5 font-bold text-blue-900">{i + 1}.</span> {p}
                       </p>
                       <button

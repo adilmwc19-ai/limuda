@@ -472,7 +472,7 @@ export default function StudyTehillimClient() {
                           <h4 className="mb-2 text-center text-xs font-semibold tracking-wide text-blue-400">
                             — אות {group.letter}׳ —
                           </h4>
-                          <div className="space-y-2 text-lg font-medium leading-relaxed text-gray-800 lg:text-xl">
+                          <div className="space-y-2 font-study text-2xl font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-3xl">
                             {group.verses.map((v) => (
                               <p key={v.verse}>
                                 <span className="ml-2 text-xs font-bold text-blue-500 align-super">{v.verse}</span>
@@ -484,7 +484,7 @@ export default function StudyTehillimClient() {
                       ))}
                     </div>
                   ) : (
-                    <div className="space-y-2 text-lg font-medium leading-relaxed text-gray-800 lg:text-xl">
+                    <div className="space-y-2 font-study text-2xl font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-3xl">
                       {psalm.verses.map((v) => (
                         <p key={v.verse}>
                           <span className="ml-2 text-xs font-bold text-blue-500 align-super">{v.verse}</span>

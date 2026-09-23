@@ -371,7 +371,7 @@ export default function StudySeferHaMitzvotClient() {
             {itemData.paragraphs.length === 0 ? (
               <p className="py-8 text-center text-sm text-slate-400">אין טקסט זמין עבור פריט זה</p>
             ) : (
-              <div className="space-y-4 text-lg font-medium leading-relaxed text-gray-800 lg:text-xl">
+              <div className="space-y-4 font-study text-2xl font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-3xl">
                 {itemData.paragraphs.map((p, i) => (
                   <p key={i}>{p}</p>
                 ))}
