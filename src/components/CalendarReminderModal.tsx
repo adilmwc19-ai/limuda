@@ -53,53 +53,60 @@ export default function CalendarReminderButton() {
 
       {open && (
         <div
-          dir="rtl"
-          className="absolute end-0 top-full z-30 mt-2 w-72 rounded-2xl border border-slate-200 bg-white p-4 text-right shadow-xl dark:border-slate-700 dark:bg-slate-800"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm sm:absolute sm:inset-auto sm:end-0 sm:top-full sm:z-30 sm:mt-2 sm:block sm:bg-transparent sm:p-0 sm:backdrop-blur-none"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setOpen(false);
+          }}
         >
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-sm font-bold text-blue-950 dark:text-blue-200">תזכורת יומית ללימוד</h3>
-            <button
-              onClick={() => setOpen(false)}
-              aria-label="סגור"
-              className="rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
-            >
-              ✕
-            </button>
-          </div>
+          <div
+            dir="rtl"
+            className="w-full max-w-sm rounded-2xl bg-white p-6 text-right shadow-2xl dark:bg-slate-800 sm:w-72 sm:max-w-none sm:rounded-2xl sm:border sm:border-slate-200 sm:p-4 sm:shadow-xl sm:dark:border-slate-700"
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-sm font-bold text-blue-950 dark:text-blue-200">תזכורת יומית ללימוד</h3>
+              <button
+                onClick={() => setOpen(false)}
+                aria-label="סגור"
+                className="rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+              >
+                ✕
+              </button>
+            </div>
 
-          <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">
-            קבל תזכורת יומית קבועה ביומן שלך, בשעה שנוחה לך.
-          </p>
+            <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">
+              קבל תזכורת יומית קבועה ביומן שלך, בשעה שנוחה לך.
+            </p>
 
-          <div className="mb-4">
-            <label
-              htmlFor="reminder-time"
-              className="mb-1.5 block text-xs font-semibold text-slate-500 dark:text-slate-400"
-            >
-              שעת תזכורת
-            </label>
-            <input
-              id="reminder-time"
-              type="time"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              className="w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm text-blue-950 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-900 dark:text-white"
-            />
-          </div>
+            <div className="mb-4">
+              <label
+                htmlFor="reminder-time"
+                className="mb-1.5 block text-xs font-semibold text-slate-500 dark:text-slate-400"
+              >
+                שעת תזכורת
+              </label>
+              <input
+                id="reminder-time"
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                className="w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm text-blue-950 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-900 dark:text-white"
+              />
+            </div>
 
-          <div className="flex flex-col gap-2">
-            <button
-              onClick={handleGoogleCalendar}
-              className="rounded-lg bg-blue-900 px-3 py-2 text-sm font-semibold text-white transition hover:bg-blue-800"
-            >
-              הוספה ליומן Google
-            </button>
-            <button
-              onClick={handleDownloadICS}
-              className="rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-semibold text-blue-900 transition hover:bg-blue-50 dark:border-slate-600 dark:bg-slate-800 dark:text-blue-200 dark:hover:bg-slate-700"
-            >
-              הורדת קובץ ליומן Apple / כללי
-            </button>
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={handleGoogleCalendar}
+                className="rounded-lg bg-blue-900 px-3 py-2 text-sm font-semibold text-white transition hover:bg-blue-800"
+              >
+                הוספה ליומן Google
+              </button>
+              <button
+                onClick={handleDownloadICS}
+                className="rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-semibold text-blue-900 transition hover:bg-blue-50 dark:border-slate-600 dark:bg-slate-800 dark:text-blue-200 dark:hover:bg-slate-700"
+              >
+                הורדת קובץ ליומן Apple / כללי
+              </button>
+            </div>
           </div>
         </div>
       )}
