@@ -57,6 +57,14 @@ function scrollToSection(id: string) {
   document.getElementById(`section-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+const NAV_BTN_BASE =
+  "flex items-center justify-center rounded-xl text-sm font-semibold transition md:text-base";
+const NAV_BTN_ACTIVE = "bg-blue-900 text-white shadow-sm dark:bg-blue-700";
+const NAV_BTN_INACTIVE =
+  "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700";
+const NAV_BTN_LETTER = "h-10 min-w-[42px] md:h-11 md:min-w-[46px]";
+const NAV_BTN_WORD = "h-10 px-4 md:h-11 md:px-5";
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function StudyPerekShirahClient() {
@@ -69,6 +77,7 @@ export default function StudyPerekShirahClient() {
   const [lastDate, setLastDate]   = useState<string | null>(null);
   const [streak, setStreak]       = useState(0);
   const [completing, setCompleting] = useState(false);
+  const [activeSection, setActiveSection] = useState<string | null>(null);
 
   const completedToday = lastDate === todayDateString();
 
@@ -115,6 +124,29 @@ export default function StudyPerekShirahClient() {
     return () => { cancelled = true; };
   }, []);
 
+  // ── Track which section is in view, to highlight the matching nav button ────
+
+  useEffect(() => {
+    if (!perekData) return;
+
+    const elements = PEREK_SHIRAH_SECTIONS
+      .map((s) => document.getElementById(`section-${s.id}`))
+      .filter((el): el is HTMLElement => el !== null);
+    if (elements.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.filter((e) => e.isIntersecting);
+        if (visible.length === 0) return;
+        const topMost = visible.reduce((a, b) => (a.boundingClientRect.top <= b.boundingClientRect.top ? a : b));
+        setActiveSection(topMost.target.id.replace("section-", ""));
+      },
+      { rootMargin: "-15% 0px -70% 0px", threshold: 0 }
+    );
+    elements.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [perekData]);
+
   // ── Mark today's reading complete ───────────────────────────────────────────
 
   async function handleMarkComplete() {
@@ -152,16 +184,21 @@ export default function StudyPerekShirahClient() {
         <StudyTitleHeader
           unitLabel="פרק שירה יומי"
           toolbar={
-            <div className="flex flex-wrap justify-center gap-1.5">
-              {PEREK_SHIRAH_SECTIONS.map((s) => (
-                <button
-                  key={s.id}
-                  onClick={() => scrollToSection(s.id)}
-                  className="flex min-h-[44px] items-center justify-center rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-xs font-medium text-blue-900 shadow-sm transition hover:bg-blue-50 dark:border-slate-700 dark:bg-slate-800 dark:text-blue-200 dark:hover:bg-slate-700"
-                >
-                  {NAV_LABELS[s.id] ?? s.title}
-                </button>
-              ))}
+            <div className="flex flex-wrap justify-center gap-2 md:gap-2.5">
+              {PEREK_SHIRAH_SECTIONS.map((s) => {
+                const isLetter = s.id.startsWith("perek");
+                const isActive = activeSection === s.id;
+                return (
+                  <button
+                    key={s.id}
+                    onClick={() => scrollToSection(s.id)}
+                    aria-current={isActive ? "true" : undefined}
+                    className={`${NAV_BTN_BASE} ${isLetter ? NAV_BTN_LETTER : NAV_BTN_WORD} ${isActive ? NAV_BTN_ACTIVE : NAV_BTN_INACTIVE}`}
+                  >
+                    {NAV_LABELS[s.id] ?? s.title}
+                  </button>
+                );
+              })}
             </div>
           }
         />
