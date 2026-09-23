@@ -63,7 +63,7 @@ function SegControl<T extends string>({
         <button
           key={o.value}
           onClick={() => onChange(o.value)}
-          className={`px-3 py-1 text-sm transition ${
+          className={`px-3.5 py-2 text-sm font-medium transition md:px-4.5 md:py-2.5 md:text-base ${
             value === o.value
               ? "bg-blue-900 text-white"
               : "bg-white text-blue-900 hover:bg-blue-50"

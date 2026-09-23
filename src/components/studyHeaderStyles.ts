@@ -8,7 +8,7 @@ export const HEADER_ICON_BUTTON_CLASS =
 
 /** Refined pace/status tag rendered next to the in-page title (e.g. "עולמי" / "צפייה"). */
 export const HEADER_BADGE_CLASS =
-  "rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-300";
+  "rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-300 md:text-sm";
 
 /** "Set as my study point" chip — rendered under the in-page title. */
 export const CHIP_PRIMARY_CLASS =

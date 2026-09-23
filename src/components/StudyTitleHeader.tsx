@@ -27,7 +27,7 @@ interface StudyTitleHeaderProps {
 }
 
 const NAV_BTN =
-  "flex h-9 w-9 items-center justify-center rounded-full border border-blue-100 bg-white text-sm font-semibold text-blue-900 shadow-sm transition hover:bg-blue-50 disabled:opacity-30 disabled:hover:bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-blue-200 dark:hover:bg-slate-700";
+  "flex h-10 w-10 items-center justify-center rounded-full border border-blue-100 bg-white text-sm font-semibold text-blue-900 shadow-sm transition hover:bg-blue-50 disabled:opacity-30 disabled:hover:bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-blue-200 dark:hover:bg-slate-700 md:h-11 md:w-11";
 
 /**
  * In-page reader title block — the source/unit title, pace badge, pagination
@@ -46,7 +46,7 @@ export default function StudyTitleHeader({
   return (
     <div className={`mx-auto w-full ${maxWidthClassName} px-4 pb-6 pt-8 text-center`} dir="rtl">
       {bookLabel && (
-        <p className="mb-2 text-xs font-semibold tracking-wide text-blue-500/80 dark:text-blue-400/80">
+        <p className="mb-2 text-sm font-semibold tracking-wide text-blue-500/80 dark:text-blue-400/80 md:text-base">
           {bookLabel}
         </p>
       )}
@@ -68,7 +68,7 @@ export default function StudyTitleHeader({
           >
             ←
           </button>
-          <span className="min-w-[4.5rem] text-xs font-medium text-slate-400 dark:text-slate-500">
+          <span className="min-w-[5.5rem] text-base font-medium text-slate-700 dark:text-slate-200 md:text-lg">
             {pagination.current} מתוך {pagination.total}
           </span>
           <button
@@ -83,7 +83,7 @@ export default function StudyTitleHeader({
       )}
 
       {toolbar && (
-        <div className="mt-4 flex flex-wrap items-center justify-center gap-2">{toolbar}</div>
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-3 md:gap-4">{toolbar}</div>
       )}
 
       {chips && (
