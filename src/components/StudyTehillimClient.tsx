@@ -21,6 +21,7 @@ import {
   toHebrewNumeral,
 } from "@/lib/tehillimStructure";
 import { fetchTehillimDay, type TehillimDayData, type TehillimVerse } from "@/lib/sefaria";
+import { useScrollPositionRestore } from "@/hooks/useScrollPositionRestore";
 
 // ─── Psalm 119 verse grouping (8 verses per letter of the alef-bet) ───────────
 
@@ -260,6 +261,15 @@ export default function StudyTehillimClient() {
     return () => { cancelled = true; };
   }, [viewingDay, initialized]);
 
+  // Silently remember/restore scroll position within each day. An explicit
+  // "עצרתי כאן" bookmark takes priority when one targets this day.
+  const { resetScroll } = useScrollPositionRestore({
+    trackId: "tehillim",
+    itemId: initialized ? viewingDay : null,
+    ready: !dayLoading && !!dayData,
+    skipRestore: !!activeBookmark && activeBookmark.day === viewingDay,
+  });
+
   // ── Set current day as personal starting point ──────────────────────────────
 
   async function handleSetAsDay() {
@@ -300,7 +310,7 @@ export default function StudyTehillimClient() {
       await updateDoc(doc(db, "users", user.uid), { tehillimDay: nextDay });
       setPersonalDay(nextDay);
       setViewingDay(nextDay);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      resetScroll("smooth");
     } finally {
       setCompleting(false);
     }
@@ -367,8 +377,8 @@ export default function StudyTehillimClient() {
           pagination={{
             current: viewingDay,
             total: TOTAL_TEHILLIM_DAYS,
-            onPrev: () => setViewingDay((d) => Math.max(1, d - 1)),
-            onNext: () => setViewingDay((d) => Math.min(TOTAL_TEHILLIM_DAYS, d + 1)),
+            onPrev: () => { resetScroll(); setViewingDay((d) => Math.max(1, d - 1)); },
+            onNext: () => { resetScroll(); setViewingDay((d) => Math.min(TOTAL_TEHILLIM_DAYS, d + 1)); },
             prevDisabled: viewingDay <= 1,
             nextDisabled: viewingDay >= TOTAL_TEHILLIM_DAYS,
           }}
@@ -519,8 +529,8 @@ export default function StudyTehillimClient() {
           pagination={{
             current: viewingDay,
             total: TOTAL_TEHILLIM_DAYS,
-            onPrev: () => setViewingDay((d) => Math.max(1, d - 1)),
-            onNext: () => setViewingDay((d) => Math.min(TOTAL_TEHILLIM_DAYS, d + 1)),
+            onPrev: () => { resetScroll(); setViewingDay((d) => Math.max(1, d - 1)); },
+            onNext: () => { resetScroll(); setViewingDay((d) => Math.min(TOTAL_TEHILLIM_DAYS, d + 1)); },
             prevDisabled: viewingDay <= 1,
             nextDisabled: viewingDay >= TOTAL_TEHILLIM_DAYS,
           }}

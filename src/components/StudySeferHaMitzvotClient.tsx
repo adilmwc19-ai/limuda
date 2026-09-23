@@ -26,6 +26,7 @@ import {
   getDailySeferHaMitzvotRef,
   type SeferHaMitzvotItemData,
 } from "@/lib/sefaria";
+import { useScrollPositionRestore } from "@/hooks/useScrollPositionRestore";
 
 const DEFAULT_START_INDEX = getGlobalIndex("positive", 1); // 15 — skips the 14 shorashim
 
@@ -247,6 +248,13 @@ export default function StudySeferHaMitzvotClient() {
     return () => { cancelled = true; };
   }, [viewingIndex, authLoading]);
 
+  // Silently remember/restore scroll position within each item.
+  const { resetScroll } = useScrollPositionRestore({
+    trackId: "sefer-hamitzvot",
+    itemId: viewingIndex,
+    ready: !itemLoading && !!itemData,
+  });
+
   // ── Set current item as personal starting point ─────────────────────────────
 
   async function handleSetAsItem() {
@@ -272,7 +280,7 @@ export default function StudySeferHaMitzvotClient() {
       await updateDoc(doc(db, "users", user.uid), { seferHaMitzvotIndex: nextIndex });
       setPersonalIndex(nextIndex);
       setViewingIndex(nextIndex);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      resetScroll("smooth");
     } finally {
       setCompleting(false);
     }
@@ -331,8 +339,8 @@ export default function StudySeferHaMitzvotClient() {
           pagination={{
             current: viewingIndex,
             total: TOTAL_SEFER_HAMITZVOT_ITEMS,
-            onPrev: () => setViewingIndex((d) => Math.max(1, d - 1)),
-            onNext: () => setViewingIndex((d) => Math.min(TOTAL_SEFER_HAMITZVOT_ITEMS, d + 1)),
+            onPrev: () => { resetScroll(); setViewingIndex((d) => Math.max(1, d - 1)); },
+            onNext: () => { resetScroll(); setViewingIndex((d) => Math.min(TOTAL_SEFER_HAMITZVOT_ITEMS, d + 1)); },
             prevDisabled: viewingIndex <= 1,
             nextDisabled: viewingIndex >= TOTAL_SEFER_HAMITZVOT_ITEMS,
           }}
@@ -403,8 +411,8 @@ export default function StudySeferHaMitzvotClient() {
           pagination={{
             current: viewingIndex,
             total: TOTAL_SEFER_HAMITZVOT_ITEMS,
-            onPrev: () => setViewingIndex((d) => Math.max(1, d - 1)),
-            onNext: () => setViewingIndex((d) => Math.min(TOTAL_SEFER_HAMITZVOT_ITEMS, d + 1)),
+            onPrev: () => { resetScroll(); setViewingIndex((d) => Math.max(1, d - 1)); },
+            onNext: () => { resetScroll(); setViewingIndex((d) => Math.min(TOTAL_SEFER_HAMITZVOT_ITEMS, d + 1)); },
             prevDisabled: viewingIndex <= 1,
             nextDisabled: viewingIndex >= TOTAL_SEFER_HAMITZVOT_ITEMS,
           }}

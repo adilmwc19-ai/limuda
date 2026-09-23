@@ -8,6 +8,7 @@ import StudyHeader from "@/components/StudyHeader";
 import StudyTitleHeader from "@/components/StudyTitleHeader";
 import { PEREK_SHIRAH_SECTIONS } from "@/lib/perekShirahStructure";
 import { fetchFullPerekShirah, type PerekShirahData } from "@/lib/sefaria";
+import { useScrollPositionRestore } from "@/hooks/useScrollPositionRestore";
 
 // ─── Date helpers (local calendar day, not UTC) ───────────────────────────────
 
@@ -123,6 +124,14 @@ export default function StudyPerekShirahClient() {
 
     return () => { cancelled = true; };
   }, []);
+
+  // Silently remember/restore scroll position on the page (content is the
+  // same every day, so a single constant item id is enough).
+  useScrollPositionRestore({
+    trackId: "perekshirah",
+    itemId: "full",
+    ready: !contentLoading && !!perekData,
+  });
 
   // ── Track which section is in view, to highlight the matching nav button ────
 

@@ -11,8 +11,6 @@ const RESTORE_RETRY_DELAY_MS = 50;
 const RESTORE_MAX_ATTEMPTS = 40; // ~2s worst case
 const RESTORE_TOLERANCE_PX = 2;
 
-const isDev = process.env.NODE_ENV !== "production";
-
 function buildScrollKey(trackId: string, itemId: string | number): string {
   return `limuda_scroll_${trackId}_${itemId}`;
 }
@@ -54,7 +52,6 @@ export function useScrollPositionRestore({
 }: UseScrollPositionRestoreOptions) {
   const restoredKeyRef = useRef<string | null>(null);
   const key = itemId === null ? null : buildScrollKey(trackId, itemId);
-  const logLabel = itemId === null ? null : `${trackId}_${itemId}`;
 
   // Prevent the browser's own history scroll restoration from fighting our
   // manual restore (e.g. Next.js/browser snapping back to 0 or to a stale
@@ -106,11 +103,6 @@ export function useScrollPositionRestore({
       if (tallEnough || attempts >= RESTORE_MAX_ATTEMPTS) {
         const finalTarget = Math.min(target, maxScrollY);
         window.scrollTo({ top: finalTarget });
-        if (isDev) {
-          console.log(
-            `[Scroll] Restoring to ${finalTarget}, actual height: ${document.documentElement.scrollHeight}`
-          );
-        }
         return;
       }
 
@@ -138,9 +130,6 @@ export function useScrollPositionRestore({
       timeoutId = setTimeout(() => {
         try {
           window.localStorage.setItem(key as string, String(window.scrollY));
-          if (isDev) {
-            console.log(`[Scroll] Saved: ${logLabel} -> ${window.scrollY}`);
-          }
         } catch {
           // ignore
         }
@@ -152,7 +141,7 @@ export function useScrollPositionRestore({
       window.removeEventListener("scroll", handleScroll);
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [key, logLabel]);
+  }, [key]);
 
   const resetScroll = useCallback(
     (behavior: ScrollBehavior = "auto") => {

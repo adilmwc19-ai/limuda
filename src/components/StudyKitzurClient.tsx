@@ -10,6 +10,7 @@ import DailyCompletionButton from "@/components/DailyCompletionButton";
 import { HEADER_ICON_BUTTON_CLASS, CHIP_PRIMARY_CLASS, CHIP_SECONDARY_CLASS } from "@/components/studyHeaderStyles";
 import { TOTAL_KITZUR_SIMANIM, getKitzurSimanInfo } from "@/lib/kitzurStructure";
 import { fetchKitzurSiman, type KitzurSimanData } from "@/lib/sefaria";
+import { useScrollPositionRestore } from "@/hooks/useScrollPositionRestore";
 
 const DEFAULT_SIMAN = 1;
 
@@ -159,6 +160,15 @@ export default function StudyKitzurClient() {
     return () => { cancelled = true; };
   }, [viewingSiman, authLoading]);
 
+  // Silently remember/restore scroll position within each siman. An explicit
+  // "עצרתי כאן" bookmark takes priority when one targets this siman.
+  const { resetScroll } = useScrollPositionRestore({
+    trackId: "kitzur",
+    itemId: viewingSiman,
+    ready: !itemLoading && !!simanData,
+    skipRestore: !!activeBookmark && activeBookmark.siman === viewingSiman,
+  });
+
   // ── Set current siman as personal starting point ────────────────────────────
 
   async function handleSetAsSiman() {
@@ -197,7 +207,7 @@ export default function StudyKitzurClient() {
       await updateDoc(doc(db, "users", user.uid), { kitzurSiman: nextSiman });
       setPersonalSiman(nextSiman);
       setViewingSiman(nextSiman);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      resetScroll("smooth");
     } finally {
       setCompleting(false);
     }
@@ -241,8 +251,8 @@ export default function StudyKitzurClient() {
           pagination={{
             current: siman,
             total: TOTAL_KITZUR_SIMANIM,
-            onPrev: () => setViewingSiman((d) => Math.max(1, d - 1)),
-            onNext: () => setViewingSiman((d) => Math.min(TOTAL_KITZUR_SIMANIM, d + 1)),
+            onPrev: () => { resetScroll(); setViewingSiman((d) => Math.max(1, d - 1)); },
+            onNext: () => { resetScroll(); setViewingSiman((d) => Math.min(TOTAL_KITZUR_SIMANIM, d + 1)); },
             prevDisabled: siman <= 1,
             nextDisabled: siman >= TOTAL_KITZUR_SIMANIM,
           }}
@@ -351,8 +361,8 @@ export default function StudyKitzurClient() {
           pagination={{
             current: siman,
             total: TOTAL_KITZUR_SIMANIM,
-            onPrev: () => setViewingSiman((d) => Math.max(1, d - 1)),
-            onNext: () => setViewingSiman((d) => Math.min(TOTAL_KITZUR_SIMANIM, d + 1)),
+            onPrev: () => { resetScroll(); setViewingSiman((d) => Math.max(1, d - 1)); },
+            onNext: () => { resetScroll(); setViewingSiman((d) => Math.min(TOTAL_KITZUR_SIMANIM, d + 1)); },
             prevDisabled: siman <= 1,
             nextDisabled: siman >= TOTAL_KITZUR_SIMANIM,
           }}

@@ -26,6 +26,7 @@ import {
   type ChofetzChaimUnit,
 } from "@/lib/chofetzChaimStructure";
 import { fetchChofetzChaimUnit, type ChofetzChaimUnitData } from "@/lib/sefaria";
+import { useScrollPositionRestore } from "@/hooks/useScrollPositionRestore";
 
 const DEFAULT_UNIT = 1;
 
@@ -254,6 +255,13 @@ export default function StudyChofetzChaimClient() {
     return () => { cancelled = true; };
   }, [viewingUnit, authLoading]);
 
+  // Silently remember/restore scroll position within each unit.
+  const { resetScroll } = useScrollPositionRestore({
+    trackId: "chofetz-chaim",
+    itemId: viewingUnit,
+    ready: !itemLoading && !!unitData,
+  });
+
   // ── Set current unit as personal starting point ─────────────────────────────
 
   async function handleSetAsUnit() {
@@ -279,7 +287,7 @@ export default function StudyChofetzChaimClient() {
       await updateDoc(doc(db, "users", user.uid), { chofetzChaimUnit: nextUnit });
       setPersonalUnit(nextUnit);
       setViewingUnit(nextUnit);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      resetScroll("smooth");
     } finally {
       setCompleting(false);
     }
@@ -337,8 +345,8 @@ export default function StudyChofetzChaimClient() {
           pagination={{
             current: viewingUnit,
             total: TOTAL_CHOFETZ_CHAIM_UNITS,
-            onPrev: () => setViewingUnit((d) => Math.max(1, d - 1)),
-            onNext: () => setViewingUnit((d) => Math.min(TOTAL_CHOFETZ_CHAIM_UNITS, d + 1)),
+            onPrev: () => { resetScroll(); setViewingUnit((d) => Math.max(1, d - 1)); },
+            onNext: () => { resetScroll(); setViewingUnit((d) => Math.min(TOTAL_CHOFETZ_CHAIM_UNITS, d + 1)); },
             prevDisabled: viewingUnit <= 1,
             nextDisabled: viewingUnit >= TOTAL_CHOFETZ_CHAIM_UNITS,
           }}
@@ -434,8 +442,8 @@ export default function StudyChofetzChaimClient() {
           pagination={{
             current: viewingUnit,
             total: TOTAL_CHOFETZ_CHAIM_UNITS,
-            onPrev: () => setViewingUnit((d) => Math.max(1, d - 1)),
-            onNext: () => setViewingUnit((d) => Math.min(TOTAL_CHOFETZ_CHAIM_UNITS, d + 1)),
+            onPrev: () => { resetScroll(); setViewingUnit((d) => Math.max(1, d - 1)); },
+            onNext: () => { resetScroll(); setViewingUnit((d) => Math.min(TOTAL_CHOFETZ_CHAIM_UNITS, d + 1)); },
             prevDisabled: viewingUnit <= 1,
             nextDisabled: viewingUnit >= TOTAL_CHOFETZ_CHAIM_UNITS,
           }}
