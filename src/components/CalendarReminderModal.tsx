@@ -117,6 +117,10 @@ export default function CalendarReminderModal({
             הורדת קובץ ליומן Apple / כללי
           </button>
         </div>
+
+        <p className="mt-3 text-center text-xs leading-relaxed text-stone-500 dark:text-stone-400">
+          התזכורת מתווספת ישירות לאפליקציית היומן במכשירך. לשינוי השעה או לביטול התזכורת, ניתן לערוך או למחוק את האירוע ישירות מתוך אפליקציית היומן.
+        </p>
       </div>
     </div>,
     document.body

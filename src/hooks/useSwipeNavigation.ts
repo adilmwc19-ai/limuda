@@ -5,10 +5,10 @@ import { useCallback, useRef, type TouchEvent } from "react";
 // Ignore touches starting this close to the screen edge — they're almost
 // always the browser/OS back-navigation gesture, not a page-turn swipe.
 const EDGE_DEADZONE_PX = 25;
-const MIN_DISTANCE_X_PX = 65;
-const MAX_DISTANCE_Y_PX = 40;
+const MIN_DISTANCE_X_PX = 60;
+const MAX_DISTANCE_Y_PX = 50;
 const MIN_DIRECTION_RATIO = 2; // |deltaX| must exceed |deltaY| by this factor
-const MAX_DURATION_MS = 500;
+const MAX_DURATION_MS = 450;
 
 interface UseSwipeNavigationOptions {
   /** Called when the reader swipes to advance (RTL: finger moves right → left). */
