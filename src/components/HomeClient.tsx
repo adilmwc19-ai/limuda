@@ -334,9 +334,9 @@ export default function HomeClient() {
       {/* Header */}
       <header className="bg-blue-950 px-6 shadow-md dark:bg-slate-900">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between md:h-16">
-          <div className="flex flex-col items-start justify-center leading-tight">
+          <div className="flex items-baseline gap-2.5 md:gap-3">
             <h1 className="text-xl font-bold tracking-tight text-white md:text-2xl">לימודא</h1>
-            <span className="mt-0.5 select-none rounded-full border border-white/10 bg-white/10 px-2 py-0.5 text-[10px] font-medium tracking-wider text-sky-200/90 md:text-xs">
+            <span className="whitespace-nowrap border-r border-blue-400/30 pr-2.5 font-sans text-[11px] font-normal tracking-normal text-sky-200/85 antialiased select-none sm:text-xs md:pr-3 md:text-sm">
               ללמוד בקצב שלך
             </span>
           </div>
