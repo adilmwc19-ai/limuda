@@ -12,7 +12,7 @@ const heebo = Heebo({
 
 const frankRuhl = Frank_Ruhl_Libre({
   subsets: ["hebrew", "latin"],
-  weight: ["400", "500", "700"],
+  weight: "variable",
   variable: "--font-frank-ruhl",
   display: "swap",
 });
