@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Menu } from "lucide-react";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
@@ -443,11 +443,9 @@ export default function StudyTanakhClient() {
             </p>
             <button
               onClick={handleOpenToc}
-              className="mt-4 inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-white px-4 py-2 text-sm font-medium text-blue-950 shadow-sm hover:bg-blue-50 transition"
+              className="mt-4 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white/90 px-5 py-2.5 text-sm font-sans font-medium text-slate-800 shadow-sm transition-all duration-150 hover:bg-slate-50 hover:shadow md:px-6 md:py-2.5 md:text-base dark:border-slate-700 dark:bg-slate-800/90 dark:text-slate-100 dark:hover:bg-slate-700"
             >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-                <path d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+              <Menu className="h-4.5 w-4.5" aria-hidden="true" />
               בחר פרק / תוכן עניינים
             </button>
           </div>
