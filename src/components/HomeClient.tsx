@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { SlidersHorizontal } from "lucide-react";
 import {
   signInWithPopup,
   signOut,
@@ -339,7 +340,7 @@ export default function HomeClient() {
       </header>
 
       {/* Main content */}
-      <section className="mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center gap-10 px-6 py-16">
+      <section className="mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center gap-10 px-4 py-16 sm:px-6">
         {!user ? (
           /* ── Not signed in ── */
           <div className="flex flex-col items-center gap-8 text-center">
@@ -362,7 +363,7 @@ export default function HomeClient() {
             </button>
 
             {/* Track previews for non-signed-in users */}
-            <div className="mt-2 grid w-full max-w-5xl grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+            <div className="mt-2 grid w-full max-w-5xl grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
               {TRACKS.map((t) => (
                 <div
                   key={t.id}
@@ -380,7 +381,7 @@ export default function HomeClient() {
         ) : (
           /* ── Signed in ── */
           <div className="flex w-full flex-col gap-8">
-            <div className="flex flex-col items-stretch gap-4 md:flex-row md:items-start md:justify-between" dir="rtl">
+            <div className="flex flex-col items-stretch gap-4 md:flex-row md:items-center md:justify-between" dir="rtl">
               <div>
                 <h2 className="text-2xl font-bold text-blue-950 dark:text-white">
                   שלום, {user.displayName?.split(" ")[0]}!
@@ -389,17 +390,17 @@ export default function HomeClient() {
               </div>
               <button
                 onClick={() => setShowTrackSelector(true)}
-                className="flex shrink-0 items-center justify-center gap-2 rounded-xl border border-blue-200 bg-white px-4 py-2 text-sm font-medium text-blue-900 shadow-sm transition-all hover:bg-blue-50 hover:shadow-md active:scale-95 dark:border-slate-600 dark:bg-slate-800 dark:text-blue-200 dark:hover:bg-slate-700 md:px-8 md:py-3.5 md:text-lg md:font-semibold"
+                className="flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-blue-900 shadow-sm transition-all hover:bg-blue-50 hover:shadow-md active:scale-95 dark:border-slate-800 dark:bg-slate-800/60 dark:text-blue-200 dark:hover:bg-slate-700"
               >
-                <span className="text-lg md:text-2xl" aria-hidden="true">⚙️</span>
-                התאמת המסלולים שלי
+                <SlidersHorizontal className="h-4 w-4 shrink-0" aria-hidden="true" />
+                התאמת המסלולים
               </button>
             </div>
 
             {/* Top: daily study hub — only the user's active tracks */}
             <div dir="rtl">
               <h3 className="mb-4 text-lg font-bold text-blue-950 dark:text-white">הסדר היומי שלי</h3>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {activeTrackIds.map((id) => renderTrackCard(id))}
               </div>
             </div>
@@ -412,7 +413,7 @@ export default function HomeClient() {
               >
                 כל מסלולי הלימוד
               </summary>
-              <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-6" dir="rtl">
+              <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" dir="rtl">
                 {TRACKS.map((t) => renderTrackCard(t.id))}
               </div>
             </details>
@@ -452,7 +453,7 @@ function StudyCard({ emoji, title, description, currentDay, totalDays, href, boo
   return (
     <Link
       href={href}
-      className="group flex flex-col rounded-2xl border border-blue-100 bg-white p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600"
+      className="group flex h-full flex-col justify-between rounded-2xl border border-blue-100 bg-white p-6 font-sans shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600"
     >
       {/* Icon + title */}
       <div className="mb-3 flex items-center gap-3" dir="rtl">
@@ -460,8 +461,8 @@ function StudyCard({ emoji, title, description, currentDay, totalDays, href, boo
           {emoji}
         </span>
         <div>
-          <h3 className="text-xl font-bold text-slate-900 dark:text-white">{title}</h3>
-          <p className="text-sm text-slate-700 dark:text-slate-200">{description}</p>
+          <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100">{title}</h3>
+          <p className="text-sm text-slate-600 dark:text-slate-400">{description}</p>
         </div>
       </div>
 
@@ -522,7 +523,7 @@ function PerekShirahCard({ completedToday, streak }: PerekShirahCardProps) {
   return (
     <Link
       href="/study/perek-shirah"
-      className="group flex flex-col rounded-2xl border border-blue-100 bg-white p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600"
+      className="group flex h-full flex-col justify-between rounded-2xl border border-blue-100 bg-white p-6 font-sans shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600"
     >
       {/* Icon + title */}
       <div className="mb-3 flex items-center gap-3" dir="rtl">
@@ -530,8 +531,8 @@ function PerekShirahCard({ completedToday, streak }: PerekShirahCardProps) {
           🕊️
         </span>
         <div>
-          <h3 className="text-xl font-bold text-slate-900 dark:text-white">פרק שירה יומי</h3>
-          <p className="text-sm text-slate-700 dark:text-slate-200">כל פרק שירה, מדי יום — ללא חלוקה לימים</p>
+          <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100">פרק שירה יומי</h3>
+          <p className="text-sm text-slate-600 dark:text-slate-400">כל פרק שירה, מדי יום — ללא חלוקה לימים</p>
         </div>
       </div>
 
@@ -547,7 +548,7 @@ function PerekShirahCard({ completedToday, streak }: PerekShirahCardProps) {
           >
             {completedToday ? "נקרא היום ✓" : "טרם נקרא היום"}
           </span>
-          {streak > 0 && <span className="text-sm text-slate-700 dark:text-slate-200">רצף {streak} ימים</span>}
+          {streak > 0 && <span className="text-sm text-slate-600 dark:text-slate-400">רצף {streak} ימים</span>}
         </div>
         <div
           className="mt-3 flex items-center justify-center gap-1.5 rounded-xl bg-blue-950 py-2 text-sm font-semibold text-white transition group-hover:bg-blue-900"
