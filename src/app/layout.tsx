@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Heebo } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -31,6 +31,15 @@ const taameyFrank = localFont({
 export const metadata: Metadata = {
   title: "לימודא - לימוד תורה יומי",
   description: "פלטפורמה אישית ללימוד תורה יומי בקצב אישי",
+  appleWebApp: {
+    capable: true,
+    title: "לימודא",
+    statusBarStyle: "black-translucent",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#1e3a8a",
 };
 
 const THEME_INIT_SCRIPT = `(function(){try{var raw=localStorage.getItem(${JSON.stringify(
@@ -51,6 +60,9 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        {/* Legacy iOS Safari still looks for the apple-prefixed tag; Next's
+            appleWebApp metadata field only emits mobile-web-app-capable. */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body className="min-h-full flex flex-col bg-slate-50 font-sans text-slate-800 dark:bg-slate-900 dark:text-zinc-100">
