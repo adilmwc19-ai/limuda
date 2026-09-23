@@ -1,7 +1,14 @@
 import type { Metadata } from "next";
-import { Frank_Ruhl_Libre } from "next/font/google";
+import { Heebo, Frank_Ruhl_Libre } from "next/font/google";
 import "./globals.css";
 import { ReadingProvider, READING_PREFS_STORAGE_KEY } from "@/context/ReadingContext";
+
+const heebo = Heebo({
+  subsets: ["hebrew", "latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-heebo",
+  display: "swap",
+});
 
 const frankRuhl = Frank_Ruhl_Libre({
   subsets: ["hebrew", "latin"],
@@ -28,7 +35,7 @@ export default function RootLayout({
     <html
       lang="he"
       dir="rtl"
-      className={`h-full ${frankRuhl.variable}`}
+      className={`h-full ${heebo.variable} ${frankRuhl.variable}`}
       data-theme="light"
       suppressHydrationWarning
     >

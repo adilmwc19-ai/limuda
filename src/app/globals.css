@@ -3,12 +3,15 @@
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @theme inline {
+  --font-sans: var(--font-heebo), "Segoe UI", Arial, sans-serif;
+  --font-serif: var(--font-frank-ruhl), "David", "Times New Roman", serif;
+  --font-study: var(--font-frank-ruhl), "David", "Times New Roman", serif;
   --font-traditional: var(--font-frank-ruhl), "David", "Times New Roman", serif;
   --font-modern: "Segoe UI", Arial, sans-serif;
 }
 
 body {
-  font-family: "Segoe UI", Arial, sans-serif;
+  font-family: var(--font-sans);
 }
 
 /* ─── Global reading settings overrides ──────────────────────────────── */
