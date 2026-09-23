@@ -490,7 +490,7 @@ export default function StudyTanakhClient() {
                         {toHebrew(verse.verseNumber)}
                       </span>
                       <p
-                        className="flex-1 text-right font-study text-xl font-normal leading-loose text-slate-800 antialiased dark:text-slate-100 md:text-2xl"
+                        className="flex-1 text-right font-study text-2xl font-normal leading-loose text-slate-800 antialiased dark:text-slate-100 md:text-3xl"
                         dir="rtl"
                         dangerouslySetInnerHTML={{ __html: verse.text }}
                       />
