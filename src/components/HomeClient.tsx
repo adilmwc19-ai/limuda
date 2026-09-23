@@ -658,35 +658,43 @@ function TrackSelectorModal({ activeTracks, onSave, onClose }: TrackSelectorModa
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
+        className="w-full max-w-lg rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-xl"
         dir="rtl"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="text-lg font-bold text-blue-950">התאמת המסלולים שלי</h3>
-        <p className="mt-1 text-xs text-slate-500">
+        <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2">
+          התאמת המסלולים שלי
+        </h3>
+        <p className="text-sm md:text-base text-slate-600 dark:text-slate-400 mb-6">
           בחרי אילו מסלולים יופיעו ב&quot;הסדר היומי שלי&quot; בדף הבית (חובה לבחור לפחות מסלול אחד).
         </p>
 
-        <div className="mt-4 flex max-h-80 flex-col gap-1 overflow-y-auto">
+        <div className="flex max-h-[60vh] flex-col gap-1 overflow-y-auto scrollbar-thin">
           {TRACKS.map((t) => {
             const checked = selected.includes(t.id);
             const isLastChecked = checked && selected.length === 1;
             return (
               <label
                 key={t.id}
-                className={`flex items-center gap-3 rounded-lg px-2 py-2 transition ${
-                  isLastChecked ? "opacity-60" : "hover:bg-blue-50"
+                className={`flex items-center justify-between gap-3 p-3.5 rounded-xl border border-transparent transition-all cursor-pointer ${
+                  isLastChecked
+                    ? "opacity-60"
+                    : "hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:border-slate-200 dark:hover:border-slate-700"
                 }`}
               >
+                <span className="flex items-center gap-3">
+                  <span className="text-xl md:text-2xl" aria-hidden="true">{t.emoji}</span>
+                  <span className="text-base md:text-lg font-medium text-slate-800 dark:text-slate-100">
+                    {t.title}
+                  </span>
+                </span>
                 <input
                   type="checkbox"
                   checked={checked}
                   disabled={isLastChecked}
                   onChange={() => toggle(t.id)}
-                  className="h-4 w-4 accent-blue-900"
+                  className="w-5 h-5 rounded text-blue-900 accent-blue-900 cursor-pointer"
                 />
-                <span className="text-lg" aria-hidden="true">{t.emoji}</span>
-                <span className="text-sm font-medium text-blue-950">{t.title}</span>
               </label>
             );
           })}
@@ -695,14 +703,14 @@ function TrackSelectorModal({ activeTracks, onSave, onClose }: TrackSelectorModa
         <div className="mt-6 flex justify-end gap-3">
           <button
             onClick={onClose}
-            className="rounded-lg px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100"
+            className="rounded-lg px-6 py-2.5 text-sm font-medium text-slate-500 dark:text-slate-400 transition hover:bg-slate-100 dark:hover:bg-slate-800"
           >
             ביטול
           </button>
           <button
             onClick={handleSave}
             disabled={saving || selected.length === 0}
-            className="rounded-lg bg-blue-950 px-5 py-2 text-sm font-semibold text-white transition hover:bg-blue-900 active:scale-95 disabled:opacity-60"
+            className="rounded-lg bg-blue-950 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-900 active:scale-95 disabled:opacity-60"
           >
             {saving ? "שומר..." : "שמירה"}
           </button>
