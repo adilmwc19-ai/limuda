@@ -5,7 +5,13 @@ import { onAuthStateChanged, type User } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import StudyHeader from "@/components/StudyHeader";
-import { HEADER_BUTTON_CLASS, HEADER_BADGE_CLASS } from "@/components/studyHeaderStyles";
+import StudyTitleHeader, { StudyBottomNav } from "@/components/StudyTitleHeader";
+import {
+  HEADER_BUTTON_CLASS,
+  HEADER_BADGE_CLASS,
+  CHIP_PRIMARY_CLASS,
+  CHIP_SECONDARY_CLASS,
+} from "@/components/studyHeaderStyles";
 import {
   TALMUD_MASECHTOT,
   TALMUD_SEDARIM,
@@ -247,12 +253,7 @@ export default function StudyTalmudClient() {
     <main className="flex min-h-screen flex-col bg-slate-50" dir="rtl">
       {/* ── Header ── */}
       <StudyHeader
-        unitLabel={`${info.masechetHe} ${dafLabel(info.dafNumber)}`}
-        bookLabel="דף יומי"
         maxWidthClassName="max-w-5xl"
-        badge={
-          paceMode === "global" && <span className={HEADER_BADGE_CLASS}>עולמי</span>
-        }
         headerActions={
           <button
             onClick={() => setIsTocOpen(true)}
@@ -267,77 +268,86 @@ export default function StudyTalmudClient() {
             <span className="hidden md:inline">תוכן עניינים</span>
           </button>
         }
-        toolbar={
-          <>
-            <SegControl<PaceMode>
-              options={[
-                { value: "global",   label: "דף יומי עולמי" },
-                { value: "personal", label: "בקצב שלי" },
-              ]}
-              value={paceMode}
-              onChange={handlePaceModeChange}
-            />
-            <SegControl<DisplayMode>
-              options={[
-                { value: "nikud", label: "עם ניקוד" },
-                { value: "vilna", label: "וילנא" },
-              ]}
-              value={displayMode}
-              onChange={setDisplayMode}
-            />
-            <SegControl<LayoutMode>
-              options={[
-                { value: "tabs",    label: "כרטיסיות" },
-                { value: "columns", label: "עמודות וילנא" },
-              ]}
-              value={layoutMode}
-              onChange={setLayoutMode}
-            />
-            {layoutMode === "tabs" && (
-              <SegControl<CommentatorKey>
-                options={[
-                  { value: "rashi",   label: 'רש"י' },
-                  { value: "tosafot", label: "תוספות" },
-                ]}
-                value={commentator}
-                onChange={setCommentator}
-              />
-            )}
-          </>
-        }
-        pagination={{
-          current: viewingDay,
-          total: TOTAL_TALMUD_DAYS,
-          onPrev: () => setViewingDay((d) => Math.max(1, d - 1)),
-          onNext: () => setViewingDay((d) => Math.min(TOTAL_TALMUD_DAYS, d + 1)),
-          prevDisabled: viewingDay <= 1,
-          nextDisabled: viewingDay >= TOTAL_TALMUD_DAYS,
-        }}
-        chips={
-          <>
-            {user && paceMode === "personal" && !isToday && (
-              <button
-                onClick={handleSetAsDaf}
-                disabled={settingDaf}
-                className="rounded-lg border border-indigo-400/40 bg-indigo-500/20 px-2.5 py-1 text-xs text-indigo-100 transition hover:bg-indigo-500/30 disabled:opacity-60"
-              >
-                {settingDaf ? "שומר..." : "📌 קבע כנקודת הלימוד שלי"}
-              </button>
-            )}
-            {!isToday && (
-              <button
-                onClick={() => setViewingDay(activeDay)}
-                className="rounded-lg border border-amber-400/40 bg-amber-500/20 px-2.5 py-1 text-xs text-amber-100 transition hover:bg-amber-500/30"
-              >
-                חזור להיום
-              </button>
-            )}
-          </>
-        }
       />
 
       {/* ── Content ── */}
       <section className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 space-y-8">
+        <StudyTitleHeader
+          unitLabel={`${info.masechetHe} ${dafLabel(info.dafNumber)}`}
+          bookLabel="דף יומי"
+          maxWidthClassName="max-w-5xl"
+          badge={
+            paceMode === "global" && <span className={HEADER_BADGE_CLASS}>עולמי</span>
+          }
+          toolbar={
+            <>
+              <SegControl<PaceMode>
+                options={[
+                  { value: "global",   label: "דף יומי עולמי" },
+                  { value: "personal", label: "בקצב שלי" },
+                ]}
+                value={paceMode}
+                onChange={handlePaceModeChange}
+              />
+              <SegControl<DisplayMode>
+                options={[
+                  { value: "nikud", label: "עם ניקוד" },
+                  { value: "vilna", label: "וילנא" },
+                ]}
+                value={displayMode}
+                onChange={setDisplayMode}
+              />
+              <SegControl<LayoutMode>
+                options={[
+                  { value: "tabs",    label: "כרטיסיות" },
+                  { value: "columns", label: "עמודות וילנא" },
+                ]}
+                value={layoutMode}
+                onChange={setLayoutMode}
+              />
+              {layoutMode === "tabs" && (
+                <SegControl<CommentatorKey>
+                  options={[
+                    { value: "rashi",   label: 'רש"י' },
+                    { value: "tosafot", label: "תוספות" },
+                  ]}
+                  value={commentator}
+                  onChange={setCommentator}
+                />
+              )}
+            </>
+          }
+          pagination={{
+            current: viewingDay,
+            total: TOTAL_TALMUD_DAYS,
+            onPrev: () => setViewingDay((d) => Math.max(1, d - 1)),
+            onNext: () => setViewingDay((d) => Math.min(TOTAL_TALMUD_DAYS, d + 1)),
+            prevDisabled: viewingDay <= 1,
+            nextDisabled: viewingDay >= TOTAL_TALMUD_DAYS,
+          }}
+          chips={
+            <>
+              {user && paceMode === "personal" && !isToday && (
+                <button
+                  onClick={handleSetAsDaf}
+                  disabled={settingDaf}
+                  className={CHIP_PRIMARY_CLASS}
+                >
+                  {settingDaf ? "שומר..." : "📌 קבע כנקודת הלימוד שלי"}
+                </button>
+              )}
+              {!isToday && (
+                <button
+                  onClick={() => setViewingDay(activeDay)}
+                  className={CHIP_SECONDARY_CLASS}
+                >
+                  חזור להיום
+                </button>
+              )}
+            </>
+          }
+        />
+
         {fetchError ? (
           <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-center text-red-700">
             {fetchError}
@@ -384,6 +394,17 @@ export default function StudyTalmudClient() {
                 )}
               </div>
             )}
+
+            <StudyBottomNav
+              pagination={{
+                current: viewingDay,
+                total: TOTAL_TALMUD_DAYS,
+                onPrev: () => setViewingDay((d) => Math.max(1, d - 1)),
+                onNext: () => setViewingDay((d) => Math.min(TOTAL_TALMUD_DAYS, d + 1)),
+                prevDisabled: viewingDay <= 1,
+                nextDisabled: viewingDay >= TOTAL_TALMUD_DAYS,
+              }}
+            />
           </>
         )}
       </section>

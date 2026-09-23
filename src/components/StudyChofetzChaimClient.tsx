@@ -5,7 +5,13 @@ import { onAuthStateChanged, type User } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import StudyHeader from "@/components/StudyHeader";
-import { HEADER_BADGE_CLASS } from "@/components/studyHeaderStyles";
+import StudyTitleHeader, { StudyBottomNav } from "@/components/StudyTitleHeader";
+import {
+  HEADER_BADGE_CLASS,
+  HEADER_ICON_BUTTON_CLASS,
+  CHIP_PRIMARY_CLASS,
+  CHIP_SECONDARY_CLASS,
+} from "@/components/studyHeaderStyles";
 import {
   CHOFETZ_CHAIM_GATES,
   TOTAL_CHOFETZ_CHAIM_UNITS,
@@ -294,77 +300,73 @@ export default function StudyChofetzChaimClient() {
     <main className="flex min-h-screen flex-col bg-slate-50" dir="rtl">
       {/* ── Header ── */}
       <StudyHeader
-        unitLabel={unit.titleHebrew}
-        bookLabel={gateTitle}
-        badge={
-          paceMode === "daily" && <span className={HEADER_BADGE_CLASS}>יומי</span>
-        }
-        toolbar={
-          <SegControl<PaceMode>
-            options={[
-              { value: "daily", label: "לפי לוח יומי" },
-              { value: "personal", label: "בקצב שלי" },
-            ]}
-            value={paceMode}
-            onChange={handlePaceModeChange}
-          />
-        }
-        pagination={{
-          current: viewingUnit,
-          total: TOTAL_CHOFETZ_CHAIM_UNITS,
-          onPrev: () => setViewingUnit((d) => Math.max(1, d - 1)),
-          onNext: () => setViewingUnit((d) => Math.min(TOTAL_CHOFETZ_CHAIM_UNITS, d + 1)),
-          prevDisabled: viewingUnit <= 1,
-          nextDisabled: viewingUnit >= TOTAL_CHOFETZ_CHAIM_UNITS,
-        }}
-        chips={
-          <>
-            {user && !isCurrent && (
-              <button
-                onClick={handleSetAsUnit}
-                disabled={settingItem}
-                className="rounded-lg border border-indigo-400/40 bg-indigo-500/20 px-2.5 py-1 text-xs text-indigo-100 transition hover:bg-indigo-500/30 disabled:opacity-60"
-              >
-                {settingItem ? "שומר..." : "📌 קבע כיחידת הלימוד שלי"}
-              </button>
-            )}
-            {!isCurrent && (
-              <button
-                onClick={() => setViewingUnit(activeUnit)}
-                className="rounded-lg border border-amber-400/40 bg-amber-500/20 px-2.5 py-1 text-xs text-amber-100 transition hover:bg-amber-500/30"
-              >
-                {paceMode === "daily" ? "חזור להיום" : "חזור לנקודת הלימוד שלי"}
-              </button>
-            )}
-          </>
+        headerActions={
+          <button
+            onClick={() => setTocOpen(true)}
+            title="תוכן עניינים"
+            aria-label="תוכן עניינים"
+            className={HEADER_ICON_BUTTON_CLASS}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+              <line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" />
+              <line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" />
+            </svg>
+          </button>
         }
       />
 
       {/* ── Content ── */}
       <section className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">
-        <div className="mb-6 flex justify-center">
-          <button
-            onClick={() => setTocOpen(true)}
-            className="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-white px-4 py-2 text-sm font-medium text-blue-950 shadow-sm transition hover:bg-blue-50"
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-              <path d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-            <span>
-              {gateTitle} <span className="text-blue-300">◄</span> {unit.titleHebrew}
-            </span>
-          </button>
-        </div>
+        <StudyTitleHeader
+          unitLabel={unit.titleHebrew}
+          bookLabel={gateTitle}
+          badge={
+            paceMode === "daily" && <span className={HEADER_BADGE_CLASS}>יומי</span>
+          }
+          toolbar={
+            <SegControl<PaceMode>
+              options={[
+                { value: "daily", label: "לפי לוח יומי" },
+                { value: "personal", label: "בקצב שלי" },
+              ]}
+              value={paceMode}
+              onChange={handlePaceModeChange}
+            />
+          }
+          pagination={{
+            current: viewingUnit,
+            total: TOTAL_CHOFETZ_CHAIM_UNITS,
+            onPrev: () => setViewingUnit((d) => Math.max(1, d - 1)),
+            onNext: () => setViewingUnit((d) => Math.min(TOTAL_CHOFETZ_CHAIM_UNITS, d + 1)),
+            prevDisabled: viewingUnit <= 1,
+            nextDisabled: viewingUnit >= TOTAL_CHOFETZ_CHAIM_UNITS,
+          }}
+          chips={
+            <>
+              {user && !isCurrent && (
+                <button
+                  onClick={handleSetAsUnit}
+                  disabled={settingItem}
+                  className={CHIP_PRIMARY_CLASS}
+                >
+                  {settingItem ? "שומר..." : "📌 קבע כיחידת הלימוד שלי"}
+                </button>
+              )}
+              {!isCurrent && (
+                <button
+                  onClick={() => setViewingUnit(activeUnit)}
+                  className={CHIP_SECONDARY_CLASS}
+                >
+                  {paceMode === "daily" ? "חזור להיום" : "חזור לנקודת הלימוד שלי"}
+                </button>
+              )}
+            </>
+          }
+        />
 
-        <div className="mb-6 text-center">
-          <p className="text-sm font-medium text-blue-500">{gateTitle}</p>
-          <div className="mt-2 inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-2xl font-bold text-blue-950 dark:border-slate-700 dark:bg-slate-800/60 dark:text-blue-100">
-            {unit.titleHebrew}
-          </div>
-          {unit.subtitleHebrew && (
-            <p className="mt-2 text-sm text-slate-400">{unit.subtitleHebrew}</p>
-          )}
-        </div>
+        {unit.subtitleHebrew && (
+          <p className="-mt-4 mb-6 text-center text-sm text-slate-400">{unit.subtitleHebrew}</p>
+        )}
 
         {fetchError ? (
           <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-center text-red-700">
@@ -429,7 +431,18 @@ export default function StudyChofetzChaimClient() {
           </div>
         )}
 
-        <footer className="mt-10 border-t border-slate-200 py-6 text-center">
+        <StudyBottomNav
+          pagination={{
+            current: viewingUnit,
+            total: TOTAL_CHOFETZ_CHAIM_UNITS,
+            onPrev: () => setViewingUnit((d) => Math.max(1, d - 1)),
+            onNext: () => setViewingUnit((d) => Math.min(TOTAL_CHOFETZ_CHAIM_UNITS, d + 1)),
+            prevDisabled: viewingUnit <= 1,
+            nextDisabled: viewingUnit >= TOTAL_CHOFETZ_CHAIM_UNITS,
+          }}
+        />
+
+        <footer className="mt-6 border-t border-slate-200 py-6 text-center">
           <p className="text-sm text-slate-400">
             טקסטים באדיבות{" "}
             <a

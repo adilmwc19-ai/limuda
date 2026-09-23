@@ -373,11 +373,6 @@ export default function StudyMishnahClient() {
       {/* Sticky header */}
       {dayInfo && (
         <StudyHeader
-          unitLabel={`מסכת ${dayInfo.masechetHe} · פרק ${dayInfo.chapter}`}
-          bookLabel={`יום ${viewingDay} מתוך ${TOTAL_MISHNAH_DAYS}`}
-          badge={
-            !isCurrentDay && <span className={HEADER_BADGE_CLASS}>צפייה</span>
-          }
           headerActions={
             <>
               <button
@@ -412,7 +407,10 @@ export default function StudyMishnahClient() {
         {/* Chapter title */}
         {dayInfo && (
           <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold text-blue-950 dark:text-blue-100">מסכת {dayInfo.masechetHe}</h1>
+            <div className="flex flex-wrap items-center justify-center gap-2.5">
+              <h1 className="text-3xl font-bold text-blue-950 dark:text-blue-100">מסכת {dayInfo.masechetHe}</h1>
+              {!isCurrentDay && <span className={HEADER_BADGE_CLASS}>צפייה</span>}
+            </div>
             <div className="mt-3 inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-xl font-semibold text-blue-700 dark:border-slate-700 dark:bg-slate-800/60 dark:text-blue-300">
               פרק {toHebrew(dayInfo.chapter)}
             </div>

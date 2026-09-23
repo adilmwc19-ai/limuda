@@ -5,6 +5,7 @@ import { onAuthStateChanged, type User } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import StudyHeader from "@/components/StudyHeader";
+import StudyTitleHeader from "@/components/StudyTitleHeader";
 import { PEREK_SHIRAH_SECTIONS } from "@/lib/perekShirahStructure";
 import { fetchFullPerekShirah, type PerekShirahData } from "@/lib/sefaria";
 
@@ -144,25 +145,27 @@ export default function StudyPerekShirahClient() {
   return (
     <main className="flex min-h-screen flex-col bg-slate-50" dir="rtl">
       {/* ── Header ── */}
-      <StudyHeader
-        unitLabel="פרק שירה יומי"
-        toolbar={
-          <div className="flex flex-wrap justify-center gap-1.5">
-            {PEREK_SHIRAH_SECTIONS.map((s) => (
-              <button
-                key={s.id}
-                onClick={() => scrollToSection(s.id)}
-                className="flex min-h-[44px] items-center justify-center rounded-lg bg-white/10 px-2.5 py-1 text-xs font-medium text-white transition hover:bg-white/20"
-              >
-                {NAV_LABELS[s.id] ?? s.title}
-              </button>
-            ))}
-          </div>
-        }
-      />
+      <StudyHeader />
 
       {/* ── Content ── */}
       <section className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">
+        <StudyTitleHeader
+          unitLabel="פרק שירה יומי"
+          toolbar={
+            <div className="flex flex-wrap justify-center gap-1.5">
+              {PEREK_SHIRAH_SECTIONS.map((s) => (
+                <button
+                  key={s.id}
+                  onClick={() => scrollToSection(s.id)}
+                  className="flex min-h-[44px] items-center justify-center rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-xs font-medium text-blue-900 shadow-sm transition hover:bg-blue-50 dark:border-slate-700 dark:bg-slate-800 dark:text-blue-200 dark:hover:bg-slate-700"
+                >
+                  {NAV_LABELS[s.id] ?? s.title}
+                </button>
+              ))}
+            </div>
+          }
+        />
+
         {/* Completion banner / status */}
         {user && (
           completedToday ? (

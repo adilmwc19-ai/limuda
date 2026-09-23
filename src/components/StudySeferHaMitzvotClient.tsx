@@ -5,7 +5,13 @@ import { onAuthStateChanged, type User } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import StudyHeader from "@/components/StudyHeader";
-import { HEADER_BADGE_CLASS } from "@/components/studyHeaderStyles";
+import StudyTitleHeader, { StudyBottomNav } from "@/components/StudyTitleHeader";
+import {
+  HEADER_BADGE_CLASS,
+  HEADER_ICON_BUTTON_CLASS,
+  CHIP_PRIMARY_CLASS,
+  CHIP_SECONDARY_CLASS,
+} from "@/components/studyHeaderStyles";
 import {
   SEFER_HAMITZVOT_SECTIONS,
   TOTAL_SEFER_HAMITZVOT_ITEMS,
@@ -286,79 +292,71 @@ export default function StudySeferHaMitzvotClient() {
     <main className="flex min-h-screen flex-col bg-slate-50" dir="rtl">
       {/* ── Header ── */}
       <StudyHeader
-        unitLabel={item.titleHebrew}
-        bookLabel={SEFER_HAMITZVOT_SECTIONS.find((s) => s.id === item.section)?.titleHebrew}
-        badge={
-          paceMode === "global" && <span className={HEADER_BADGE_CLASS}>עולמי</span>
-        }
-        toolbar={
-          dailyGlobalIndex !== null && (
-            <SegControl<PaceMode>
-              options={[
-                { value: "global", label: "יומי עולמי" },
-                { value: "personal", label: "בקצב שלי" },
-              ]}
-              value={paceMode}
-              onChange={handlePaceModeChange}
-            />
-          )
-        }
-        pagination={{
-          current: viewingIndex,
-          total: TOTAL_SEFER_HAMITZVOT_ITEMS,
-          onPrev: () => setViewingIndex((d) => Math.max(1, d - 1)),
-          onNext: () => setViewingIndex((d) => Math.min(TOTAL_SEFER_HAMITZVOT_ITEMS, d + 1)),
-          prevDisabled: viewingIndex <= 1,
-          nextDisabled: viewingIndex >= TOTAL_SEFER_HAMITZVOT_ITEMS,
-        }}
-        chips={
-          <>
-            {user && !isCurrent && (
-              <button
-                onClick={handleSetAsItem}
-                disabled={settingItem}
-                className="rounded-lg border border-indigo-400/40 bg-indigo-500/20 px-2.5 py-1 text-xs text-indigo-100 transition hover:bg-indigo-500/30 disabled:opacity-60"
-              >
-                {settingItem ? "שומר..." : "📌 קבע כמצוות הלימוד שלי"}
-              </button>
-            )}
-            {!isCurrent && (
-              <button
-                onClick={() => setViewingIndex(activeIndex)}
-                className="rounded-lg border border-amber-400/40 bg-amber-500/20 px-2.5 py-1 text-xs text-amber-100 transition hover:bg-amber-500/30"
-              >
-                {paceMode === "global" ? "חזור להיום" : "חזור לנקודת הלימוד שלי"}
-              </button>
-            )}
-          </>
+        headerActions={
+          <button
+            onClick={() => setTocOpen(true)}
+            title="תוכן עניינים"
+            aria-label="תוכן עניינים"
+            className={HEADER_ICON_BUTTON_CLASS}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+              <line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" />
+              <line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" />
+            </svg>
+          </button>
         }
       />
 
       {/* ── Content ── */}
       <section className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">
-        <div className="mb-6 flex justify-center">
-          <button
-            onClick={() => setTocOpen(true)}
-            className="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-white px-4 py-2 text-sm font-medium text-blue-950 shadow-sm transition hover:bg-blue-50"
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-              <path d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-            <span>
-              {SEFER_HAMITZVOT_SECTIONS.find((s) => s.id === item.section)?.titleHebrew}{" "}
-              <span className="text-blue-300">◄</span> {item.titleHebrew}
-            </span>
-          </button>
-        </div>
-
-        <div className="mb-6 text-center">
-          <div className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-2xl font-bold text-blue-950 dark:border-slate-700 dark:bg-slate-800/60 dark:text-blue-100">
-            {item.titleHebrew}
-          </div>
-          <p className="mt-2 text-sm text-slate-400">
-            {SEFER_HAMITZVOT_SECTIONS.find((s) => s.id === item.section)?.titleHebrew}
-          </p>
-        </div>
+        <StudyTitleHeader
+          unitLabel={item.titleHebrew}
+          bookLabel={SEFER_HAMITZVOT_SECTIONS.find((s) => s.id === item.section)?.titleHebrew}
+          badge={
+            paceMode === "global" && <span className={HEADER_BADGE_CLASS}>עולמי</span>
+          }
+          toolbar={
+            dailyGlobalIndex !== null && (
+              <SegControl<PaceMode>
+                options={[
+                  { value: "global", label: "יומי עולמי" },
+                  { value: "personal", label: "בקצב שלי" },
+                ]}
+                value={paceMode}
+                onChange={handlePaceModeChange}
+              />
+            )
+          }
+          pagination={{
+            current: viewingIndex,
+            total: TOTAL_SEFER_HAMITZVOT_ITEMS,
+            onPrev: () => setViewingIndex((d) => Math.max(1, d - 1)),
+            onNext: () => setViewingIndex((d) => Math.min(TOTAL_SEFER_HAMITZVOT_ITEMS, d + 1)),
+            prevDisabled: viewingIndex <= 1,
+            nextDisabled: viewingIndex >= TOTAL_SEFER_HAMITZVOT_ITEMS,
+          }}
+          chips={
+            <>
+              {user && !isCurrent && (
+                <button
+                  onClick={handleSetAsItem}
+                  disabled={settingItem}
+                  className={CHIP_PRIMARY_CLASS}
+                >
+                  {settingItem ? "שומר..." : "📌 קבע כמצוות הלימוד שלי"}
+                </button>
+              )}
+              {!isCurrent && (
+                <button
+                  onClick={() => setViewingIndex(activeIndex)}
+                  className={CHIP_SECONDARY_CLASS}
+                >
+                  {paceMode === "global" ? "חזור להיום" : "חזור לנקודת הלימוד שלי"}
+                </button>
+              )}
+            </>
+          }
+        />
 
         {fetchError ? (
           <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-center text-red-700">
@@ -402,7 +400,18 @@ export default function StudySeferHaMitzvotClient() {
           </div>
         )}
 
-        <footer className="mt-10 border-t border-slate-200 py-6 text-center">
+        <StudyBottomNav
+          pagination={{
+            current: viewingIndex,
+            total: TOTAL_SEFER_HAMITZVOT_ITEMS,
+            onPrev: () => setViewingIndex((d) => Math.max(1, d - 1)),
+            onNext: () => setViewingIndex((d) => Math.min(TOTAL_SEFER_HAMITZVOT_ITEMS, d + 1)),
+            prevDisabled: viewingIndex <= 1,
+            nextDisabled: viewingIndex >= TOTAL_SEFER_HAMITZVOT_ITEMS,
+          }}
+        />
+
+        <footer className="mt-6 border-t border-slate-200 py-6 text-center">
           <p className="text-sm text-slate-400">
             טקסטים באדיבות{" "}
             <a
