@@ -333,27 +333,19 @@ export default function StudyKitzurClient() {
           </article>
         )}
 
-        {/* Action row */}
-        {user && (
-          <div className="flex flex-col items-center gap-2 pt-8">
-            {isCurrent && siman < TOTAL_KITZUR_SIMANIM && (
-              <button
-                onClick={handleFinished}
-                disabled={completing}
-                className="rounded-xl bg-blue-950 px-8 py-2.5 text-sm font-semibold text-white shadow transition hover:bg-blue-900 active:scale-95 disabled:opacity-60"
-              >
-                {completing ? "שומר..." : "סיימתי סימן זה ←"}
-              </button>
-            )}
-            {setItemMsg && (
-              <p className="rounded-lg bg-green-50 px-4 py-2 text-sm font-medium text-green-700 border border-green-200">
-                {setItemMsg}
-              </p>
-            )}
+        {/* "Set as my point" confirmation message */}
+        {user && setItemMsg && (
+          <div className="flex justify-center pt-8">
+            <p className="rounded-lg bg-green-50 px-4 py-2 text-sm font-medium text-green-700 border border-green-200">
+              {setItemMsg}
+            </p>
           </div>
         )}
 
-        <DailyCompletionButton trackId="kitzur-shulchan-aruch" />
+        <DailyCompletionButton
+          trackId="kitzur-shulchan-aruch"
+          onAdvance={user && isCurrent && siman < TOTAL_KITZUR_SIMANIM ? handleFinished : undefined}
+        />
 
         <StudyBottomNav
           pagination={{

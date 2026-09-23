@@ -580,17 +580,10 @@ export default function StudyTanakhClient() {
         {/* Bottom controls */}
         {chapterData && !chapterLoading && (
           <div className="my-12 flex flex-col items-center gap-6">
-            {isCurrentDay && (
-              <button
-                onClick={handleComplete}
-                disabled={completing}
-                className="rounded-xl bg-blue-950 px-8 py-2.5 text-sm font-semibold text-white shadow transition hover:bg-blue-900 active:scale-95 disabled:opacity-60"
-              >
-                {completing ? "שומר..." : activeDay >= TOTAL_DAYS ? 'סיימתי את כל התנ"ך!' : "סיימתי יום זה ←"}
-              </button>
-            )}
-
-            <DailyCompletionButton trackId="tanakh" />
+            <DailyCompletionButton
+              trackId="tanakh"
+              onAdvance={isCurrentDay ? handleComplete : undefined}
+            />
 
             <div className="flex items-center gap-3">
               <button

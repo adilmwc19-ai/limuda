@@ -376,27 +376,23 @@ export default function StudyTalmudClient() {
               layoutMode={layoutMode}
             />
 
-            {/* Action row — personal mode, signed in */}
-            {user && paceMode === "personal" && (
-              <div className="flex flex-col items-center gap-2 pt-2">
-                {isToday && viewingDay < TOTAL_TALMUD_DAYS && (
-                  <button
-                    onClick={handleFinished}
-                    disabled={finishing}
-                    className="rounded-xl bg-blue-950 px-8 py-2.5 text-sm font-semibold text-white shadow transition hover:bg-blue-900 active:scale-95 disabled:opacity-60"
-                  >
-                    {finishing ? "שומר..." : "סיימתי את הדף ←"}
-                  </button>
-                )}
-                {setDafMsg && (
-                  <p className="rounded-lg bg-green-50 px-4 py-2 text-sm font-medium text-green-700 border border-green-200">
-                    {setDafMsg}
-                  </p>
-                )}
+            {/* "Set as my point" confirmation message — personal mode only */}
+            {user && paceMode === "personal" && setDafMsg && (
+              <div className="flex justify-center pt-2">
+                <p className="rounded-lg bg-green-50 px-4 py-2 text-sm font-medium text-green-700 border border-green-200">
+                  {setDafMsg}
+                </p>
               </div>
             )}
 
-            <DailyCompletionButton trackId="talmud" />
+            <DailyCompletionButton
+              trackId="talmud"
+              onAdvance={
+                user && paceMode === "personal" && isToday && viewingDay < TOTAL_TALMUD_DAYS
+                  ? handleFinished
+                  : undefined
+              }
+            />
 
             <StudyBottomNav
               pagination={{

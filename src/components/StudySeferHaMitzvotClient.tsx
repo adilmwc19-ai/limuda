@@ -381,27 +381,23 @@ export default function StudySeferHaMitzvotClient() {
           </article>
         )}
 
-        {/* Action row — personal mode only; hidden entirely in global mode */}
-        {user && paceMode === "personal" && (
-          <div className="flex flex-col items-center gap-2 pt-8">
-            {isCurrent && viewingIndex < TOTAL_SEFER_HAMITZVOT_ITEMS && (
-              <button
-                onClick={handleFinished}
-                disabled={completing}
-                className="rounded-xl bg-blue-950 px-8 py-2.5 text-sm font-semibold text-white shadow transition hover:bg-blue-900 active:scale-95 disabled:opacity-60"
-              >
-                {completing ? "שומר..." : "סיימתי מצווה זו ←"}
-              </button>
-            )}
-            {setItemMsg && (
-              <p className="rounded-lg bg-green-50 px-4 py-2 text-sm font-medium text-green-700 border border-green-200">
-                {setItemMsg}
-              </p>
-            )}
+        {/* "Set as my point" confirmation message — personal mode only */}
+        {user && paceMode === "personal" && setItemMsg && (
+          <div className="flex justify-center pt-8">
+            <p className="rounded-lg bg-green-50 px-4 py-2 text-sm font-medium text-green-700 border border-green-200">
+              {setItemMsg}
+            </p>
           </div>
         )}
 
-        <DailyCompletionButton trackId="sefer-hamitzvot" />
+        <DailyCompletionButton
+          trackId="sefer-hamitzvot"
+          onAdvance={
+            user && paceMode === "personal" && isCurrent && viewingIndex < TOTAL_SEFER_HAMITZVOT_ITEMS
+              ? handleFinished
+              : undefined
+          }
+        />
 
         <StudyBottomNav
           pagination={{

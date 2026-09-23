@@ -533,27 +533,23 @@ export default function StudyRambamClient() {
           </article>
         )}
 
-        {/* Action row — personal mode only; hidden entirely in global mode */}
-        {user && paceMode === "personal" && (
-          <div className="flex flex-col items-center gap-2 pt-8">
-            {isCurrent && viewingIndex < TOTAL_RAMBAM_CHAPTERS && (
-              <button
-                onClick={handleFinished}
-                disabled={completing}
-                className="rounded-xl bg-blue-950 px-8 py-2.5 text-sm font-semibold text-white shadow transition hover:bg-blue-900 active:scale-95 disabled:opacity-60"
-              >
-                {completing ? "שומר..." : "סיימתי פרק זה ←"}
-              </button>
-            )}
-            {setChapterMsg && (
-              <p className="rounded-lg bg-green-50 px-4 py-2 text-sm font-medium text-green-700 border border-green-200">
-                {setChapterMsg}
-              </p>
-            )}
+        {/* "Set as my point" confirmation message — personal mode only */}
+        {user && paceMode === "personal" && setChapterMsg && (
+          <div className="flex justify-center pt-8">
+            <p className="rounded-lg bg-green-50 px-4 py-2 text-sm font-medium text-green-700 border border-green-200">
+              {setChapterMsg}
+            </p>
           </div>
         )}
 
-        <DailyCompletionButton trackId="rambam" />
+        <DailyCompletionButton
+          trackId="rambam"
+          onAdvance={
+            user && paceMode === "personal" && isCurrent && viewingIndex < TOTAL_RAMBAM_CHAPTERS
+              ? handleFinished
+              : undefined
+          }
+        />
 
         <StudyBottomNav
           pagination={{
