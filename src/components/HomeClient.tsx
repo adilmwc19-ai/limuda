@@ -332,11 +332,11 @@ export default function HomeClient() {
   return (
     <main className="flex min-h-screen flex-col bg-slate-50 dark:bg-slate-950">
       {/* Header */}
-      <header className="bg-blue-950 px-6 py-4 shadow-md dark:bg-slate-900">
-        <div className="mx-auto flex max-w-6xl items-center justify-between">
-          <div className="flex items-baseline gap-2.5">
-            <h1 className="text-2xl font-bold tracking-wide text-white">לימודא</h1>
-            <span className="hidden border-r border-blue-700/60 pr-2.5 text-xs font-normal tracking-wide text-blue-200/85 sm:inline md:text-sm dark:text-blue-300/80">
+      <header className="bg-blue-950 px-6 shadow-md dark:bg-slate-900">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between md:h-16">
+          <div className="flex flex-col items-start justify-center leading-tight">
+            <h1 className="text-xl font-bold tracking-tight text-white md:text-2xl">לימודא</h1>
+            <span className="mt-0.5 select-none rounded-full border border-white/10 bg-white/10 px-2 py-0.5 text-[10px] font-medium tracking-wider text-sky-200/90 md:text-xs">
               ללמוד בקצב שלך
             </span>
           </div>
