@@ -11,6 +11,7 @@ import {
 } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { auth, db, googleProvider } from "@/lib/firebase";
+import { isTrackCompletedToday, todayDateString } from "@/lib/progress";
 import { TOTAL_DAYS } from "@/lib/tanakhMapping";
 import { TOTAL_MISHNAH_DAYS } from "@/lib/mishnahStructure";
 import { TOTAL_TALMUD_DAYS, getCurrentDafYomiDay } from "@/lib/talmudStructure";
@@ -21,11 +22,6 @@ import { TOTAL_KITZUR_SIMANIM } from "@/lib/kitzurStructure";
 import { TOTAL_CHOFETZ_CHAIM_UNITS, getChofetzChaimDailyUnit } from "@/lib/chofetzChaimStructure";
 
 const SEFER_HAMITZVOT_DEFAULT_INDEX = getGlobalIndex("positive", 1); // 15
-
-function todayDateString(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
 
 interface UserProgress {
   tanakh929Day: number;
@@ -71,6 +67,12 @@ export default function HomeClient() {
   const [loading, setLoading] = useState(true);
   const [signingIn, setSigningIn] = useState(false);
   const [showTrackSelector, setShowTrackSelector] = useState(false);
+  const [completedToday, setCompletedToday] = useState<Set<string>>(new Set());
+
+  // Check LocalStorage on the client only, to avoid SSR hydration mismatch.
+  useEffect(() => {
+    setCompletedToday(new Set(ALL_TRACK_IDS.filter((id) => isTrackCompletedToday(id))));
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -170,6 +172,7 @@ export default function HomeClient() {
             bookmarkLabel={
               bookmark ? `המשך מפסוק ${toHebrewVerseNumeral(bookmark.verse)}` : undefined
             }
+            completedToday={completedToday.has(id)}
           />
         );
       }
@@ -189,6 +192,7 @@ export default function HomeClient() {
                 ? `המשך ממשנה ${toHebrewVerseNumeral(mishnahBookmark.mishnahIndex)}`
                 : undefined
             }
+            completedToday={completedToday.has(id)}
           />
         );
       }
@@ -202,6 +206,7 @@ export default function HomeClient() {
             currentDay={progress?.talmudDafYomiDay ?? getCurrentDafYomiDay()}
             totalDays={TOTAL_TALMUD_DAYS}
             href="/study/talmud"
+            completedToday={completedToday.has(id)}
           />
         );
       case "rambam": {
@@ -220,6 +225,7 @@ export default function HomeClient() {
                 ? `המשך מהלכה ${toHebrewVerseNumeral(rambamBookmark.halakhahNumber)}`
                 : undefined
             }
+            completedToday={completedToday.has(id)}
           />
         );
       }
@@ -233,6 +239,7 @@ export default function HomeClient() {
             currentDay={progress?.seferHaMitzvotIndex ?? SEFER_HAMITZVOT_DEFAULT_INDEX}
             totalDays={TOTAL_SEFER_HAMITZVOT_ITEMS}
             href="/study/sefer-hamitzvot"
+            completedToday={completedToday.has(id)}
           />
         );
       case "tehillim": {
@@ -251,6 +258,7 @@ export default function HomeClient() {
                 ? `המשך ממזמור ${toHebrewVerseNumeral(tehillimBookmark.psalmNumber)}`
                 : undefined
             }
+            completedToday={completedToday.has(id)}
           />
         );
       }
@@ -270,6 +278,7 @@ export default function HomeClient() {
                 ? `המשך מסעיף ${toHebrewVerseNumeral(kitzurBookmark.seifIndex)}`
                 : undefined
             }
+            completedToday={completedToday.has(id)}
           />
         );
       }
@@ -283,6 +292,7 @@ export default function HomeClient() {
             currentDay={progress?.chofetzChaimUnit ?? 1}
             totalDays={TOTAL_CHOFETZ_CHAIM_UNITS}
             href="/study/chofetz-chaim"
+            completedToday={completedToday.has(id)}
           />
         );
       case "perek-shirah":
@@ -445,9 +455,10 @@ interface StudyCardProps {
   totalDays: number;
   href: string;
   bookmarkLabel?: string;
+  completedToday?: boolean;
 }
 
-function StudyCard({ emoji, title, description, currentDay, totalDays, href, bookmarkLabel }: StudyCardProps) {
+function StudyCard({ emoji, title, description, currentDay, totalDays, href, bookmarkLabel, completedToday }: StudyCardProps) {
   const pct = Math.round((currentDay / totalDays) * 100);
 
   return (
@@ -455,6 +466,14 @@ function StudyCard({ emoji, title, description, currentDay, totalDays, href, boo
       href={href}
       className="group flex h-full flex-col justify-between rounded-2xl border border-blue-100 bg-white p-6 font-sans shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600"
     >
+      {completedToday && (
+        <div className="mb-3 flex justify-end" dir="rtl">
+          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+            הושלם היום ✓
+          </span>
+        </div>
+      )}
+
       {/* Icon + title */}
       <div className="mb-3 flex items-center gap-3" dir="rtl">
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-2xl dark:bg-blue-900/40">

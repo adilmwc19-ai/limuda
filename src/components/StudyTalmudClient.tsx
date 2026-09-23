@@ -6,6 +6,7 @@ import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import StudyHeader from "@/components/StudyHeader";
 import StudyTitleHeader, { StudyBottomNav } from "@/components/StudyTitleHeader";
+import DailyCompletionButton from "@/components/DailyCompletionButton";
 import {
   HEADER_BUTTON_CLASS,
   HEADER_BADGE_CLASS,
@@ -407,6 +408,8 @@ export default function StudyTalmudClient() {
             />
           </>
         )}
+
+        <DailyCompletionButton trackId="talmud" />
       </section>
 
       {/* ── TOC Modal ── */}

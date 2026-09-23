@@ -7,6 +7,7 @@ import { onAuthStateChanged, type User } from "firebase/auth";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import StudyHeader from "@/components/StudyHeader";
+import DailyCompletionButton from "@/components/DailyCompletionButton";
 import { HEADER_BUTTON_CLASS, HEADER_ICON_BUTTON_CLASS, HEADER_BADGE_CLASS } from "@/components/studyHeaderStyles";
 import { getDayInfo, getDayFromBookChapter, getNakhBooks, TOTAL_DAYS } from "@/lib/tanakhMapping";
 import { PARSHIYOT, getBookHebrewName } from "@/lib/tanakhStructure";
@@ -617,6 +618,8 @@ export default function StudyTanakhClient() {
             </div>
           </div>
         )}
+
+        <DailyCompletionButton trackId="tanakh" />
 
         <footer className="mt-4 border-t border-slate-200 py-6 text-center">
           <p className="text-sm text-slate-400">

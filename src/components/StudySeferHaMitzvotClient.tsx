@@ -6,6 +6,7 @@ import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import StudyHeader from "@/components/StudyHeader";
 import StudyTitleHeader, { StudyBottomNav } from "@/components/StudyTitleHeader";
+import DailyCompletionButton from "@/components/DailyCompletionButton";
 import {
   HEADER_BADGE_CLASS,
   HEADER_ICON_BUTTON_CLASS,
@@ -410,6 +411,8 @@ export default function StudySeferHaMitzvotClient() {
             nextDisabled: viewingIndex >= TOTAL_SEFER_HAMITZVOT_ITEMS,
           }}
         />
+
+        <DailyCompletionButton trackId="sefer-hamitzvot" />
 
         <footer className="mt-6 border-t border-slate-200 py-6 text-center">
           <p className="text-sm text-slate-400">
