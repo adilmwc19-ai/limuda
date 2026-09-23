@@ -390,9 +390,9 @@ export default function HomeClient() {
               </div>
               <button
                 onClick={() => setShowTrackSelector(true)}
-                className="flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-blue-900 shadow-sm transition-all hover:bg-blue-50 hover:shadow-md active:scale-95 dark:border-slate-800 dark:bg-slate-800/60 dark:text-blue-200 dark:hover:bg-slate-700"
+                className="flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-800 shadow-sm transition-all duration-200 hover:bg-slate-50 hover:shadow active:scale-95 md:px-6 md:py-3 md:text-base dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
               >
-                <SlidersHorizontal className="h-4 w-4 shrink-0" aria-hidden="true" />
+                <SlidersHorizontal className="h-4.5 w-4.5 shrink-0 md:h-5 md:w-5" aria-hidden="true" />
                 התאמת המסלולים
               </button>
             </div>
