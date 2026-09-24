@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
-import { Hash } from "lucide-react";
 import { auth, db } from "@/lib/firebase";
 import StudyHeader from "@/components/StudyHeader";
 import StudyTitleHeader, { StudyBottomNav } from "@/components/StudyTitleHeader";
@@ -379,19 +378,9 @@ export default function StudyTehillimClient() {
         <StudyTitleHeader
           unitLabel={info.description}
           bookLabel="תהלים יומי"
-          badge={
-            <>
-              {paceMode === "global" && <span className={HEADER_BADGE_CLASS}>לפי יום בחודש</span>}
-              <button
-                onClick={() => setChapterModalOpen(true)}
-                title="בחירת פרק"
-                aria-label="בחירת פרק"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-blue-100 bg-white text-blue-900 shadow-sm transition hover:bg-blue-50 dark:border-slate-700 dark:bg-slate-800 dark:text-blue-200 dark:hover:bg-slate-700"
-              >
-                <Hash className="h-4 w-4" aria-hidden="true" />
-              </button>
-            </>
-          }
+          badge={paceMode === "global" && <span className={HEADER_BADGE_CLASS}>לפי יום בחודש</span>}
+          onTitleClick={() => setChapterModalOpen(true)}
+          titleClickLabel="בחירת פרק"
           toolbar={
             <SegControl<PaceMode>
               options={[

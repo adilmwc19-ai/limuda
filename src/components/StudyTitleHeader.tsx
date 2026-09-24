@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { Search } from "lucide-react";
 
 export interface StudyHeaderPagination {
   current: number;
@@ -18,6 +19,10 @@ interface StudyTitleHeaderProps {
   bookLabel?: string;
   /** Small refined tag rendered next to the title, e.g. "עולמי" / "בקצב שלי" */
   badge?: ReactNode;
+  /** When set, the title (+ badge) becomes a button that opens a chapter/unit picker. */
+  onTitleClick?: () => void;
+  /** Accessible label for the title button, when onTitleClick is set. */
+  titleClickLabel?: string;
   pagination?: StudyHeaderPagination;
   /** Mode toggles / segmented controls */
   toolbar?: ReactNode;
@@ -38,6 +43,8 @@ export default function StudyTitleHeader({
   unitLabel,
   bookLabel,
   badge,
+  onTitleClick,
+  titleClickLabel,
   pagination,
   toolbar,
   chips,
@@ -51,12 +58,30 @@ export default function StudyTitleHeader({
         </p>
       )}
 
-      <div className="flex flex-wrap items-center justify-center gap-2.5">
-        <h1 className="text-[1.65rem] font-bold leading-tight tracking-tight text-blue-950 dark:text-blue-50 sm:text-3xl">
-          {unitLabel}
-        </h1>
-        {badge}
-      </div>
+      {onTitleClick ? (
+        <button
+          type="button"
+          onClick={onTitleClick}
+          aria-label={titleClickLabel ?? unitLabel}
+          className="group mx-auto flex flex-wrap items-center justify-center gap-2 rounded-xl px-2.5 py-1 transition hover:bg-blue-50/70 dark:hover:bg-slate-800/50"
+        >
+          <h1 className="text-[1.65rem] font-bold leading-tight tracking-tight text-blue-950 dark:text-blue-50 sm:text-3xl">
+            {unitLabel}
+          </h1>
+          <Search
+            className="h-4 w-4 shrink-0 text-blue-400/70 transition group-hover:text-blue-600 dark:text-blue-300/60 dark:group-hover:text-blue-200"
+            aria-hidden="true"
+          />
+          {badge}
+        </button>
+      ) : (
+        <div className="flex flex-wrap items-center justify-center gap-2.5">
+          <h1 className="text-[1.65rem] font-bold leading-tight tracking-tight text-blue-950 dark:text-blue-50 sm:text-3xl">
+            {unitLabel}
+          </h1>
+          {badge}
+        </div>
+      )}
 
       {pagination && (
         <div className="mt-4 flex items-center justify-center gap-3">
