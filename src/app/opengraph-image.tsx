@@ -4,6 +4,14 @@ export const alt = "לימודא • מרחב לימוד יומי שקט";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
+// Satori lays out glyphs in naive left-to-right order and does not apply the
+// Unicode bidi algorithm, so `direction: rtl` alone does not reorder Hebrew
+// text — it renders mirrored (e.g. "לימודא" becomes "אדומיל"). Pre-reversing
+// the codepoints here makes satori's LTR placement produce correct RTL output.
+function toSatoriRTL(text: string) {
+  return Array.from(text).reverse().join("");
+}
+
 async function loadHeeboFont(weight: 400 | 700) {
   const css = await fetch(
     `https://fonts.googleapis.com/css2?family=Heebo:wght@${weight}&subset=hebrew`,
@@ -63,7 +71,7 @@ export default async function Image() {
               letterSpacing: "-2px",
             }}
           >
-            לימודא
+            {toSatoriRTL("לימודא")}
           </div>
           <div
             style={{
@@ -76,7 +84,7 @@ export default async function Image() {
               direction: "rtl",
             }}
           >
-            מרחב לימוד יומי שקט
+            {toSatoriRTL("מרחב לימוד יומי שקט")}
           </div>
         </div>
       </div>
