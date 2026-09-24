@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { Hash } from "lucide-react";
 import { auth, db } from "@/lib/firebase";
 import StudyHeader from "@/components/StudyHeader";
 import StudyTitleHeader, { StudyBottomNav } from "@/components/StudyTitleHeader";
 import DailyCompletionButton from "@/components/DailyCompletionButton";
+import TehillimChapterModal from "@/components/TehillimChapterModal";
 import {
   HEADER_BADGE_CLASS,
   HEADER_ICON_BUTTON_CLASS,
@@ -147,6 +149,13 @@ function TocModal({ currentDay, onSelect, onClose }: TocModalProps) {
   );
 }
 
+// Reverse lookup: which day contains a given psalm number. Psalm 119 spans
+// two days (25, 26) — selecting it resolves to the first of the two.
+function findDayForPsalm(psalmNumber: number): number {
+  const range = TEHILLIM_DAYS.find((d) => psalmNumber >= d.fromPsalm && psalmNumber <= d.toPsalm);
+  return range?.day ?? 1;
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 type PaceMode = "global" | "personal";
@@ -170,6 +179,7 @@ export default function StudyTehillimClient() {
   const [settingDay, setSettingDay] = useState(false);
   const [setDayMsg, setSetDayMsg]   = useState<string | null>(null);
   const [tocOpen, setTocOpen]       = useState(false);
+  const [chapterModalOpen, setChapterModalOpen] = useState(false);
   const [activeBookmark, setActiveBookmark] = useState<TehillimBookmark | null>(null);
   const [highlightedPsalm, setHighlightedPsalm] = useState<number | null>(null);
   const [initialized, setInitialized] = useState(false);
@@ -270,6 +280,14 @@ export default function StudyTehillimClient() {
     skipRestore: !!activeBookmark && activeBookmark.day === viewingDay,
   });
 
+  // ── Quick chapter selector ──────────────────────────────────────────────────
+
+  function handleSelectChapter(psalmNumber: number) {
+    resetScroll();
+    setViewingDay(findDayForPsalm(psalmNumber));
+    setChapterModalOpen(false);
+  }
+
   // ── Set current day as personal starting point ──────────────────────────────
 
   async function handleSetAsDay() {
@@ -362,7 +380,17 @@ export default function StudyTehillimClient() {
           unitLabel={info.description}
           bookLabel="תהלים יומי"
           badge={
-            paceMode === "global" && <span className={HEADER_BADGE_CLASS}>לפי יום בחודש</span>
+            <>
+              {paceMode === "global" && <span className={HEADER_BADGE_CLASS}>לפי יום בחודש</span>}
+              <button
+                onClick={() => setChapterModalOpen(true)}
+                title="בחירת פרק"
+                aria-label="בחירת פרק"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-blue-100 bg-white text-blue-900 shadow-sm transition hover:bg-blue-50 dark:border-slate-700 dark:bg-slate-800 dark:text-blue-200 dark:hover:bg-slate-700"
+              >
+                <Hash className="h-4 w-4" aria-hidden="true" />
+              </button>
+            </>
           }
           toolbar={
             <SegControl<PaceMode>
@@ -557,6 +585,16 @@ export default function StudyTehillimClient() {
           currentDay={viewingDay}
           onSelect={setViewingDay}
           onClose={() => setTocOpen(false)}
+        />
+      )}
+
+      {/* ── Quick Chapter Selector Modal ── */}
+      {chapterModalOpen && (
+        <TehillimChapterModal
+          currentChapterFrom={info.fromPsalm}
+          currentChapterTo={info.toPsalm}
+          onSelect={handleSelectChapter}
+          onClose={() => setChapterModalOpen(false)}
         />
       )}
     </main>
