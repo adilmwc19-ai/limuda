@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { SlidersHorizontal } from "lucide-react";
 import CalendarReminderModal, { CalendarReminderButton } from "@/components/CalendarReminderModal";
+import ShareButton from "@/components/ShareButton";
 import {
   signInWithPopup,
   signOut,
@@ -343,18 +344,21 @@ export default function HomeClient() {
       >
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between md:h-16">
           <h1 className="text-xl font-bold tracking-tight text-white md:text-2xl">לימודא</h1>
-          {user && (
-            <div className="flex items-center gap-3">
-              <CalendarReminderButton onClick={() => setReminderOpen(true)} />
-              <span className="text-sm text-blue-200">{user.displayName}</span>
-              <button
-                onClick={handleSignOut}
-                className="rounded-lg bg-blue-800 px-4 py-1.5 text-sm text-white transition hover:bg-blue-700 active:scale-95"
-              >
-                התנתק
-              </button>
-            </div>
-          )}
+          <div className="flex items-center gap-3">
+            {user && (
+              <>
+                <CalendarReminderButton onClick={() => setReminderOpen(true)} />
+                <span className="text-sm text-blue-200">{user.displayName}</span>
+                <button
+                  onClick={handleSignOut}
+                  className="rounded-lg bg-blue-800 px-4 py-1.5 text-sm text-white transition hover:bg-blue-700 active:scale-95"
+                >
+                  התנתק
+                </button>
+              </>
+            )}
+            <ShareButton />
+          </div>
         </div>
       </header>
 

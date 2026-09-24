@@ -9,7 +9,11 @@ import { HEADER_ICON_BUTTON_CLASS } from "@/components/studyHeaderStyles";
  * study header. Uses the Web Share API when available; otherwise copies the
  * current page URL to the clipboard and shows a brief inline confirmation.
  */
-export default function ShareButton() {
+interface ShareButtonProps {
+  className?: string;
+}
+
+export default function ShareButton({ className = HEADER_ICON_BUTTON_CLASS }: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -51,7 +55,7 @@ export default function ShareButton() {
         onClick={handleShare}
         title="שיתוף"
         aria-label="שיתוף"
-        className={HEADER_ICON_BUTTON_CLASS}
+        className={className}
       >
         <Share2 className="h-[18px] w-[18px]" strokeWidth={2} aria-hidden="true" />
       </button>
