@@ -5,6 +5,7 @@ import Link from "next/link";
 import { SlidersHorizontal } from "lucide-react";
 import CalendarReminderModal, { CalendarReminderButton } from "@/components/CalendarReminderModal";
 import ShareButton from "@/components/ShareButton";
+import AboutModal from "@/components/AboutModal";
 import {
   signInWithPopup,
   signOut,
@@ -71,6 +72,7 @@ export default function HomeClient() {
   const [signingIn, setSigningIn] = useState(false);
   const [showTrackSelector, setShowTrackSelector] = useState(false);
   const [reminderOpen, setReminderOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
   const [completedToday, setCompletedToday] = useState<Set<string>>(new Set());
   const headerHidden = useAutoHideHeader();
 
@@ -457,7 +459,18 @@ export default function HomeClient() {
         />
       )}
 
+      {/* Footer */}
+      <footer className="border-t border-stone-200 px-4 py-4 text-center dark:border-stone-800">
+        <button
+          onClick={() => setAboutOpen(true)}
+          className="text-xs text-stone-400 underline decoration-transparent underline-offset-2 transition hover:text-stone-600 hover:decoration-stone-400 dark:text-stone-500 dark:hover:text-stone-300 dark:hover:decoration-stone-500"
+        >
+          אודות והקדשה
+        </button>
+      </footer>
+
       <CalendarReminderModal open={reminderOpen} onClose={() => setReminderOpen(false)} />
+      <AboutModal isOpen={aboutOpen} onClose={() => setAboutOpen(false)} />
     </main>
   );
 }
