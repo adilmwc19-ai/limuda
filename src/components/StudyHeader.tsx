@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import ReadingSettingsButton from "@/components/ReadingSettingsModal";
+import ShareButton from "@/components/ShareButton";
 import { HEADER_BUTTON_CLASS } from "@/components/studyHeaderStyles";
 import { useAutoHideHeader } from "@/hooks/useAutoHideHeader";
 
@@ -47,6 +48,7 @@ export default function StudyHeader({
 
         <div className="flex shrink-0 items-center gap-1">
           {headerActions}
+          <ShareButton />
           <ReadingSettingsButton />
         </div>
       </div>
