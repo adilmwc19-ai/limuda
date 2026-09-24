@@ -23,6 +23,7 @@ import {
 } from "@/lib/tehillimStructure";
 import { fetchTehillimDay, type TehillimDayData, type TehillimVerse } from "@/lib/sefaria";
 import { useScrollPositionRestore } from "@/hooks/useScrollPositionRestore";
+import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 
 // ─── Psalm 119 verse grouping (8 verses per letter of the alef-bet) ───────────
 
@@ -279,6 +280,22 @@ export default function StudyTehillimClient() {
     skipRestore: !!activeBookmark && activeBookmark.day === viewingDay,
   });
 
+  function goToPrevDay() {
+    resetScroll();
+    setViewingDay((d) => Math.max(1, d - 1));
+  }
+
+  function goToNextDay() {
+    resetScroll();
+    setViewingDay((d) => Math.min(TOTAL_TEHILLIM_DAYS, d + 1));
+  }
+
+  const swipeHandlers = useSwipeNavigation({
+    onSwipeNext: goToNextDay,
+    onSwipePrev: goToPrevDay,
+    enabled: !tocOpen && !chapterModalOpen,
+  });
+
   // ── Quick chapter selector ──────────────────────────────────────────────────
 
   function handleSelectChapter(psalmNumber: number) {
@@ -355,7 +372,13 @@ export default function StudyTehillimClient() {
       : `יום ${viewingDay} בסבב הלימוד החודשי`;
 
   return (
-    <main className="flex min-h-screen flex-col bg-slate-50" dir="rtl">
+    <main
+      className="flex min-h-screen flex-col bg-slate-50"
+      dir="rtl"
+      onTouchStart={swipeHandlers.onTouchStart}
+      onTouchEnd={swipeHandlers.onTouchEnd}
+      onTouchCancel={swipeHandlers.onTouchCancel}
+    >
       {/* ── Header ── */}
       <StudyHeader
         headerActions={
@@ -394,8 +417,8 @@ export default function StudyTehillimClient() {
           pagination={{
             current: viewingDay,
             total: TOTAL_TEHILLIM_DAYS,
-            onPrev: () => { resetScroll(); setViewingDay((d) => Math.max(1, d - 1)); },
-            onNext: () => { resetScroll(); setViewingDay((d) => Math.min(TOTAL_TEHILLIM_DAYS, d + 1)); },
+            onPrev: goToPrevDay,
+            onNext: goToNextDay,
             prevDisabled: viewingDay <= 1,
             nextDisabled: viewingDay >= TOTAL_TEHILLIM_DAYS,
           }}
@@ -546,8 +569,8 @@ export default function StudyTehillimClient() {
           pagination={{
             current: viewingDay,
             total: TOTAL_TEHILLIM_DAYS,
-            onPrev: () => { resetScroll(); setViewingDay((d) => Math.max(1, d - 1)); },
-            onNext: () => { resetScroll(); setViewingDay((d) => Math.min(TOTAL_TEHILLIM_DAYS, d + 1)); },
+            onPrev: goToPrevDay,
+            onNext: goToNextDay,
             prevDisabled: viewingDay <= 1,
             nextDisabled: viewingDay >= TOTAL_TEHILLIM_DAYS,
           }}

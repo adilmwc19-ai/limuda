@@ -9,6 +9,7 @@ import StudyTitleHeader from "@/components/StudyTitleHeader";
 import { PEREK_SHIRAH_SECTIONS } from "@/lib/perekShirahStructure";
 import { fetchFullPerekShirah, type PerekShirahData } from "@/lib/sefaria";
 import { useScrollPositionRestore } from "@/hooks/useScrollPositionRestore";
+import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 
 // ─── Date helpers (local calendar day, not UTC) ───────────────────────────────
 
@@ -56,6 +57,17 @@ const NAV_LABELS: Record<string, string> = {
 
 function scrollToSection(id: string) {
   document.getElementById(`section-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+// Content here is one continuous scroll (not paged days/chapters like the
+// other tracks), so swipe navigation steps between sections instead —
+// mirroring what the toolbar's section buttons already do.
+function goToAdjacentSection(currentId: string | null, direction: 1 | -1) {
+  const ids = PEREK_SHIRAH_SECTIONS.map((s) => s.id);
+  const currentIndex = currentId ? ids.indexOf(currentId) : 0;
+  const nextIndex = currentIndex + direction;
+  if (nextIndex < 0 || nextIndex >= ids.length) return;
+  scrollToSection(ids[nextIndex]);
 }
 
 const NAV_BTN_BASE =
@@ -133,6 +145,11 @@ export default function StudyPerekShirahClient() {
     ready: !contentLoading && !!perekData,
   });
 
+  const swipeHandlers = useSwipeNavigation({
+    onSwipeNext: () => goToAdjacentSection(activeSection, 1),
+    onSwipePrev: () => goToAdjacentSection(activeSection, -1),
+  });
+
   // ── Track which section is in view, to highlight the matching nav button ────
 
   useEffect(() => {
@@ -184,7 +201,13 @@ export default function StudyPerekShirahClient() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col bg-slate-50" dir="rtl">
+    <main
+      className="flex min-h-screen flex-col bg-slate-50"
+      dir="rtl"
+      onTouchStart={swipeHandlers.onTouchStart}
+      onTouchEnd={swipeHandlers.onTouchEnd}
+      onTouchCancel={swipeHandlers.onTouchCancel}
+    >
       {/* ── Header ── */}
       <StudyHeader />
 

@@ -27,6 +27,7 @@ import {
   type SeferHaMitzvotItemData,
 } from "@/lib/sefaria";
 import { useScrollPositionRestore } from "@/hooks/useScrollPositionRestore";
+import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 
 const DEFAULT_START_INDEX = getGlobalIndex("positive", 1); // 15 — skips the 14 shorashim
 
@@ -255,6 +256,22 @@ export default function StudySeferHaMitzvotClient() {
     ready: !itemLoading && !!itemData,
   });
 
+  function goToPrevItem() {
+    resetScroll();
+    setViewingIndex((d) => Math.max(1, d - 1));
+  }
+
+  function goToNextItem() {
+    resetScroll();
+    setViewingIndex((d) => Math.min(TOTAL_SEFER_HAMITZVOT_ITEMS, d + 1));
+  }
+
+  const swipeHandlers = useSwipeNavigation({
+    onSwipeNext: goToNextItem,
+    onSwipePrev: goToPrevItem,
+    enabled: !tocOpen,
+  });
+
   // ── Set current item as personal starting point ─────────────────────────────
 
   async function handleSetAsItem() {
@@ -298,7 +315,13 @@ export default function StudySeferHaMitzvotClient() {
   const isCurrent = viewingIndex === activeIndex;
 
   return (
-    <main className="flex min-h-screen flex-col bg-slate-50" dir="rtl">
+    <main
+      className="flex min-h-screen flex-col bg-slate-50"
+      dir="rtl"
+      onTouchStart={swipeHandlers.onTouchStart}
+      onTouchEnd={swipeHandlers.onTouchEnd}
+      onTouchCancel={swipeHandlers.onTouchCancel}
+    >
       {/* ── Header ── */}
       <StudyHeader
         headerActions={
@@ -339,8 +362,8 @@ export default function StudySeferHaMitzvotClient() {
           pagination={{
             current: viewingIndex,
             total: TOTAL_SEFER_HAMITZVOT_ITEMS,
-            onPrev: () => { resetScroll(); setViewingIndex((d) => Math.max(1, d - 1)); },
-            onNext: () => { resetScroll(); setViewingIndex((d) => Math.min(TOTAL_SEFER_HAMITZVOT_ITEMS, d + 1)); },
+            onPrev: goToPrevItem,
+            onNext: goToNextItem,
             prevDisabled: viewingIndex <= 1,
             nextDisabled: viewingIndex >= TOTAL_SEFER_HAMITZVOT_ITEMS,
           }}
@@ -411,8 +434,8 @@ export default function StudySeferHaMitzvotClient() {
           pagination={{
             current: viewingIndex,
             total: TOTAL_SEFER_HAMITZVOT_ITEMS,
-            onPrev: () => { resetScroll(); setViewingIndex((d) => Math.max(1, d - 1)); },
-            onNext: () => { resetScroll(); setViewingIndex((d) => Math.min(TOTAL_SEFER_HAMITZVOT_ITEMS, d + 1)); },
+            onPrev: goToPrevItem,
+            onNext: goToNextItem,
             prevDisabled: viewingIndex <= 1,
             nextDisabled: viewingIndex >= TOTAL_SEFER_HAMITZVOT_ITEMS,
           }}

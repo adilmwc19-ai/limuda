@@ -23,6 +23,7 @@ import {
 } from "@/lib/rambamStructure";
 import { fetchRambamChapter, getDailyRambamRef, type RambamChapterData } from "@/lib/sefaria";
 import { useScrollPositionRestore } from "@/hooks/useScrollPositionRestore";
+import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 
 // ─── Hebrew numerals (chapter / halakhah numbers) ─────────────────────────────
 
@@ -350,6 +351,22 @@ export default function StudyRambamClient() {
     skipRestore: !!activeBookmark && activeBookmark.chapterIndex === viewingIndex,
   });
 
+  function goToPrevChapter() {
+    resetScroll();
+    setViewingIndex((d) => Math.max(1, d - 1));
+  }
+
+  function goToNextChapter() {
+    resetScroll();
+    setViewingIndex((d) => Math.min(TOTAL_RAMBAM_CHAPTERS, d + 1));
+  }
+
+  const swipeHandlers = useSwipeNavigation({
+    onSwipeNext: goToNextChapter,
+    onSwipePrev: goToPrevChapter,
+    enabled: !tocOpen,
+  });
+
   // ── Set current chapter as personal starting point ─────────────────────────
 
   async function handleSetAsChapter() {
@@ -408,7 +425,13 @@ export default function StudyRambamClient() {
   const isCurrent = viewingIndex === activeIndex;
 
   return (
-    <main className="flex min-h-screen flex-col bg-slate-50" dir="rtl">
+    <main
+      className="flex min-h-screen flex-col bg-slate-50"
+      dir="rtl"
+      onTouchStart={swipeHandlers.onTouchStart}
+      onTouchEnd={swipeHandlers.onTouchEnd}
+      onTouchCancel={swipeHandlers.onTouchCancel}
+    >
       {/* ── Header ── */}
       <StudyHeader
         headerActions={
@@ -452,8 +475,8 @@ export default function StudyRambamClient() {
           pagination={{
             current: viewingIndex,
             total: TOTAL_RAMBAM_CHAPTERS,
-            onPrev: () => { resetScroll(); setViewingIndex((d) => Math.max(1, d - 1)); },
-            onNext: () => { resetScroll(); setViewingIndex((d) => Math.min(TOTAL_RAMBAM_CHAPTERS, d + 1)); },
+            onPrev: goToPrevChapter,
+            onNext: goToNextChapter,
             prevDisabled: viewingIndex <= 1,
             nextDisabled: viewingIndex >= TOTAL_RAMBAM_CHAPTERS,
           }}
@@ -565,8 +588,8 @@ export default function StudyRambamClient() {
           pagination={{
             current: viewingIndex,
             total: TOTAL_RAMBAM_CHAPTERS,
-            onPrev: () => { resetScroll(); setViewingIndex((d) => Math.max(1, d - 1)); },
-            onNext: () => { resetScroll(); setViewingIndex((d) => Math.min(TOTAL_RAMBAM_CHAPTERS, d + 1)); },
+            onPrev: goToPrevChapter,
+            onNext: goToNextChapter,
             prevDisabled: viewingIndex <= 1,
             nextDisabled: viewingIndex >= TOTAL_RAMBAM_CHAPTERS,
           }}

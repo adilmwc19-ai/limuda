@@ -27,6 +27,7 @@ import {
 } from "@/lib/chofetzChaimStructure";
 import { fetchChofetzChaimUnit, type ChofetzChaimUnitData } from "@/lib/sefaria";
 import { useScrollPositionRestore } from "@/hooks/useScrollPositionRestore";
+import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 
 const DEFAULT_UNIT = 1;
 
@@ -262,6 +263,22 @@ export default function StudyChofetzChaimClient() {
     ready: !itemLoading && !!unitData,
   });
 
+  function goToPrevUnit() {
+    resetScroll();
+    setViewingUnit((d) => Math.max(1, d - 1));
+  }
+
+  function goToNextUnit() {
+    resetScroll();
+    setViewingUnit((d) => Math.min(TOTAL_CHOFETZ_CHAIM_UNITS, d + 1));
+  }
+
+  const swipeHandlers = useSwipeNavigation({
+    onSwipeNext: goToNextUnit,
+    onSwipePrev: goToPrevUnit,
+    enabled: !tocOpen,
+  });
+
   // ── Set current unit as personal starting point ─────────────────────────────
 
   async function handleSetAsUnit() {
@@ -306,7 +323,13 @@ export default function StudyChofetzChaimClient() {
   const isCurrent = viewingUnit === activeUnit;
 
   return (
-    <main className="flex min-h-screen flex-col bg-slate-50" dir="rtl">
+    <main
+      className="flex min-h-screen flex-col bg-slate-50"
+      dir="rtl"
+      onTouchStart={swipeHandlers.onTouchStart}
+      onTouchEnd={swipeHandlers.onTouchEnd}
+      onTouchCancel={swipeHandlers.onTouchCancel}
+    >
       {/* ── Header ── */}
       <StudyHeader
         headerActions={
@@ -345,8 +368,8 @@ export default function StudyChofetzChaimClient() {
           pagination={{
             current: viewingUnit,
             total: TOTAL_CHOFETZ_CHAIM_UNITS,
-            onPrev: () => { resetScroll(); setViewingUnit((d) => Math.max(1, d - 1)); },
-            onNext: () => { resetScroll(); setViewingUnit((d) => Math.min(TOTAL_CHOFETZ_CHAIM_UNITS, d + 1)); },
+            onPrev: goToPrevUnit,
+            onNext: goToNextUnit,
             prevDisabled: viewingUnit <= 1,
             nextDisabled: viewingUnit >= TOTAL_CHOFETZ_CHAIM_UNITS,
           }}
@@ -442,8 +465,8 @@ export default function StudyChofetzChaimClient() {
           pagination={{
             current: viewingUnit,
             total: TOTAL_CHOFETZ_CHAIM_UNITS,
-            onPrev: () => { resetScroll(); setViewingUnit((d) => Math.max(1, d - 1)); },
-            onNext: () => { resetScroll(); setViewingUnit((d) => Math.min(TOTAL_CHOFETZ_CHAIM_UNITS, d + 1)); },
+            onPrev: goToPrevUnit,
+            onNext: goToNextUnit,
             prevDisabled: viewingUnit <= 1,
             nextDisabled: viewingUnit >= TOTAL_CHOFETZ_CHAIM_UNITS,
           }}

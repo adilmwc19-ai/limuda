@@ -11,6 +11,7 @@ import { HEADER_ICON_BUTTON_CLASS, CHIP_PRIMARY_CLASS, CHIP_SECONDARY_CLASS } fr
 import { TOTAL_KITZUR_SIMANIM, getKitzurSimanInfo } from "@/lib/kitzurStructure";
 import { fetchKitzurSiman, type KitzurSimanData } from "@/lib/sefaria";
 import { useScrollPositionRestore } from "@/hooks/useScrollPositionRestore";
+import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 
 const DEFAULT_SIMAN = 1;
 
@@ -169,6 +170,22 @@ export default function StudyKitzurClient() {
     skipRestore: !!activeBookmark && activeBookmark.siman === viewingSiman,
   });
 
+  function goToPrevSiman() {
+    resetScroll();
+    setViewingSiman((d) => Math.max(1, d - 1));
+  }
+
+  function goToNextSiman() {
+    resetScroll();
+    setViewingSiman((d) => Math.min(TOTAL_KITZUR_SIMANIM, d + 1));
+  }
+
+  const swipeHandlers = useSwipeNavigation({
+    onSwipeNext: goToNextSiman,
+    onSwipePrev: goToPrevSiman,
+    enabled: !tocOpen,
+  });
+
   // ── Set current siman as personal starting point ────────────────────────────
 
   async function handleSetAsSiman() {
@@ -225,7 +242,13 @@ export default function StudyKitzurClient() {
   const isCurrent = viewingSiman === personalSiman;
 
   return (
-    <main className="flex min-h-screen flex-col bg-slate-50" dir="rtl">
+    <main
+      className="flex min-h-screen flex-col bg-slate-50"
+      dir="rtl"
+      onTouchStart={swipeHandlers.onTouchStart}
+      onTouchEnd={swipeHandlers.onTouchEnd}
+      onTouchCancel={swipeHandlers.onTouchCancel}
+    >
       {/* ── Header ── */}
       <StudyHeader
         headerActions={
@@ -251,8 +274,8 @@ export default function StudyKitzurClient() {
           pagination={{
             current: siman,
             total: TOTAL_KITZUR_SIMANIM,
-            onPrev: () => { resetScroll(); setViewingSiman((d) => Math.max(1, d - 1)); },
-            onNext: () => { resetScroll(); setViewingSiman((d) => Math.min(TOTAL_KITZUR_SIMANIM, d + 1)); },
+            onPrev: goToPrevSiman,
+            onNext: goToNextSiman,
             prevDisabled: siman <= 1,
             nextDisabled: siman >= TOTAL_KITZUR_SIMANIM,
           }}
@@ -361,8 +384,8 @@ export default function StudyKitzurClient() {
           pagination={{
             current: siman,
             total: TOTAL_KITZUR_SIMANIM,
-            onPrev: () => { resetScroll(); setViewingSiman((d) => Math.max(1, d - 1)); },
-            onNext: () => { resetScroll(); setViewingSiman((d) => Math.min(TOTAL_KITZUR_SIMANIM, d + 1)); },
+            onPrev: goToPrevSiman,
+            onNext: goToNextSiman,
             prevDisabled: siman <= 1,
             nextDisabled: siman >= TOTAL_KITZUR_SIMANIM,
           }}
