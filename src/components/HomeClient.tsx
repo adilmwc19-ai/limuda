@@ -463,7 +463,7 @@ export default function HomeClient() {
       <footer className="border-t border-stone-200 px-4 py-4 text-center dark:border-stone-800">
         <button
           onClick={() => setAboutOpen(true)}
-          className="text-xs text-stone-400 underline decoration-transparent underline-offset-2 transition hover:text-stone-600 hover:decoration-stone-400 dark:text-stone-500 dark:hover:text-stone-300 dark:hover:decoration-stone-500"
+          className="text-sm text-stone-600 underline decoration-transparent underline-offset-2 transition hover:text-stone-900 hover:decoration-stone-600 dark:text-stone-300 dark:hover:text-stone-100 dark:hover:decoration-stone-300"
         >
           אודות והקדשה
         </button>
