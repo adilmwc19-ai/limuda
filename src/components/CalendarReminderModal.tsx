@@ -15,7 +15,7 @@ export function CalendarReminderButton({ onClick }: { onClick: () => void }) {
       onClick={onClick}
       title="תזכורת יומית ליומן"
       aria-label="תזכורת יומית ליומן"
-      className="inline-flex min-h-[36px] min-w-[36px] items-center justify-center rounded-lg text-blue-200 transition hover:bg-white/10 hover:text-white"
+      className="inline-flex min-h-[36px] min-w-[36px] items-center justify-center rounded-lg text-blue-200 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
     >
       <Bell className="h-4.5 w-4.5" aria-hidden="true" />
     </button>
@@ -77,7 +77,7 @@ export default function CalendarReminderModal({
           <button
             onClick={onClose}
             aria-label="סגור"
-            className="rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+            className="rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
           >
             ✕
           </button>
@@ -99,20 +99,20 @@ export default function CalendarReminderModal({
             type="time"
             value={time}
             onChange={(e) => setTime(e.target.value)}
-            className="w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm text-blue-950 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-900 dark:text-white"
+            className="w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm text-blue-950 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus-visible:ring-2 focus-visible:ring-blue-600/50 dark:border-slate-600 dark:bg-slate-900 dark:text-white"
           />
         </div>
 
         <div className="flex flex-col gap-2">
           <button
             onClick={handleGoogleCalendar}
-            className="rounded-lg bg-blue-900 px-3 py-2 text-sm font-semibold text-white transition hover:bg-blue-800"
+            className="rounded-lg bg-blue-900 px-3 py-2 text-sm font-semibold text-white transition hover:bg-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
           >
             הוספה ליומן Google
           </button>
           <button
             onClick={handleDownloadICS}
-            className="rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-semibold text-blue-900 transition hover:bg-blue-50 dark:border-slate-600 dark:bg-slate-800 dark:text-blue-200 dark:hover:bg-slate-700"
+            className="rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-semibold text-blue-900 transition hover:bg-blue-50 dark:border-slate-600 dark:bg-slate-800 dark:text-blue-200 dark:hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
           >
             הורדת קובץ ליומן Apple / כללי
           </button>

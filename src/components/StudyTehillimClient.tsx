@@ -66,7 +66,7 @@ function SegControl<T extends string>({
         <button
           key={o.value}
           onClick={() => onChange(o.value)}
-          className={`px-3.5 py-2 text-sm font-medium transition md:px-4.5 md:py-2.5 md:text-base ${
+          className={`px-3.5 py-2 text-sm font-medium transition md:px-4.5 md:py-2.5 md:text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-inset ${
             value === o.value
               ? "bg-blue-900 text-white"
               : "bg-white text-blue-900 hover:bg-blue-50"
@@ -111,7 +111,8 @@ function TocModal({ currentDay, onSelect, onClose }: TocModalProps) {
           <h2 className="text-lg font-bold text-blue-950">תוכן עניינים — תהלים יומי</h2>
           <button
             onClick={onClose}
-            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+            aria-label="סגור"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
           >
             ✕
           </button>
@@ -129,7 +130,7 @@ function TocModal({ currentDay, onSelect, onClose }: TocModalProps) {
                     onSelect(d.day);
                     onClose();
                   }}
-                  className={`flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-right transition ${
+                  className={`flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-right transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-inset ${
                     isCurrent
                       ? "bg-blue-900 text-white"
                       : "text-blue-950 hover:bg-blue-50"
@@ -452,7 +453,7 @@ export default function StudyTehillimClient() {
             <p>החודש העברי הנוכחי חסר (כ״ט ימים) — נהוג לקרוא היום גם את תהלים של יום ל׳.</p>
             <button
               onClick={() => setViewingDay(30)}
-              className="rounded-lg border border-amber-300 bg-white px-3 py-1 text-xs font-medium text-amber-800 transition hover:bg-amber-100"
+              className="rounded-lg border border-amber-300 bg-white px-3 py-1 text-xs font-medium text-amber-800 transition hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
             >
               עבור ליום ל׳ ({getTehillimDayInfo(30).label})
             </button>
@@ -495,7 +496,7 @@ export default function StudyTehillimClient() {
                         onClick={() => toggleBookmark(psalm.number)}
                         title="עצרתי כאן"
                         aria-label={isBookmarked ? "בטל סימנייה" : "סמן כמקום שעצרתי"}
-                        className={`flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-lg p-2.5 transition ${
+                        className={`flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-lg p-2.5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 ${
                           isBookmarked
                             ? "text-blue-600 dark:text-blue-400"
                             : "text-slate-300 hover:text-blue-400"

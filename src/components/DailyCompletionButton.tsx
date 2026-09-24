@@ -37,7 +37,7 @@ export default function DailyCompletionButton({ trackId, onAdvance }: DailyCompl
       <button
         onClick={handleToggle}
         disabled={advancing}
-        className={`flex min-h-[44px] items-center justify-center rounded-2xl px-10 py-4 text-lg font-bold shadow-sm transition active:scale-95 disabled:opacity-60 ${
+        className={`flex min-h-[44px] items-center justify-center rounded-2xl px-10 py-4 text-lg font-bold shadow-sm transition active:scale-95 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2 ${
           completed
             ? "border border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
             : "bg-blue-900 text-white shadow-lg hover:bg-blue-800"

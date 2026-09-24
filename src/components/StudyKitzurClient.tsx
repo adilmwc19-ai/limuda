@@ -47,7 +47,8 @@ function TocModal({ currentSiman, onSelect, onClose }: TocModalProps) {
           <h2 className="text-lg font-bold text-blue-950">תוכן עניינים — קיצור שולחן ערוך</h2>
           <button
             onClick={onClose}
-            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+            aria-label="סגור"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
           >
             ✕
           </button>
@@ -65,7 +66,7 @@ function TocModal({ currentSiman, onSelect, onClose }: TocModalProps) {
                     onSelect(num);
                     onClose();
                   }}
-                  className={`min-w-[2.5rem] rounded-lg px-2.5 py-1 text-sm transition ${
+                  className={`min-w-[2.5rem] rounded-lg px-2.5 py-1 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2 ${
                     isCurrent
                       ? "bg-blue-900 font-bold text-white"
                       : "bg-white text-blue-900 hover:bg-blue-100 border border-blue-100"
@@ -339,7 +340,7 @@ export default function StudyKitzurClient() {
                         onClick={(e) => { e.stopPropagation(); toggleBookmark(i); }}
                         title="עצרתי כאן"
                         aria-label={isBookmarked ? "בטל סימנייה" : "סמן כמקום שעצרתי"}
-                        className={`flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-lg p-2.5 transition ${
+                        className={`flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-lg p-2.5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 ${
                           isBookmarked
                             ? "text-blue-600 dark:text-blue-400"
                             : "text-slate-300 hover:text-blue-400"

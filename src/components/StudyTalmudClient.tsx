@@ -107,7 +107,7 @@ function SegControl<T extends string>({
         <button
           key={o.value}
           onClick={() => onChange(o.value)}
-          className={`px-3.5 py-2 text-sm font-medium transition md:px-4.5 md:py-2.5 md:text-base ${
+          className={`px-3.5 py-2 text-sm font-medium transition md:px-4.5 md:py-2.5 md:text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-inset ${
             value === o.value
               ? "bg-blue-900 text-white"
               : "bg-white text-blue-900 hover:bg-blue-50"
@@ -581,7 +581,8 @@ function TocModal({
           <h2 className="text-lg font-bold text-blue-950">תוכן עניינים</h2>
           <button
             onClick={onClose}
-            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+            aria-label="סגור"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
           >
             ✕
           </button>
@@ -595,7 +596,8 @@ function TocModal({
               <div key={seder.nameHe} className="mb-1">
                 <button
                   onClick={() => setOpenSeder(isOpen ? null : seder.nameHe)}
-                  className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-right font-semibold text-blue-950 transition hover:bg-blue-50"
+                  aria-expanded={isOpen}
+                  className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-right font-semibold text-blue-950 transition hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-inset"
                 >
                   <span>{seder.nameHe}</span>
                   <span className="text-xs text-slate-400">{isOpen ? "▲" : "▼"}</span>
@@ -610,7 +612,8 @@ function TocModal({
                         <div key={m.sefariaName} className="mb-0.5">
                           <button
                             onClick={() => setOpenMasechet(isMOpen ? null : m.sefariaName)}
-                            className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-right text-sm text-blue-800 transition hover:bg-blue-50"
+                            aria-expanded={isMOpen}
+                            className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-right text-sm text-blue-800 transition hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-inset"
                           >
                             <span>{m.nameHe}</span>
                             <span className="text-xs text-slate-400">{isMOpen ? "▲" : "▼"}</span>
@@ -626,7 +629,7 @@ function TocModal({
                                   <button
                                     key={d}
                                     onClick={() => onSelect(day)}
-                                    className={`rounded-lg px-2.5 py-1 text-sm transition ${
+                                    className={`rounded-lg px-2.5 py-1 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2 ${
                                       isCurrent
                                         ? "bg-blue-900 font-bold text-white"
                                         : "bg-blue-50 text-blue-900 hover:bg-blue-100"

@@ -76,7 +76,7 @@ export default function TehillimChapterModal({
           <button
             onClick={onClose}
             aria-label="סגור"
-            className="rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+            className="rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
           >
             ✕
           </button>
@@ -89,7 +89,7 @@ export default function TehillimChapterModal({
           onChange={(e) => setFilter(e.target.value)}
           placeholder="חיפוש לפי מספר או אות (למשל 119 או קיט)"
           autoFocus
-          className="mb-4 w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm text-blue-950 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+          className="mb-4 w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm text-blue-950 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus-visible:ring-2 focus-visible:ring-blue-600/50 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
         />
 
         <div className="flex-1 overflow-y-auto">
@@ -103,7 +103,7 @@ export default function TehillimChapterModal({
                   <button
                     key={c}
                     onClick={() => onSelect(c)}
-                    className={`rounded-lg py-2 text-sm font-medium transition ${
+                    className={`rounded-lg py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2 ${
                       isCurrent
                         ? "bg-blue-900 text-white"
                         : "bg-slate-50 text-blue-950 hover:bg-blue-50 dark:bg-slate-800 dark:text-blue-100 dark:hover:bg-slate-700"

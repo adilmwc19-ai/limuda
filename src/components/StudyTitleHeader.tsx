@@ -32,7 +32,7 @@ interface StudyTitleHeaderProps {
 }
 
 const NAV_BTN =
-  "flex h-10 w-10 items-center justify-center rounded-full border border-blue-100 bg-white text-sm font-semibold text-blue-900 shadow-sm transition hover:bg-blue-50 disabled:opacity-30 disabled:hover:bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-blue-200 dark:hover:bg-slate-700 md:h-11 md:w-11";
+  "flex h-10 w-10 items-center justify-center rounded-full border border-blue-100 bg-white text-sm font-semibold text-blue-900 shadow-sm transition hover:bg-blue-50 disabled:opacity-30 disabled:hover:bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-blue-200 dark:hover:bg-slate-700 md:h-11 md:w-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2";
 
 /**
  * In-page reader title block — the source/unit title, pace badge, pagination
@@ -63,7 +63,7 @@ export default function StudyTitleHeader({
           type="button"
           onClick={onTitleClick}
           aria-label={titleClickLabel ?? unitLabel}
-          className="group mx-auto flex flex-wrap items-center justify-center gap-2 rounded-xl px-2.5 py-1 transition hover:bg-blue-50/70 dark:hover:bg-slate-800/50"
+          className="group mx-auto flex flex-wrap items-center justify-center gap-2 rounded-xl px-2.5 py-1 transition hover:bg-blue-50/70 dark:hover:bg-slate-800/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
         >
           <h1 className="text-[1.65rem] font-bold leading-tight tracking-tight text-blue-950 dark:text-blue-50 sm:text-3xl">
             {unitLabel}
@@ -119,7 +119,7 @@ export default function StudyTitleHeader({
 }
 
 const BOTTOM_NAV_BTN =
-  "flex min-h-[44px] items-center gap-1.5 rounded-xl border border-blue-100 bg-white px-4 py-2 text-sm font-medium text-blue-950 shadow-sm transition hover:bg-blue-50 disabled:opacity-30 disabled:hover:bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-blue-100 dark:hover:bg-slate-700";
+  "flex min-h-[44px] items-center gap-1.5 rounded-xl border border-blue-100 bg-white px-4 py-2 text-sm font-medium text-blue-950 shadow-sm transition hover:bg-blue-50 disabled:opacity-30 disabled:hover:bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-blue-100 dark:hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2";
 
 /** End-of-text navigation row — prev/next, rendered under the reading content. */
 export function StudyBottomNav({ pagination }: { pagination: StudyHeaderPagination }) {

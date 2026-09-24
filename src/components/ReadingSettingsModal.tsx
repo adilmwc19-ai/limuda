@@ -11,7 +11,7 @@ const FONT_SIZE_OPTIONS: { value: FontSize; label: string; textClass: string }[]
 ];
 
 const SEG_BASE =
-  "flex-1 py-1.5 font-semibold transition";
+  "flex-1 py-1.5 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2";
 const SEG_ACTIVE = "bg-blue-900 text-white";
 const SEG_INACTIVE =
   "bg-white text-blue-900 hover:bg-blue-50 dark:bg-slate-800 dark:text-blue-200 dark:hover:bg-slate-700";
@@ -59,7 +59,7 @@ export default function ReadingSettingsButton() {
             <button
               onClick={() => setOpen(false)}
               aria-label="סגור"
-              className="rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+              className="rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
             >
               ✕
             </button>

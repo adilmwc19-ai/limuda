@@ -148,7 +148,7 @@ function TocModal({
           <h2 className="text-lg font-bold text-blue-950">תוכן עניינים — משנה</h2>
           <button
             onClick={onClose}
-            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
             aria-label="סגור"
           >
             ✕
@@ -165,7 +165,8 @@ function TocModal({
                 <div key={seder.nameEn} className="rounded-xl border border-slate-100">
                   <button
                     onClick={() => setExpandedSeder(sederOpen ? null : seder.nameEn)}
-                    className="flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-right hover:bg-slate-50 transition"
+                    aria-expanded={sederOpen}
+                    className="flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-right hover:bg-slate-50 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-inset"
                   >
                     <span className="font-bold text-blue-950">{seder.nameHe}</span>
                     <span className="text-xs text-slate-400">
@@ -189,7 +190,8 @@ function TocModal({
                                   masechetOpen ? null : masechet.sefariaName
                                 )
                               }
-                              className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-right hover:bg-blue-50 transition"
+                              aria-expanded={masechetOpen}
+                              className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-right hover:bg-blue-50 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-inset"
                             >
                               <span className="text-sm font-semibold text-blue-900">
                                 מסכת {masechet.nameHe}
@@ -221,7 +223,7 @@ function TocModal({
                                           onClose();
                                         }}
                                         title={`יום ${day}`}
-                                        className={`rounded-lg px-2.5 py-1.5 text-xs font-bold transition ${
+                                        className={`rounded-lg px-2.5 py-1.5 text-xs font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2 ${
                                           isCurrent
                                             ? "bg-blue-950 text-white shadow"
                                             : "bg-white text-slate-700 hover:bg-blue-100 hover:text-blue-950 border border-slate-200"
@@ -453,7 +455,7 @@ export default function StudyMishnahClient() {
             </p>
             <button
               onClick={handleOpenToc}
-              className="mt-4 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white/90 px-5 py-2.5 text-sm font-sans font-medium text-slate-800 shadow-sm transition-all duration-150 hover:bg-slate-50 hover:shadow md:px-6 md:py-2.5 md:text-base dark:border-slate-700 dark:bg-slate-800/90 dark:text-slate-100 dark:hover:bg-slate-700"
+              className="mt-4 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white/90 px-5 py-2.5 text-sm font-sans font-medium text-slate-800 shadow-sm transition-all duration-150 hover:bg-slate-50 hover:shadow md:px-6 md:py-2.5 md:text-base dark:border-slate-700 dark:bg-slate-800/90 dark:text-slate-100 dark:hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
             >
               <Menu className="h-4.5 w-4.5" aria-hidden="true" />
               בחר פרק / תוכן עניינים
@@ -498,8 +500,18 @@ export default function StudyMishnahClient() {
                 >
                   {/* Mishnah text */}
                   <div
-                    className={`p-4 ${hasAnyContent ? "cursor-pointer hover:bg-slate-50 active:bg-slate-100" : ""}`}
+                    role={hasAnyContent ? "button" : undefined}
+                    tabIndex={hasAnyContent ? 0 : undefined}
+                    aria-expanded={hasAnyContent ? commentaryOpen : undefined}
+                    className={`p-4 ${hasAnyContent ? "cursor-pointer hover:bg-slate-50 active:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-inset" : ""}`}
                     onClick={() => hasAnyContent && toggleMishnah(mishnah.mishnahNumber)}
+                    onKeyDown={(e) => {
+                      if (!hasAnyContent) return;
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        toggleMishnah(mishnah.mishnahNumber);
+                      }
+                    }}
                   >
                     <div className="flex items-start gap-3">
                       <span className="mt-2 shrink-0 text-sm font-bold text-blue-400" dir="rtl">
@@ -514,7 +526,7 @@ export default function StudyMishnahClient() {
                         onClick={(e) => { e.stopPropagation(); toggleBookmark(mishnah.mishnahNumber); }}
                         title="עצרתי כאן"
                         aria-label={isBookmarked ? "בטל סימנייה" : "סמן כמקום שעצרתי"}
-                        className={`flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-lg p-2.5 transition ${
+                        className={`flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-lg p-2.5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 ${
                           isBookmarked
                             ? "text-blue-600 dark:text-blue-400"
                             : "text-slate-300 hover:text-blue-400"
@@ -562,7 +574,7 @@ export default function StudyMishnahClient() {
                             <button
                               key={c.id}
                               onClick={() => setActiveCommentator(c.id)}
-                              className={`shrink-0 rounded-t-lg px-3 py-1.5 text-xs font-medium transition ${
+                              className={`shrink-0 rounded-t-lg px-3 py-1.5 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 ${
                                 isActive
                                   ? "bg-white text-amber-900 shadow-sm ring-1 ring-amber-200"
                                   : hasContent
@@ -618,7 +630,7 @@ export default function StudyMishnahClient() {
               <button
                 onClick={goToPrevDay}
                 disabled={viewingDay <= 1}
-                className="flex min-h-[44px] items-center justify-center rounded-xl border border-blue-200 bg-white px-5 py-2.5 text-sm font-medium text-blue-950 shadow-sm transition hover:bg-blue-50 disabled:opacity-40"
+                className="flex min-h-[44px] items-center justify-center rounded-xl border border-blue-200 bg-white px-5 py-2.5 text-sm font-medium text-blue-950 shadow-sm transition hover:bg-blue-50 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
               >
                 &larr; היום הקודם
               </button>
@@ -628,7 +640,7 @@ export default function StudyMishnahClient() {
               <button
                 onClick={goToNextDay}
                 disabled={viewingDay >= TOTAL_MISHNAH_DAYS}
-                className="flex min-h-[44px] items-center justify-center rounded-xl border border-blue-200 bg-white px-5 py-2.5 text-sm font-medium text-blue-950 shadow-sm transition hover:bg-blue-50 disabled:opacity-40"
+                className="flex min-h-[44px] items-center justify-center rounded-xl border border-blue-200 bg-white px-5 py-2.5 text-sm font-medium text-blue-950 shadow-sm transition hover:bg-blue-50 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
               >
                 היום הבא &rarr;
               </button>

@@ -353,7 +353,7 @@ export default function HomeClient() {
                 <span className="text-sm text-blue-200">{user.displayName}</span>
                 <button
                   onClick={handleSignOut}
-                  className="rounded-lg bg-blue-800 px-4 py-1.5 text-sm text-white transition hover:bg-blue-700 active:scale-95"
+                  className="rounded-lg bg-blue-800 px-4 py-1.5 text-sm text-white transition hover:bg-blue-700 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
                 >
                   התנתק
                 </button>
@@ -377,7 +377,7 @@ export default function HomeClient() {
             <button
               onClick={handleSignIn}
               disabled={signingIn}
-              className="flex items-center gap-3 rounded-xl bg-blue-950 px-8 py-3 text-lg font-medium text-white shadow-lg transition hover:bg-blue-900 active:scale-95 disabled:opacity-60"
+              className="flex items-center gap-3 rounded-xl bg-blue-950 px-8 py-3 text-lg font-medium text-white shadow-lg transition hover:bg-blue-900 active:scale-95 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
             >
               {signingIn ? (
                 <span className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -415,7 +415,7 @@ export default function HomeClient() {
               </div>
               <button
                 onClick={() => setShowTrackSelector(true)}
-                className="flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-800 shadow-sm transition-all duration-200 hover:bg-slate-50 hover:shadow active:scale-95 md:px-6 md:py-3 md:text-base dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
+                className="flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-800 shadow-sm transition-all duration-200 hover:bg-slate-50 hover:shadow active:scale-95 md:px-6 md:py-3 md:text-base dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
               >
                 <SlidersHorizontal className="h-4.5 w-4.5 shrink-0 md:h-5 md:w-5" aria-hidden="true" />
                 התאמת המסלולים
@@ -463,7 +463,7 @@ export default function HomeClient() {
       <footer className="border-t border-stone-200 px-4 py-4 text-center dark:border-stone-800">
         <button
           onClick={() => setAboutOpen(true)}
-          className="text-sm text-stone-600 underline decoration-transparent underline-offset-2 transition hover:text-stone-900 hover:decoration-stone-600 dark:text-stone-300 dark:hover:text-stone-100 dark:hover:decoration-stone-300"
+          className="rounded text-sm text-stone-600 underline decoration-transparent underline-offset-2 transition hover:text-stone-900 hover:decoration-stone-600 dark:text-stone-300 dark:hover:text-stone-100 dark:hover:decoration-stone-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
         >
           אודות והקדשה
         </button>
@@ -494,7 +494,7 @@ function StudyCard({ emoji, title, description, currentDay, totalDays, href, boo
   return (
     <Link
       href={href}
-      className="group flex h-full flex-col justify-between rounded-2xl border border-blue-100 bg-white p-6 font-sans shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600"
+      className="group flex h-full flex-col justify-between rounded-2xl border border-blue-100 bg-white p-6 font-sans shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
     >
       {completedToday && (
         <div className="mb-3 flex justify-end" dir="rtl">
@@ -572,7 +572,7 @@ function PerekShirahCard({ completedToday, streak }: PerekShirahCardProps) {
   return (
     <Link
       href="/study/perek-shirah"
-      className="group flex h-full flex-col justify-between rounded-2xl border border-blue-100 bg-white p-6 font-sans shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600"
+      className="group flex h-full flex-col justify-between rounded-2xl border border-blue-100 bg-white p-6 font-sans shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
     >
       {/* Icon + title */}
       <div className="mb-3 flex items-center gap-3" dir="rtl">
@@ -725,7 +725,7 @@ function TrackSelectorModal({ activeTracks, onSave, onClose }: TrackSelectorModa
             return (
               <label
                 key={t.id}
-                className={`flex items-center justify-between gap-3 p-3.5 rounded-xl border border-transparent transition-all cursor-pointer ${
+                className={`flex items-center justify-between gap-3 p-3.5 rounded-xl border border-transparent transition-all cursor-pointer has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-blue-600/50 ${
                   isLastChecked
                     ? "opacity-60"
                     : "hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:border-slate-200 dark:hover:border-slate-700"
@@ -752,14 +752,14 @@ function TrackSelectorModal({ activeTracks, onSave, onClose }: TrackSelectorModa
         <div className="mt-6 flex justify-end gap-3">
           <button
             onClick={onClose}
-            className="rounded-lg px-6 py-2.5 text-sm font-medium text-slate-500 dark:text-slate-400 transition hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="rounded-lg px-6 py-2.5 text-sm font-medium text-slate-500 dark:text-slate-400 transition hover:bg-slate-100 dark:hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
           >
             ביטול
           </button>
           <button
             onClick={handleSave}
             disabled={saving || selected.length === 0}
-            className="rounded-lg bg-blue-950 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-900 active:scale-95 disabled:opacity-60"
+            className="rounded-lg bg-blue-950 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-900 active:scale-95 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
           >
             {saving ? "שומר..." : "שמירה"}
           </button>

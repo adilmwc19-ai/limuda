@@ -71,7 +71,7 @@ function goToAdjacentSection(currentId: string | null, direction: 1 | -1) {
 }
 
 const NAV_BTN_BASE =
-  "flex items-center justify-center rounded-xl text-sm font-semibold transition md:text-base";
+  "flex items-center justify-center rounded-xl text-sm font-semibold transition md:text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2";
 const NAV_BTN_ACTIVE = "bg-blue-900 text-white shadow-sm dark:bg-blue-700";
 const NAV_BTN_INACTIVE =
   "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700";
@@ -288,7 +288,7 @@ export default function StudyPerekShirahClient() {
             <button
               onClick={handleMarkComplete}
               disabled={completing}
-              className="flex min-h-[44px] items-center justify-center rounded-xl bg-blue-950 px-8 py-3 text-base font-semibold text-white shadow transition hover:bg-blue-900 active:scale-95 disabled:opacity-60"
+              className="flex min-h-[44px] items-center justify-center rounded-xl bg-blue-950 px-8 py-3 text-base font-semibold text-white shadow transition hover:bg-blue-900 active:scale-95 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
             >
               {completing ? "שומר..." : "סיימתי לקרוא פרק שירה היום ✨"}
             </button>

@@ -138,7 +138,7 @@ function TocModal({ viewingDay, initialTab, initialParasha, initialBook, onSelec
         key={ch}
         onClick={() => handleSelectDay(day)}
         title={`יום ${day}`}
-        className={`rounded-lg px-2.5 py-1.5 text-xs font-bold transition ${
+        className={`rounded-lg px-2.5 py-1.5 text-xs font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2 ${
           isCurrent
             ? "bg-blue-950 text-white shadow"
             : "bg-slate-100 text-slate-700 hover:bg-blue-100 hover:text-blue-950"
@@ -166,7 +166,7 @@ function TocModal({ viewingDay, initialTab, initialParasha, initialBook, onSelec
           <h2 className="text-lg font-bold text-blue-950">תוכן עניינים</h2>
           <button
             onClick={onClose}
-            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
             aria-label="סגור"
           >
             ✕
@@ -179,7 +179,7 @@ function TocModal({ viewingDay, initialTab, initialParasha, initialBook, onSelec
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`flex-1 py-3 text-sm font-semibold transition ${
+              className={`flex-1 py-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-inset ${
                 tab === t
                   ? "border-b-2 border-blue-950 text-blue-950"
                   : "text-slate-500 hover:text-blue-800"
@@ -201,7 +201,8 @@ function TocModal({ viewingDay, initialTab, initialParasha, initialBook, onSelec
                   <div key={p.nameHe} className="rounded-xl border border-slate-100">
                     <button
                       onClick={() => setExpandedParasha(open ? null : p.nameHe)}
-                      className="flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-right hover:bg-slate-50 transition"
+                      aria-expanded={open}
+                      className="flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-right hover:bg-slate-50 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-inset"
                     >
                       <span className="font-semibold text-blue-950">פרשת {p.nameHe}</span>
                       <span className="text-xs text-slate-400">
@@ -232,7 +233,8 @@ function TocModal({ viewingDay, initialTab, initialParasha, initialBook, onSelec
                   <div key={book.sefariaName} className="rounded-xl border border-slate-100">
                     <button
                       onClick={() => setExpandedBook(open ? null : book.sefariaName)}
-                      className="flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-right hover:bg-slate-50 transition"
+                      aria-expanded={open}
+                      className="flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-right hover:bg-slate-50 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-inset"
                     >
                       <span className="font-semibold text-blue-950">{book.hebrewName}</span>
                       <span className="text-xs text-slate-400">
@@ -476,7 +478,7 @@ export default function StudyTanakhClient() {
             </p>
             <button
               onClick={handleOpenToc}
-              className="mt-4 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white/90 px-5 py-2.5 text-sm font-sans font-medium text-slate-800 shadow-sm transition-all duration-150 hover:bg-slate-50 hover:shadow md:px-6 md:py-2.5 md:text-base dark:border-slate-700 dark:bg-slate-800/90 dark:text-slate-100 dark:hover:bg-slate-700"
+              className="mt-4 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white/90 px-5 py-2.5 text-sm font-sans font-medium text-slate-800 shadow-sm transition-all duration-150 hover:bg-slate-50 hover:shadow md:px-6 md:py-2.5 md:text-base dark:border-slate-700 dark:bg-slate-800/90 dark:text-slate-100 dark:hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
             >
               <Menu className="h-4.5 w-4.5" aria-hidden="true" />
               בחר פרק / תוכן עניינים
@@ -514,8 +516,18 @@ export default function StudyTanakhClient() {
                   }`}
                 >
                   <div
-                    className={`p-4 ${hasAnyContent ? "cursor-pointer hover:bg-slate-50 active:bg-slate-100" : ""}`}
+                    role={hasAnyContent ? "button" : undefined}
+                    tabIndex={hasAnyContent ? 0 : undefined}
+                    aria-expanded={hasAnyContent ? commentaryOpen : undefined}
+                    className={`p-4 ${hasAnyContent ? "cursor-pointer hover:bg-slate-50 active:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-inset" : ""}`}
                     onClick={() => hasAnyContent && toggleVerse(verse.verseNumber)}
+                    onKeyDown={(e) => {
+                      if (!hasAnyContent) return;
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        toggleVerse(verse.verseNumber);
+                      }
+                    }}
                   >
                     <div className="flex items-start gap-3">
                       <span className="mt-2 shrink-0 text-sm font-bold text-blue-400" dir="rtl">
@@ -530,7 +542,7 @@ export default function StudyTanakhClient() {
                         onClick={(e) => { e.stopPropagation(); toggleBookmark(verse.verseNumber); }}
                         title="עצרתי כאן"
                         aria-label={isBookmarked ? "בטל סימנייה" : "סמן כמקום שעצרתי"}
-                        className={`flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-lg p-2.5 transition ${
+                        className={`flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-lg p-2.5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 ${
                           isBookmarked
                             ? "text-blue-600 dark:text-blue-400"
                             : "text-slate-300 hover:text-blue-400"
@@ -573,7 +585,7 @@ export default function StudyTanakhClient() {
                             <button
                               key={c.id}
                               onClick={() => setActiveCommentator(c.id)}
-                              className={`shrink-0 rounded-t-lg px-3 py-1.5 text-xs font-medium transition ${
+                              className={`shrink-0 rounded-t-lg px-3 py-1.5 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 ${
                                 isActive
                                   ? "bg-white text-amber-900 shadow-sm ring-1 ring-amber-200"
                                   : hasContent
@@ -621,7 +633,7 @@ export default function StudyTanakhClient() {
               <button
                 onClick={goToPrevDay}
                 disabled={viewingDay <= 1}
-                className="flex min-h-[44px] items-center justify-center rounded-xl border border-blue-200 bg-white px-5 py-2.5 text-sm font-medium text-blue-950 shadow-sm transition hover:bg-blue-50 disabled:opacity-40"
+                className="flex min-h-[44px] items-center justify-center rounded-xl border border-blue-200 bg-white px-5 py-2.5 text-sm font-medium text-blue-950 shadow-sm transition hover:bg-blue-50 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
               >
                 &larr; היום הקודם
               </button>
@@ -629,7 +641,7 @@ export default function StudyTanakhClient() {
               <button
                 onClick={goToNextDay}
                 disabled={viewingDay >= TOTAL_DAYS}
-                className="flex min-h-[44px] items-center justify-center rounded-xl border border-blue-200 bg-white px-5 py-2.5 text-sm font-medium text-blue-950 shadow-sm transition hover:bg-blue-50 disabled:opacity-40"
+                className="flex min-h-[44px] items-center justify-center rounded-xl border border-blue-200 bg-white px-5 py-2.5 text-sm font-medium text-blue-950 shadow-sm transition hover:bg-blue-50 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
               >
                 היום הבא &rarr;
               </button>

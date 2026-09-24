@@ -61,7 +61,7 @@ export default function AboutModal({
           <button
             onClick={onClose}
             aria-label="סגור"
-            className="rounded-lg p-1 text-stone-400 transition hover:bg-stone-100 hover:text-stone-600 dark:hover:bg-stone-800 dark:hover:text-stone-300"
+            className="rounded-lg p-1 text-stone-400 transition hover:bg-stone-100 hover:text-stone-600 dark:hover:bg-stone-800 dark:hover:text-stone-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
           >
             ✕
           </button>
@@ -86,6 +86,25 @@ export default function AboutModal({
               </li>
             ))}
           </ul>
+        </div>
+
+        <hr className="my-4 border-stone-200 dark:border-stone-700" />
+
+        <div>
+          <p className="mb-1.5 text-sm font-medium text-stone-500 dark:text-stone-400 md:text-base">
+            הצהרת נגישות
+          </p>
+          <p className="text-xs leading-relaxed text-stone-600 dark:text-stone-300 md:text-sm">
+            מרחב זה פותח בהתאם להנחיות הנגישות בתקן הישראלי (ת&quot;י 5568) ברמת AA. האתר מותאם לקוראי מסך,
+            מאפשר ניווט מלא באמצעות מקלדת ושליטה בגודל הגופן ומצב התצוגה. נתקלת בקושי נגישות?{" "}
+            <a
+              href="mailto:adilmwc19@gmail.com"
+              className="text-blue-800 underline decoration-transparent underline-offset-2 transition hover:decoration-blue-800 dark:text-blue-300 dark:hover:decoration-blue-300"
+            >
+              נשמח לשמוע ולתקן
+            </a>
+            .
+          </p>
         </div>
 
         <hr className="my-4 border-stone-200 dark:border-stone-700" />

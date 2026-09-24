@@ -99,7 +99,7 @@ export default function PwaUpdatePrompt() {
           type="button"
           onClick={handleUpdate}
           disabled={updating}
-          className="whitespace-nowrap rounded-lg bg-blue-950 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-blue-900 active:scale-95 disabled:opacity-60"
+          className="whitespace-nowrap rounded-lg bg-blue-950 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-blue-900 active:scale-95 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
         >
           {updating ? "מעדכן..." : "עדכן כעת"}
         </button>
@@ -108,7 +108,7 @@ export default function PwaUpdatePrompt() {
           onClick={() => setDismissed(true)}
           disabled={updating}
           aria-label="סגור"
-          className="rounded-lg p-1.5 text-stone-400 transition hover:bg-stone-100 hover:text-stone-600 disabled:opacity-60 dark:hover:bg-stone-800 dark:hover:text-stone-300"
+          className="rounded-lg p-1.5 text-stone-400 transition hover:bg-stone-100 hover:text-stone-600 disabled:opacity-60 dark:hover:bg-stone-800 dark:hover:text-stone-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
         >
           ✕
         </button>

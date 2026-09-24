@@ -48,7 +48,7 @@ function SegControl<T extends string>({
         <button
           key={o.value}
           onClick={() => onChange(o.value)}
-          className={`px-3.5 py-2 text-sm font-medium transition md:px-4.5 md:py-2.5 md:text-base ${
+          className={`px-3.5 py-2 text-sm font-medium transition md:px-4.5 md:py-2.5 md:text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-inset ${
             value === o.value
               ? "bg-blue-900 text-white"
               : "bg-white text-blue-900 hover:bg-blue-50"
@@ -97,7 +97,8 @@ function TocModal({ currentGlobalIndex, initialSection, onSelect, onClose }: Toc
           <h2 className="text-lg font-bold text-blue-950">תוכן עניינים — ספר המצוות</h2>
           <button
             onClick={onClose}
-            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+            aria-label="סגור"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
           >
             ✕
           </button>
@@ -108,7 +109,7 @@ function TocModal({ currentGlobalIndex, initialSection, onSelect, onClose }: Toc
             <button
               key={s.id}
               onClick={() => setTab(s.id)}
-              className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
+              className={`rounded-lg px-3 py-1.5 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 ${
                 tab === s.id
                   ? "bg-blue-900 text-white"
                   : "bg-slate-50 text-blue-900 hover:bg-blue-50"
@@ -132,7 +133,7 @@ function TocModal({ currentGlobalIndex, initialSection, onSelect, onClose }: Toc
                     onSelect(globalIndex);
                     onClose();
                   }}
-                  className={`min-w-[2.5rem] rounded-lg px-2.5 py-1 text-sm transition ${
+                  className={`min-w-[2.5rem] rounded-lg px-2.5 py-1 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2 ${
                     isCurrent
                       ? "bg-blue-900 font-bold text-white"
                       : "bg-white text-blue-900 hover:bg-blue-100 border border-blue-100"
