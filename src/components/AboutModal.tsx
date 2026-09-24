@@ -47,14 +47,14 @@ export default function AboutModal({
     >
       <div
         dir="rtl"
-        className="my-auto max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-2xl border border-stone-200 bg-white p-6 text-right shadow-2xl dark:border-stone-700 dark:bg-stone-900"
+        className="my-auto max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-stone-200 bg-white p-6 text-right shadow-2xl dark:border-stone-700 dark:bg-stone-900 sm:max-w-lg md:max-w-xl md:p-8"
       >
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-baseline gap-2">
-            <h2 id="about-modal-title" className="text-lg font-bold text-blue-950 dark:text-blue-200">
+            <h2 id="about-modal-title" className="text-xl font-bold text-blue-950 dark:text-blue-200 md:text-2xl">
               לימודא
             </h2>
-            <span className="rounded-full bg-stone-100 px-2 py-0.5 text-[11px] font-medium text-stone-500 dark:bg-stone-800 dark:text-stone-400">
+            <span className="rounded-full bg-stone-100 px-2 py-0.5 text-xs font-medium text-stone-500 dark:bg-stone-800 dark:text-stone-400 md:text-sm">
               {APP_VERSION}
             </span>
           </div>
@@ -67,7 +67,7 @@ export default function AboutModal({
           </button>
         </div>
 
-        <p className="text-sm leading-relaxed text-stone-600 dark:text-stone-300">
+        <p className="text-sm leading-relaxed text-stone-600 dark:text-stone-300 md:text-base">
           מרחב לימוד יומי שקט, נטול הסחות דעת ורעשי רקע, המאפשר לימוד תורני בקצב שלך, בדרך שלך.
           <br />
           ללא פרסומות • ללא תשלום
@@ -76,12 +76,12 @@ export default function AboutModal({
         <hr className="my-4 border-stone-200 dark:border-stone-700" />
 
         <div>
-          <p className="mb-2 text-xs font-bold text-stone-500 dark:text-stone-400">
+          <p className="mb-2 text-sm font-medium text-stone-500 dark:text-stone-400 md:text-base">
             הלימוד במרחב זה מוקדש באהבה לעילוי נשמת:
           </p>
           <ul className="space-y-1">
             {DEDICATIONS.map((name) => (
-              <li key={name} className="text-sm text-stone-700 dark:text-stone-200">
+              <li key={name} className="text-base font-semibold text-stone-700 dark:text-stone-200 md:text-lg">
                 • {name}
               </li>
             ))}
@@ -90,7 +90,7 @@ export default function AboutModal({
 
         <hr className="my-4 border-stone-200 dark:border-stone-700" />
 
-        <p className="text-xs text-stone-500 dark:text-stone-400">
+        <p className="text-xs text-stone-500 dark:text-stone-400 md:text-sm">
           פיתוח: עדי לייטנר •{" "}
           <a
             href="mailto:adilmwc19@gmail.com"
