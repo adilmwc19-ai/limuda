@@ -428,18 +428,20 @@ export default function HomeClient() {
               </div>
             </div>
 
-            {/* Bottom: quick access to all tracks, collapsed by default */}
-            <details className="border-t border-slate-200 pt-4 dark:border-slate-700">
-              <summary
-                className="cursor-pointer select-none text-sm font-semibold text-slate-700 transition hover:text-blue-900 dark:text-slate-200 dark:hover:text-white"
-                dir="rtl"
-              >
-                כל מסלולי הלימוד
-              </summary>
-              <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" dir="rtl">
-                {TRACKS.map((t) => renderTrackCard(t.id))}
-              </div>
-            </details>
+            {/* Bottom: quick access to all tracks, collapsed by default — only shown when filtered */}
+            {activeTrackIds.length < ALL_TRACK_IDS.length && (
+              <details className="border-t border-slate-200 pt-4 dark:border-slate-700">
+                <summary
+                  className="cursor-pointer select-none text-sm font-semibold text-slate-700 transition hover:text-blue-900 dark:text-slate-200 dark:hover:text-white"
+                  dir="rtl"
+                >
+                  כל מסלולי הלימוד
+                </summary>
+                <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" dir="rtl">
+                  {TRACKS.map((t) => renderTrackCard(t.id))}
+                </div>
+              </details>
+            )}
           </div>
         )}
       </section>
