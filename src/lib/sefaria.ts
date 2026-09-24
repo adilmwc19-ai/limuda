@@ -66,6 +66,55 @@ function extractForVerse(raw: unknown): string[] {
   return flattenHeField(raw);
 }
 
+// ── Shared fetch layer ──────────────────────────────────────────────────────
+// Every call site below hits Sefaria's read-only text API for content that
+// only changes on Sefaria's own publishing cadence, so responses are safe to
+// reuse for a full day. `next.revalidate` feeds Next.js's Data Cache for any
+// server-side caller; the in-memory Map covers today's actual callers — the
+// "use client" study components — where fetch runs in the browser and the
+// Data Cache does not apply. It dedupes repeat requests for a ref already
+// loaded this session (e.g. re-visiting a daf/chapter/day) and collapses
+// concurrent requests for the same ref (base text + commentaries racing)
+// into a single network call.
+interface SefariaFetchResult {
+  ok: boolean;
+  status: number;
+  statusText: string;
+  // Matches the implicit `any` of `res.json()` that every call site below
+  // already narrows itself (via `.he`, `.error`, etc.).
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: any;
+}
+
+const SEFARIA_CACHE_MAX_ENTRIES = 500;
+const sefariaCache = new Map<string, Promise<SefariaFetchResult>>();
+
+async function sefariaFetch(url: string): Promise<SefariaFetchResult> {
+  const cached = sefariaCache.get(url);
+  if (cached) return cached;
+
+  const promise = (async (): Promise<SefariaFetchResult> => {
+    const res = await fetch(url, { next: { revalidate: 86400 } });
+    const data = res.ok ? await res.json() : null;
+    return { ok: res.ok, status: res.status, statusText: res.statusText, data };
+  })();
+
+  sefariaCache.set(url, promise);
+  // Never keep a failed fetch cached — the next attempt should hit the
+  // network again rather than replay the same error for the rest of the session.
+  promise.then(
+    (result) => { if (!result.ok) sefariaCache.delete(url); },
+    () => sefariaCache.delete(url)
+  );
+
+  if (sefariaCache.size > SEFARIA_CACHE_MAX_ENTRIES) {
+    const oldestKey = sefariaCache.keys().next().value;
+    if (oldestKey !== undefined) sefariaCache.delete(oldestKey);
+  }
+
+  return promise;
+}
+
 async function fetchCommentatorChapter(
   commentator: Commentator,
   enc: string,
@@ -73,11 +122,10 @@ async function fetchCommentatorChapter(
   verseCount: number
 ): Promise<{ id: string; heArr: unknown[] }> {
   const url = `https://www.sefaria.org/api/texts/${commentator.prefix}${enc}.${chapter}.1-${verseCount}?context=0`;
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error(`API ${res.status} for ${commentator.id}: ${url}`);
+  const { ok, status, data } = await sefariaFetch(url);
+  if (!ok) {
+    throw new Error(`API ${status} for ${commentator.id}: ${url}`);
   }
-  const data = await res.json();
   return {
     id: commentator.id,
     heArr: Array.isArray(data.he) ? (data.he as unknown[]) : [],
@@ -117,13 +165,11 @@ export async function fetchMishnahChapter(
 ): Promise<MishnahChapterData> {
   const enc = encodeURIComponent(sefariaName);
 
-  const textRes = await fetch(
-    `https://www.sefaria.org/api/texts/${enc}.${chapter}?context=0`
-  );
-  if (!textRes.ok) {
-    throw new Error(`שגיאה בטעינת פרק משנה: ${textRes.status} ${textRes.statusText}`);
+  const { ok: textOk, status: textStatus, statusText: textStatusText, data: textData } =
+    await sefariaFetch(`https://www.sefaria.org/api/texts/${enc}.${chapter}?context=0`);
+  if (!textOk) {
+    throw new Error(`שגיאה בטעינת פרק משנה: ${textStatus} ${textStatusText}`);
   }
-  const textData = await textRes.json();
   const rawMishnahs: string[] = Array.isArray(textData.he)
     ? (textData.he as string[]).map(stripCantillation)
     : [];
@@ -137,9 +183,8 @@ export async function fetchMishnahChapter(
   const settled = await Promise.allSettled(
     COMMS_WITH_PREFIX.map(async (c) => {
       const url = `https://www.sefaria.org/api/texts/${encodeURIComponent(c.prefix + sefariaName)}.${chapter}.1-${mishnahCount}?context=0`;
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(`API ${res.status} for ${c.id}: ${url}`);
-      const data = await res.json();
+      const { ok, status, data } = await sefariaFetch(url);
+      if (!ok) throw new Error(`API ${status} for ${c.id}: ${url}`);
       return {
         id: c.id,
         heArr: Array.isArray(data.he) ? (data.he as unknown[]) : [],
@@ -221,9 +266,9 @@ export async function fetchTalmudDaf(
   }
 
   async function fetchJson(url: string): Promise<Record<string, unknown>> {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`${res.status} ${url}`);
-    return res.json();
+    const { ok, status, data } = await sefariaFetch(url);
+    if (!ok) throw new Error(`${status} ${url}`);
+    return data as Record<string, unknown>;
   }
 
   function heSegments(result: PromiseSettledResult<Record<string, unknown>>): string[] {
@@ -288,13 +333,11 @@ export async function fetchChapterWithCommentaries(
   const enc = encodeURIComponent(bookEn);
 
   // 1. Fetch chapter text
-  const textRes = await fetch(
-    `https://www.sefaria.org/api/texts/${enc}.${chapter}?context=0`
-  );
-  if (!textRes.ok) {
-    throw new Error(`שגיאה בטעינת הפרק מספריא: ${textRes.status} ${textRes.statusText}`);
+  const { ok: textOk, status: textStatus, statusText: textStatusText, data: textData } =
+    await sefariaFetch(`https://www.sefaria.org/api/texts/${enc}.${chapter}?context=0`);
+  if (!textOk) {
+    throw new Error(`שגיאה בטעינת הפרק מספריא: ${textStatus} ${textStatusText}`);
   }
-  const textData = await textRes.json();
   const rawVerses: string[] = Array.isArray(textData.he)
     ? (textData.he as string[]).map(stripCantillation)
     : [];
@@ -354,11 +397,10 @@ export async function fetchRambamChapter(
   chapter: number
 ): Promise<RambamChapterData> {
   const ref = `Mishneh Torah, ${sefariaTreatise} ${chapter}`;
-  const res = await fetch(`https://www.sefaria.org/api/texts/${encodeURIComponent(ref)}?context=0`);
-  if (!res.ok) {
-    throw new Error(`שגיאה בטעינת הפרק מספריא: ${res.status} ${res.statusText}`);
+  const { ok, status, statusText, data } = await sefariaFetch(`https://www.sefaria.org/api/texts/${encodeURIComponent(ref)}?context=0`);
+  if (!ok) {
+    throw new Error(`שגיאה בטעינת הפרק מספריא: ${status} ${statusText}`);
   }
-  const data = await res.json();
   // Sefaria returns {"error":"..."} with HTTP 200 for missing refs
   if (typeof data.error === "string") {
     throw new Error(data.error as string);
@@ -392,11 +434,10 @@ export interface DailyRambamRef {
 // title.en is exactly "Daily Rambam" (as opposed to "Daily Rambam (3
 // Chapters)", the three-chapters-a-day cycle, which must NOT match).
 export async function getDailyRambamRef(): Promise<DailyRambamRef> {
-  const res = await fetch("https://www.sefaria.org/api/calendars");
-  if (!res.ok) {
-    throw new Error(`שגיאה בטעינת הלוח היומי מספריא: ${res.status} ${res.statusText}`);
+  const { ok, status, statusText, data } = await sefariaFetch("https://www.sefaria.org/api/calendars");
+  if (!ok) {
+    throw new Error(`שגיאה בטעינת הלוח היומי מספריא: ${status} ${statusText}`);
   }
-  const data = await res.json();
   const items: unknown[] = Array.isArray(data.calendar_items) ? (data.calendar_items as unknown[]) : [];
 
   const item = items.find((raw): raw is { ref: string } => {
@@ -447,11 +488,10 @@ export async function fetchSeferHaMitzvot(
   }
 
   const ref = `${sectionInfo.sefariaTreatise} ${number}`;
-  const res = await fetch(`https://www.sefaria.org/api/texts/${encodeURIComponent(ref)}?context=0`);
-  if (!res.ok) {
-    throw new Error(`שגיאה בטעינה מספריא: ${res.status} ${res.statusText}`);
+  const { ok, status, statusText, data } = await sefariaFetch(`https://www.sefaria.org/api/texts/${encodeURIComponent(ref)}?context=0`);
+  if (!ok) {
+    throw new Error(`שגיאה בטעינה מספריא: ${status} ${statusText}`);
   }
-  const data = await res.json();
   // Sefaria returns {"error":"..."} with HTTP 200 for missing refs
   if (typeof data.error === "string") {
     throw new Error(data.error as string);
@@ -486,11 +526,10 @@ const SEFER_HAMITZVOT_REF_TO_SECTION: Record<string, SeferHaMitzvotSection> = {
 // automatically if Sefaria ever adds that track, without a code change.
 // Returns null (not an error) when no such calendar entry exists.
 export async function getDailySeferHaMitzvotRef(): Promise<DailySeferHaMitzvotRef | null> {
-  const res = await fetch("https://www.sefaria.org/api/calendars");
-  if (!res.ok) {
-    throw new Error(`שגיאה בטעינת הלוח היומי מספריא: ${res.status} ${res.statusText}`);
+  const { ok, status, statusText, data } = await sefariaFetch("https://www.sefaria.org/api/calendars");
+  if (!ok) {
+    throw new Error(`שגיאה בטעינת הלוח היומי מספריא: ${status} ${statusText}`);
   }
-  const data = await res.json();
   const items: unknown[] = Array.isArray(data.calendar_items) ? (data.calendar_items as unknown[]) : [];
 
   const item = items.find((raw): raw is { ref: string } => {
@@ -544,11 +583,10 @@ async function fetchPsalm(
   toVerse?: number
 ): Promise<TehillimPsalmData> {
   const ref = fromVerse && toVerse ? `Psalms ${psalmNumber}:${fromVerse}-${toVerse}` : `Psalms ${psalmNumber}`;
-  const res = await fetch(`https://www.sefaria.org/api/texts/${encodeURIComponent(ref)}?context=0`);
-  if (!res.ok) {
-    throw new Error(`שגיאה בטעינת תהלים ${psalmNumber} מספריא: ${res.status} ${res.statusText}`);
+  const { ok, status, statusText, data } = await sefariaFetch(`https://www.sefaria.org/api/texts/${encodeURIComponent(ref)}?context=0`);
+  if (!ok) {
+    throw new Error(`שגיאה בטעינת תהלים ${psalmNumber} מספריא: ${status} ${statusText}`);
   }
-  const data = await res.json();
   if (typeof data.error === "string") {
     throw new Error(data.error as string);
   }
@@ -612,11 +650,10 @@ export interface PerekShirahData {
 export async function fetchFullPerekShirah(): Promise<PerekShirahData> {
   const settled = await Promise.allSettled(
     PEREK_SHIRAH_SECTIONS.map(async (section) => {
-      const res = await fetch(`https://www.sefaria.org/api/texts/${encodeURIComponent(section.ref)}?context=0`);
-      if (!res.ok) {
-        throw new Error(`שגיאה בטעינת "${section.title}" מספריא: ${res.status} ${res.statusText}`);
+      const { ok, status, statusText, data } = await sefariaFetch(`https://www.sefaria.org/api/texts/${encodeURIComponent(section.ref)}?context=0`);
+      if (!ok) {
+        throw new Error(`שגיאה בטעינת "${section.title}" מספריא: ${status} ${statusText}`);
       }
-      const data = await res.json();
       if (typeof data.error === "string") {
         throw new Error(data.error as string);
       }
@@ -678,11 +715,10 @@ function extractKitzurTitle(
 
 export async function fetchKitzurSiman(siman: number): Promise<KitzurSimanData> {
   const ref = `Kitzur Shulchan Aruch ${siman}`;
-  const res = await fetch(`https://www.sefaria.org/api/texts/${encodeURIComponent(ref)}?context=0`);
-  if (!res.ok) {
-    throw new Error(`שגיאה בטעינת הסימן מספריא: ${res.status} ${res.statusText}`);
+  const { ok, status, statusText, data } = await sefariaFetch(`https://www.sefaria.org/api/texts/${encodeURIComponent(ref)}?context=0`);
+  if (!ok) {
+    throw new Error(`שגיאה בטעינת הסימן מספריא: ${status} ${statusText}`);
   }
-  const data = await res.json();
   // Sefaria returns {"error":"..."} with HTTP 200 for missing refs
   if (typeof data.error === "string") {
     throw new Error(data.error as string);
@@ -728,11 +764,10 @@ function toPerSeifRaw(he: unknown, seifCount: number): unknown[] {
 // ── Chofetz Chaim fetch ──────────────────────────────────────────────────────
 
 async function fetchSefariaHe(ref: string): Promise<unknown> {
-  const res = await fetch(`https://www.sefaria.org/api/texts/${encodeURIComponent(ref)}?context=0`);
-  if (!res.ok) {
-    throw new Error(`שגיאה בטעינה מספריא: ${res.status} ${res.statusText}`);
+  const { ok, status, statusText, data } = await sefariaFetch(`https://www.sefaria.org/api/texts/${encodeURIComponent(ref)}?context=0`);
+  if (!ok) {
+    throw new Error(`שגיאה בטעינה מספריא: ${status} ${statusText}`);
   }
-  const data = await res.json();
   // Sefaria returns {"error":"..."} with HTTP 200 for missing refs
   if (typeof data.error === "string") {
     throw new Error(data.error as string);
