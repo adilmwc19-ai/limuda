@@ -3,6 +3,7 @@ import { Heebo } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { ReadingProvider, READING_PREFS_STORAGE_KEY } from "@/context/ReadingContext";
+import PwaUpdatePrompt from "@/components/PwaUpdatePrompt";
 
 const heebo = Heebo({
   subsets: ["hebrew", "latin"],
@@ -89,6 +90,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-slate-50 font-sans text-slate-800 dark:bg-slate-900 dark:text-zinc-100">
         <ReadingProvider>{children}</ReadingProvider>
+        <PwaUpdatePrompt />
       </body>
     </html>
   );
