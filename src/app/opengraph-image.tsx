@@ -45,7 +45,7 @@ export default async function Image() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#0c0a09",
+          background: "#0f2b48",
         }}
       >
         <div
@@ -56,7 +56,7 @@ export default async function Image() {
             justifyContent: "center",
             width: "1080px",
             height: "510px",
-            border: "1px solid #292524",
+            border: "1px solid #3b6ea5",
             borderRadius: "12px",
           }}
         >
@@ -76,15 +76,15 @@ export default async function Image() {
           <div
             style={{
               display: "flex",
-              marginTop: 28,
+              marginTop: 48,
               fontFamily: "Heebo",
               fontWeight: 400,
-              fontSize: 40,
-              color: "#a8a29e",
+              fontSize: 30,
+              color: "#bcd2e8",
               direction: "rtl",
             }}
           >
-            {toSatoriRTL("מרחב לימוד יומי שקט")}
+            {toSatoriRTL("לימוד יומי ללא רעשי רקע, בקצב שלך")}
           </div>
         </div>
       </div>

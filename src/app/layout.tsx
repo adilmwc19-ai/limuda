@@ -31,7 +31,7 @@ const taameyFrank = localFont({
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://limuda.vercel.app";
 const SITE_TITLE = "לימודא • מרחב לימוד יומי שקט";
 const SITE_DESCRIPTION =
-  "קריאה יומית עברית נקייה ללא רעש רקע: תנ״ך, משנה, גמרא, רמב״ם, תהילים ועוד.";
+  "לימוד יומי ללא רעשי רקע, בקצב שלך: תנ״ך, משנה, גמרא, רמב״ם, תהילים ועוד.";
 
 export const metadata: Metadata = {
   title: {
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: SITE_TITLE,
-    description: "קריאה יומית עברית נקייה ללא רעש רקע.",
+    description: SITE_DESCRIPTION,
   },
   appleWebApp: {
     capable: true,
