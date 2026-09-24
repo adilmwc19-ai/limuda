@@ -28,9 +28,31 @@ const taameyFrank = localFont({
   display: "swap",
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://limuda.vercel.app";
+const SITE_TITLE = "לימודא • מרחב לימוד יומי שקט";
+const SITE_DESCRIPTION =
+  "קריאה יומית עברית נקייה ללא רעש רקע: תנ״ך, משנה, גמרא, רמב״ם, תהילים ועוד.";
+
 export const metadata: Metadata = {
-  title: "לימודא - לימוד תורה יומי",
-  description: "פלטפורמה אישית ללימוד תורה יומי בקצב אישי",
+  title: {
+    default: SITE_TITLE,
+    template: "%s | לימודא",
+  },
+  description: SITE_DESCRIPTION,
+  metadataBase: new URL(SITE_URL),
+  openGraph: {
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+    siteName: "לימודא",
+    locale: "he_IL",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: "קריאה יומית עברית נקייה ללא רעש רקע.",
+  },
   appleWebApp: {
     capable: true,
     title: "לימודא",
