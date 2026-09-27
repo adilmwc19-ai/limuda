@@ -604,6 +604,12 @@ async function fetchPsalm(
   };
 }
 
+// Single full psalm/chapter, independent of the daily 30-day grouping —
+// used by the quick chapter selector to read one psalm on its own.
+export async function fetchTehillimChapter(psalmNumber: number): Promise<TehillimPsalmData> {
+  return fetchPsalm(psalmNumber);
+}
+
 export async function fetchTehillimDay(day: number): Promise<TehillimDayData> {
   const info = getTehillimDayInfo(day);
 

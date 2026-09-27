@@ -21,7 +21,13 @@ import {
   getCurrentHebrewDayOfMonth,
   toHebrewNumeral,
 } from "@/lib/tehillimStructure";
-import { fetchTehillimDay, type TehillimDayData, type TehillimVerse } from "@/lib/sefaria";
+import {
+  fetchTehillimDay,
+  fetchTehillimChapter,
+  type TehillimDayData,
+  type TehillimPsalmData,
+  type TehillimVerse,
+} from "@/lib/sefaria";
 import { useScrollPositionRestore } from "@/hooks/useScrollPositionRestore";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 
@@ -160,6 +166,8 @@ function findDayForPsalm(psalmNumber: number): number {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 type PaceMode = "global" | "personal";
+type ViewMode = "day" | "chapter";
+const TOTAL_TEHILLIM_CHAPTERS = 150;
 
 interface TehillimBookmark {
   bookId: "tehillim";
@@ -176,6 +184,11 @@ export default function StudyTehillimClient() {
   const [loading, setLoading]       = useState(true);
   const [dayLoading, setDayLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [viewMode, setViewMode]           = useState<ViewMode>("day");
+  const [viewingChapter, setViewingChapter] = useState<number>(1);
+  const [chapterData, setChapterData]     = useState<TehillimPsalmData | null>(null);
+  const [chapterLoading, setChapterLoading] = useState(false);
+  const [chapterFetchError, setChapterFetchError] = useState<string | null>(null);
   const [completing, setCompleting] = useState(false);
   const [settingDay, setSettingDay] = useState(false);
   const [setDayMsg, setSetDayMsg]   = useState<string | null>(null);
@@ -272,12 +285,32 @@ export default function StudyTehillimClient() {
     return () => { cancelled = true; };
   }, [viewingDay, initialized]);
 
-  // Silently remember/restore scroll position within each day. An explicit
-  // "עצרתי כאן" bookmark takes priority when one targets this day.
+  // ── Fetch a single chapter when browsing in single-chapter mode ─────────────
+
+  useEffect(() => {
+    if (!initialized || viewMode !== "chapter") return;
+    let cancelled = false;
+    setChapterData(null);
+    setChapterFetchError(null);
+    setChapterLoading(true);
+
+    fetchTehillimChapter(viewingChapter)
+      .then((data) => { if (!cancelled) setChapterData(data); })
+      .catch((e: unknown) => {
+        if (!cancelled) setChapterFetchError(e instanceof Error ? e.message : "שגיאה בטעינת הפרק");
+      })
+      .finally(() => { if (!cancelled) setChapterLoading(false); });
+
+    return () => { cancelled = true; };
+  }, [viewingChapter, viewMode, initialized]);
+
+  // Silently remember/restore scroll position within each day or single
+  // chapter. An explicit "עצרתי כאן" bookmark takes priority when one
+  // targets the day currently being viewed.
   const { resetScroll } = useScrollPositionRestore({
     trackId: "tehillim",
-    itemId: initialized ? viewingDay : null,
-    ready: !dayLoading && !!dayData,
+    itemId: !initialized ? null : viewMode === "day" ? viewingDay : `chapter-${viewingChapter}`,
+    ready: viewMode === "day" ? !dayLoading && !!dayData : !chapterLoading && !!chapterData,
     skipRestore: !!activeBookmark && activeBookmark.day === viewingDay,
   });
 
@@ -291,18 +324,47 @@ export default function StudyTehillimClient() {
     setViewingDay((d) => Math.min(TOTAL_TEHILLIM_DAYS, d + 1));
   }
 
+  function goToPrevChapter() {
+    resetScroll();
+    setViewingChapter((c) => Math.max(1, c - 1));
+  }
+
+  function goToNextChapter() {
+    resetScroll();
+    setViewingChapter((c) => Math.min(TOTAL_TEHILLIM_CHAPTERS, c + 1));
+  }
+
+  function goToPrev() {
+    if (viewMode === "chapter") goToPrevChapter();
+    else goToPrevDay();
+  }
+
+  function goToNext() {
+    if (viewMode === "chapter") goToNextChapter();
+    else goToNextDay();
+  }
+
   const swipeHandlers = useSwipeNavigation({
-    onSwipeNext: goToNextDay,
-    onSwipePrev: goToPrevDay,
+    onSwipeNext: goToNext,
+    onSwipePrev: goToPrev,
     enabled: !tocOpen && !chapterModalOpen,
   });
 
   // ── Quick chapter selector ──────────────────────────────────────────────────
+  // Selecting a specific psalm from the full 1–150 grid switches into
+  // single-chapter mode, showing only that psalm — not its whole daily group.
 
   function handleSelectChapter(psalmNumber: number) {
     resetScroll();
-    setViewingDay(findDayForPsalm(psalmNumber));
+    setViewMode("chapter");
+    setViewingChapter(psalmNumber);
     setChapterModalOpen(false);
+  }
+
+  // Leaves single-chapter mode and returns to the daily-group reading view.
+  function handleBackToDailyView() {
+    resetScroll();
+    setViewMode("day");
   }
 
   // ── Set current day as personal starting point ──────────────────────────────
@@ -324,11 +386,15 @@ export default function StudyTehillimClient() {
 
   function toggleBookmark(psalmNumber: number) {
     if (!user) return;
+    // In single-chapter mode there's no "viewingDay" for this psalm — resolve
+    // the daily-cycle day it actually belongs to, so the bookmark still
+    // round-trips correctly into the daily view.
+    const bookmarkDay = viewMode === "day" ? viewingDay : findDayForPsalm(psalmNumber);
     const isActive =
-      activeBookmark?.day === viewingDay && activeBookmark?.psalmNumber === psalmNumber;
+      activeBookmark?.day === bookmarkDay && activeBookmark?.psalmNumber === psalmNumber;
     const next: TehillimBookmark | null = isActive
       ? null
-      : { bookId: "tehillim", day: viewingDay, psalmNumber };
+      : { bookId: "tehillim", day: bookmarkDay, psalmNumber };
     setActiveBookmark(next);
     updateDoc(doc(db, "users", user.uid), { tehillimBookmark: next }).catch((err: unknown) => {
       console.error("[tehillim] bookmark save failed:", err instanceof Error ? err.message : err);
@@ -362,7 +428,7 @@ export default function StudyTehillimClient() {
   const info = getTehillimDayInfo(viewingDay);
   const isCurrent = viewingDay === activeDay;
   const showDeficientNote =
-    paceMode === "global" && viewingDay === 29 && currentHebrew.combineWithDay30;
+    viewMode === "day" && paceMode === "global" && viewingDay === 29 && currentHebrew.combineWithDay30;
 
   // "בחודש העברי" when synced to (or coinciding with) today's real Hebrew date;
   // "בסבב הלימוד החודשי" when browsing personal progress that doesn't match today.
@@ -371,6 +437,102 @@ export default function StudyTehillimClient() {
     paceMode === "global" || matchesHebrewToday
       ? `יום ${viewingDay} בחודש העברי`
       : `יום ${viewingDay} בסבב הלימוד החודשי`;
+
+  // Renders one psalm/chapter article — shared between the daily-group view
+  // (a list of these) and single-chapter mode (exactly one of these).
+  function renderPsalmArticle(psalm: TehillimPsalmData) {
+    const bookmarkDay = viewMode === "day" ? viewingDay : findDayForPsalm(psalm.number);
+    const isBookmarked =
+      activeBookmark?.day === bookmarkDay && activeBookmark?.psalmNumber === psalm.number;
+    const isHighlighted = highlightedPsalm === psalm.number;
+    return (
+      <article
+        key={psalm.number}
+        id={`psalm-${psalm.number}`}
+        className={`scroll-mt-24 rounded-2xl border p-5 shadow-sm transition-colors ${
+          isBookmarked
+            ? "border-slate-200 border-r-4 border-r-blue-600 bg-blue-50/40 dark:border-r-blue-400 dark:bg-blue-950/30"
+            : "border-blue-100 bg-white"
+        } ${isHighlighted ? "study-highlight-pulse" : ""}`}
+      >
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <h3 className="text-lg font-bold text-blue-900">תהלים פרק {toHebrewNumeral(psalm.number)}</h3>
+          {user && (
+            <button
+              onClick={() => toggleBookmark(psalm.number)}
+              title="עצרתי כאן"
+              aria-label={isBookmarked ? "בטל סימנייה" : "סמן כמקום שעצרתי"}
+              className={`flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-lg p-2.5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 ${
+                isBookmarked
+                  ? "text-blue-600 dark:text-blue-400"
+                  : "text-slate-300 hover:text-blue-400"
+              }`}
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill={isBookmarked ? "currentColor" : "none"}
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M6 3.75A1.75 1.75 0 0 1 7.75 2h8.5A1.75 1.75 0 0 1 18 3.75V21l-6-3.6L6 21V3.75Z" />
+              </svg>
+            </button>
+          )}
+        </div>
+        {psalm.number === 119 ? (
+          <div className="space-y-6">
+            {groupPsalm119Verses(psalm.verses).map((group, gi) => (
+              <div key={`${group.letter}-${gi}`}>
+                <h4 className="mb-2 text-center text-xs font-semibold tracking-wide text-blue-400">
+                  — אות {group.letter}׳ —
+                </h4>
+                <div className="space-y-2 font-study text-2xl font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-3xl">
+                  {group.verses.map((v) => (
+                    <p key={v.verse}>
+                      <span className="ml-2 text-xs font-bold text-blue-500 align-super">{v.verse}</span>
+                      {v.text}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-2 font-study text-2xl font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-3xl">
+            {psalm.verses.map((v) => (
+              <p key={v.verse}>
+                <span className="ml-2 text-xs font-bold text-blue-500 align-super">{v.verse}</span>
+                {v.text}
+              </p>
+            ))}
+          </div>
+        )}
+      </article>
+    );
+  }
+
+  const paginationProps =
+    viewMode === "day"
+      ? {
+          current: viewingDay,
+          total: TOTAL_TEHILLIM_DAYS,
+          onPrev: goToPrevDay,
+          onNext: goToNextDay,
+          prevDisabled: viewingDay <= 1,
+          nextDisabled: viewingDay >= TOTAL_TEHILLIM_DAYS,
+        }
+      : {
+          current: viewingChapter,
+          total: TOTAL_TEHILLIM_CHAPTERS,
+          onPrev: goToPrevChapter,
+          onNext: goToNextChapter,
+          prevDisabled: viewingChapter <= 1,
+          nextDisabled: viewingChapter >= TOTAL_TEHILLIM_CHAPTERS,
+        };
 
   return (
     <main
@@ -400,53 +562,62 @@ export default function StudyTehillimClient() {
       {/* ── Content ── */}
       <section className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">
         <StudyTitleHeader
-          unitLabel={info.description}
-          bookLabel="תהלים יומי"
-          badge={paceMode === "global" && <span className={HEADER_BADGE_CLASS}>לפי יום בחודש</span>}
+          unitLabel={viewMode === "day" ? info.description : `פרק ${toHebrewNumeral(viewingChapter)}`}
+          bookLabel={viewMode === "day" ? "תהלים יומי" : "תהלים"}
+          badge={
+            viewMode === "chapter" ? (
+              <span className={HEADER_BADGE_CLASS}>לפי פרק</span>
+            ) : (
+              paceMode === "global" && <span className={HEADER_BADGE_CLASS}>לפי יום בחודש</span>
+            )
+          }
           onTitleClick={() => setChapterModalOpen(true)}
           titleClickLabel="בחירת פרק"
           toolbar={
-            <SegControl<PaceMode>
-              options={[
-                { value: "global", label: "לפי יום בחודש" },
-                { value: "personal", label: "בקצב שלי" },
-              ]}
-              value={paceMode}
-              onChange={handlePaceModeChange}
-            />
+            viewMode === "day" && (
+              <SegControl<PaceMode>
+                options={[
+                  { value: "global", label: "לפי יום בחודש" },
+                  { value: "personal", label: "בקצב שלי" },
+                ]}
+                value={paceMode}
+                onChange={handlePaceModeChange}
+              />
+            )
           }
-          pagination={{
-            current: viewingDay,
-            total: TOTAL_TEHILLIM_DAYS,
-            onPrev: goToPrevDay,
-            onNext: goToNextDay,
-            prevDisabled: viewingDay <= 1,
-            nextDisabled: viewingDay >= TOTAL_TEHILLIM_DAYS,
-          }}
+          pagination={paginationProps}
           chips={
-            <>
-              {user && !isCurrent && (
-                <button
-                  onClick={handleSetAsDay}
-                  disabled={settingDay}
-                  className={CHIP_PRIMARY_CLASS}
-                >
-                  {settingDay ? "שומר..." : "📌 קבע כיום הלימוד שלי"}
-                </button>
-              )}
-              {!isCurrent && (
-                <button
-                  onClick={() => setViewingDay(activeDay)}
-                  className={CHIP_SECONDARY_CLASS}
-                >
-                  {paceMode === "global" ? "חזור להיום" : "חזור לנקודת הלימוד שלי"}
-                </button>
-              )}
-            </>
+            viewMode === "chapter" ? (
+              <button onClick={handleBackToDailyView} className={CHIP_SECONDARY_CLASS}>
+                חזרה ללימוד היומי
+              </button>
+            ) : (
+              <>
+                {user && !isCurrent && (
+                  <button
+                    onClick={handleSetAsDay}
+                    disabled={settingDay}
+                    className={CHIP_PRIMARY_CLASS}
+                  >
+                    {settingDay ? "שומר..." : "📌 קבע כיום הלימוד שלי"}
+                  </button>
+                )}
+                {!isCurrent && (
+                  <button
+                    onClick={() => { setViewMode("day"); setViewingDay(activeDay); }}
+                    className={CHIP_SECONDARY_CLASS}
+                  >
+                    {paceMode === "global" ? "חזור להיום" : "חזור לנקודת הלימוד שלי"}
+                  </button>
+                )}
+              </>
+            )
           }
         />
 
-        <p className="-mt-4 mb-6 text-center text-sm text-slate-400">{dayModeLabel}</p>
+        {viewMode === "day" && (
+          <p className="-mt-4 mb-6 text-center text-sm text-slate-400">{dayModeLabel}</p>
+        )}
 
         {showDeficientNote && (
           <div className="mb-6 flex flex-col items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 p-4 text-center text-sm text-amber-800">
@@ -460,7 +631,19 @@ export default function StudyTehillimClient() {
           </div>
         )}
 
-        {fetchError ? (
+        {viewMode === "chapter" ? (
+          chapterFetchError ? (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-center text-red-700">
+              {chapterFetchError}
+            </div>
+          ) : chapterLoading || !chapterData ? (
+            <div className="flex justify-center py-16">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-900 border-t-transparent" />
+            </div>
+          ) : (
+            <div className="space-y-6">{renderPsalmArticle(chapterData)}</div>
+          )
+        ) : fetchError ? (
           <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-center text-red-700">
             {fetchError}
           </div>
@@ -475,79 +658,7 @@ export default function StudyTehillimClient() {
                 <p className="py-8 text-center text-sm text-slate-400">אין טקסט זמין ליום זה</p>
               </article>
             ) : (
-              dayData.psalms.map((psalm) => {
-                const isBookmarked =
-                  activeBookmark?.day === viewingDay && activeBookmark?.psalmNumber === psalm.number;
-                const isHighlighted = highlightedPsalm === psalm.number;
-                return (
-                <article
-                  key={psalm.number}
-                  id={`psalm-${psalm.number}`}
-                  className={`scroll-mt-24 rounded-2xl border p-5 shadow-sm transition-colors ${
-                    isBookmarked
-                      ? "border-slate-200 border-r-4 border-r-blue-600 bg-blue-50/40 dark:border-r-blue-400 dark:bg-blue-950/30"
-                      : "border-blue-100 bg-white"
-                  } ${isHighlighted ? "study-highlight-pulse" : ""}`}
-                >
-                  <div className="mb-3 flex items-center justify-between gap-2">
-                    <h3 className="text-lg font-bold text-blue-900">תהלים פרק {toHebrewNumeral(psalm.number)}</h3>
-                    {user && (
-                      <button
-                        onClick={() => toggleBookmark(psalm.number)}
-                        title="עצרתי כאן"
-                        aria-label={isBookmarked ? "בטל סימנייה" : "סמן כמקום שעצרתי"}
-                        className={`flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-lg p-2.5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 ${
-                          isBookmarked
-                            ? "text-blue-600 dark:text-blue-400"
-                            : "text-slate-300 hover:text-blue-400"
-                        }`}
-                      >
-                        <svg
-                          width="18"
-                          height="18"
-                          viewBox="0 0 24 24"
-                          fill={isBookmarked ? "currentColor" : "none"}
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M6 3.75A1.75 1.75 0 0 1 7.75 2h8.5A1.75 1.75 0 0 1 18 3.75V21l-6-3.6L6 21V3.75Z" />
-                        </svg>
-                      </button>
-                    )}
-                  </div>
-                  {psalm.number === 119 ? (
-                    <div className="space-y-6">
-                      {groupPsalm119Verses(psalm.verses).map((group, gi) => (
-                        <div key={`${group.letter}-${gi}`}>
-                          <h4 className="mb-2 text-center text-xs font-semibold tracking-wide text-blue-400">
-                            — אות {group.letter}׳ —
-                          </h4>
-                          <div className="space-y-2 font-study text-2xl font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-3xl">
-                            {group.verses.map((v) => (
-                              <p key={v.verse}>
-                                <span className="ml-2 text-xs font-bold text-blue-500 align-super">{v.verse}</span>
-                                {v.text}
-                              </p>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="space-y-2 font-study text-2xl font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-3xl">
-                      {psalm.verses.map((v) => (
-                        <p key={v.verse}>
-                          <span className="ml-2 text-xs font-bold text-blue-500 align-super">{v.verse}</span>
-                          {v.text}
-                        </p>
-                      ))}
-                    </div>
-                  )}
-                </article>
-                );
-              })
+              dayData.psalms.map((psalm) => renderPsalmArticle(psalm))
             )}
           </div>
         )}
@@ -563,19 +674,12 @@ export default function StudyTehillimClient() {
 
         <DailyCompletionButton
           trackId="tehillim"
-          onAdvance={user && paceMode === "personal" && isCurrent ? handleFinished : undefined}
+          onAdvance={
+            viewMode === "day" && user && paceMode === "personal" && isCurrent ? handleFinished : undefined
+          }
         />
 
-        <StudyBottomNav
-          pagination={{
-            current: viewingDay,
-            total: TOTAL_TEHILLIM_DAYS,
-            onPrev: goToPrevDay,
-            onNext: goToNextDay,
-            prevDisabled: viewingDay <= 1,
-            nextDisabled: viewingDay >= TOTAL_TEHILLIM_DAYS,
-          }}
-        />
+        <StudyBottomNav pagination={paginationProps} />
 
         <footer className="mt-6 border-t border-slate-200 py-6 text-center">
           <p className="text-sm text-slate-400">
@@ -596,7 +700,7 @@ export default function StudyTehillimClient() {
       {tocOpen && (
         <TocModal
           currentDay={viewingDay}
-          onSelect={setViewingDay}
+          onSelect={(day) => { setViewMode("day"); setViewingDay(day); }}
           onClose={() => setTocOpen(false)}
         />
       )}
@@ -604,8 +708,8 @@ export default function StudyTehillimClient() {
       {/* ── Quick Chapter Selector Modal ── */}
       {chapterModalOpen && (
         <TehillimChapterModal
-          currentChapterFrom={info.fromPsalm}
-          currentChapterTo={info.toPsalm}
+          currentChapterFrom={viewMode === "chapter" ? viewingChapter : info.fromPsalm}
+          currentChapterTo={viewMode === "chapter" ? viewingChapter : info.toPsalm}
           onSelect={handleSelectChapter}
           onClose={() => setChapterModalOpen(false)}
         />
