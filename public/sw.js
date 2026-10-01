@@ -3,7 +3,7 @@
 // SW_VERSION is stamped in automatically by next.config.ts on every
 // `next build` (see resolveBuildId there) — the browser diffs these file
 // bytes to notice a new deploy, so do not hand-edit this value.
-const SW_VERSION = "822ee02-muperri4";
+const SW_VERSION = "aebbf10-mupf3z8v";
 
 self.addEventListener("install", () => {
   // Stay in "waiting" until the client explicitly asks to activate, so an
