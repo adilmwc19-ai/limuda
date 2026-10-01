@@ -7,6 +7,28 @@ const APP_VERSION = "v1.7.0";
 
 const DEDICATIONS = ["בזל (דב) רוז ז״ל", "מרים רוז ז״ל", "גבריאל (גבי) הר-צבי ז״ל"];
 
+const ACCESSIBILITY_EMAIL = "adilmwc19@gmail.com";
+const ACCESSIBILITY_SUBJECT = "פנייה בנושא נגישות - לימודא";
+
+function isDesktopDevice() {
+  if (typeof navigator === "undefined") return false;
+  const isMobileUA = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  const isCoarsePointer =
+    typeof window !== "undefined" &&
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(pointer: coarse)").matches;
+  return !isMobileUA && !isCoarsePointer;
+}
+
+function handleAccessibilityEmailClick(e: React.MouseEvent<HTMLAnchorElement>) {
+  if (!isDesktopDevice()) return;
+  e.preventDefault();
+  const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${ACCESSIBILITY_EMAIL}&su=${encodeURIComponent(
+    ACCESSIBILITY_SUBJECT
+  )}`;
+  window.open(gmailUrl, "_blank", "noopener,noreferrer");
+}
+
 export default function AboutModal({
   isOpen,
   onClose,
@@ -98,7 +120,9 @@ export default function AboutModal({
             מרחב זה פותח בהתאם להנחיות הנגישות בתקן הישראלי (ת&quot;י 5568) ברמת AA. האתר מותאם לקוראי מסך,
             מאפשר ניווט מלא באמצעות מקלדת ושליטה בגודל הגופן ומצב התצוגה. נתקלת בקושי נגישות?{" "}
             <a
-              href="mailto:adilmwc19@gmail.com"
+              href={`mailto:${ACCESSIBILITY_EMAIL}?subject=${encodeURIComponent(ACCESSIBILITY_SUBJECT)}`}
+              onClick={handleAccessibilityEmailClick}
+              aria-label="שליחת מייל לפניות נגישות"
               className="text-blue-800 underline decoration-transparent underline-offset-2 transition hover:decoration-blue-800 dark:text-blue-300 dark:hover:decoration-blue-300"
             >
               נשמח לשמוע ולתקן

@@ -3,7 +3,7 @@
 // automatically by next.config.ts on every `next build` (see resolveBuildId
 // there) — the browser diffs these file bytes to notice a new deploy, so do
 // not hand-edit this value.
-const SW_VERSION = "ad7ad92-mupfrltb";
+const SW_VERSION = "e6687d7-muphgcbz";
 
 self.addEventListener("install", () => {
   // Activate the new worker immediately instead of waiting — the update is
