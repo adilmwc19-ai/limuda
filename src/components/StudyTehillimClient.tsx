@@ -435,8 +435,8 @@ export default function StudyTehillimClient() {
   const matchesHebrewToday = viewingDay === currentHebrew.day;
   const dayModeLabel =
     paceMode === "global" || matchesHebrewToday
-      ? `יום ${viewingDay} בחודש העברי`
-      : `יום ${viewingDay} בסבב הלימוד החודשי`;
+      ? `יום ${toHebrewNumeral(viewingDay)} בחודש העברי`
+      : `יום ${toHebrewNumeral(viewingDay)} בסבב הלימוד החודשי`;
 
   // Renders one psalm/chapter article — shared between the daily-group view
   // (a list of these) and single-chapter mode (exactly one of these).
