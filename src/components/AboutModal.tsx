@@ -9,6 +9,7 @@ const DEDICATIONS = ["בזל (דב) רוז ז״ל", "מרים רוז ז״ל", "�
 
 const ACCESSIBILITY_EMAIL = "adilmwc19@gmail.com";
 const ACCESSIBILITY_SUBJECT = "פנייה בנושא נגישות - לימודא";
+const CONTACT_SUBJECT = "יצירת קשר ומשוב - לימודא";
 
 function isDesktopDevice() {
   if (typeof navigator === "undefined") return false;
@@ -20,14 +21,19 @@ function isDesktopDevice() {
   return !isMobileUA && !isCoarsePointer;
 }
 
-function handleAccessibilityEmailClick(e: React.MouseEvent<HTMLAnchorElement>) {
-  if (!isDesktopDevice()) return;
-  e.preventDefault();
-  const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${ACCESSIBILITY_EMAIL}&su=${encodeURIComponent(
-    ACCESSIBILITY_SUBJECT
-  )}`;
-  window.open(gmailUrl, "_blank", "noopener,noreferrer");
+function makeSmartEmailClickHandler(subject: string) {
+  return function handleSmartEmailClick(e: React.MouseEvent<HTMLAnchorElement>) {
+    if (!isDesktopDevice()) return;
+    e.preventDefault();
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${ACCESSIBILITY_EMAIL}&su=${encodeURIComponent(
+      subject
+    )}`;
+    window.open(gmailUrl, "_blank", "noopener,noreferrer");
+  };
 }
+
+const handleAccessibilityEmailClick = makeSmartEmailClickHandler(ACCESSIBILITY_SUBJECT);
+const handleContactEmailClick = makeSmartEmailClickHandler(CONTACT_SUBJECT);
 
 export default function AboutModal({
   isOpen,
@@ -136,7 +142,9 @@ export default function AboutModal({
         <p className="text-xs text-stone-500 dark:text-stone-400 md:text-sm">
           פיתוח: עדי לייטנר •{" "}
           <a
-            href="mailto:adilmwc19@gmail.com"
+            href={`mailto:${ACCESSIBILITY_EMAIL}?subject=${encodeURIComponent(CONTACT_SUBJECT)}`}
+            onClick={handleContactEmailClick}
+            aria-label="יצירת קשר ומשוב עם המפתח"
             className="text-blue-800 underline decoration-transparent underline-offset-2 transition hover:decoration-blue-800 dark:text-blue-300 dark:hover:decoration-blue-300"
           >
             יצירת קשר ומשוב
