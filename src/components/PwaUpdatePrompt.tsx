@@ -16,6 +16,14 @@ export default function PwaUpdatePrompt() {
       // simply keep using whatever version is already running.
     });
 
+    // Force an immediate update check against the server for every worker
+    // already registered for this origin, so a client sitting on a stale
+    // worker from before this check existed doesn't have to wait for the
+    // next visibilitychange to notice a new deploy.
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      registrations.forEach((registration) => registration.update());
+    });
+
     // Foregrounding the app (coming back from the background/another tab)
     // doesn't otherwise trigger a fetch of sw.js, so without this a user who
     // keeps the PWA open for days never sees registration.update() run.

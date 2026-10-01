@@ -3,7 +3,7 @@
 // automatically by next.config.ts on every `next build` (see resolveBuildId
 // there) — the browser diffs these file bytes to notice a new deploy, so do
 // not hand-edit this value.
-const SW_VERSION = "e6687d7-muphgcbz";
+const SW_VERSION = "9d52b4a-mupi4qyv";
 
 self.addEventListener("install", () => {
   // Activate the new worker immediately instead of waiting — the update is
@@ -13,5 +13,14 @@ self.addEventListener("install", () => {
 });
 
 self.addEventListener("activate", (event) => {
-  event.waitUntil(self.clients.claim());
+  // This worker never writes to the Cache API itself, but wipe any caches
+  // left behind by an older installed worker (or anything else same-origin)
+  // before taking over clients, so a stale entry can never shadow a fresh
+  // network request.
+  event.waitUntil(
+    caches
+      .keys()
+      .then((keys) => Promise.all(keys.map((key) => caches.delete(key))))
+      .then(() => self.clients.claim())
+  );
 });
