@@ -15,7 +15,6 @@ const SW_URL = `/sw.js?v=${process.env.NEXT_PUBLIC_BUILD_ID ?? "dev"}`;
 export default function PwaUpdatePrompt() {
   const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null);
   const [dismissed, setDismissed] = useState(false);
-  const [updating, setUpdating] = useState(false);
   const lastCheckRef = useRef(0);
 
   useEffect(() => {
@@ -27,6 +26,15 @@ export default function PwaUpdatePrompt() {
 
     function handleWaitingWorker(worker: ServiceWorker | null) {
       if (!cancelled && worker) setWaitingWorker(worker);
+    }
+
+    // A worker can sit in `reg.waiting` transiently while the browser is
+    // mid-handoff, or if it already won control before we got here. Only
+    // treat it as "an update is available" once there's an active
+    // controller that is a genuinely different worker.
+    function isGenuineUpdate(worker: ServiceWorker) {
+      const controller = navigator.serviceWorker.controller;
+      return !!controller && controller !== worker;
     }
 
     function trackInstallingWorker(worker: ServiceWorker) {
@@ -46,7 +54,7 @@ export default function PwaUpdatePrompt() {
         if (cancelled) return;
         registration = reg;
 
-        if (reg.waiting) handleWaitingWorker(reg.waiting);
+        if (reg.waiting && isGenuineUpdate(reg.waiting)) handleWaitingWorker(reg.waiting);
 
         reg.addEventListener("updatefound", () => {
           if (reg.installing) trackInstallingWorker(reg.installing);
@@ -82,8 +90,11 @@ export default function PwaUpdatePrompt() {
   if (!waitingWorker || dismissed) return null;
 
   function handleUpdate() {
-    setUpdating(true);
-    waitingWorker?.postMessage({ type: "SKIP_WAITING" });
+    const worker = waitingWorker;
+    // Hide the banner immediately so it can't reappear from stale state —
+    // the actual reload is driven by the 'controllerchange' listener above.
+    setWaitingWorker(null);
+    worker?.postMessage({ type: "SKIP_WAITING" });
   }
 
   return (
@@ -94,7 +105,7 @@ export default function PwaUpdatePrompt() {
       style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
     >
       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200">
-        <RefreshCw className={`h-4.5 w-4.5 ${updating ? "animate-spin" : ""}`} aria-hidden="true" />
+        <RefreshCw className="h-4.5 w-4.5" aria-hidden="true" />
       </span>
 
       <span className="text-sm font-medium text-stone-700 dark:text-stone-200">גרסה חדשה זמינה</span>
@@ -103,17 +114,15 @@ export default function PwaUpdatePrompt() {
         <button
           type="button"
           onClick={handleUpdate}
-          disabled={updating}
-          className="whitespace-nowrap rounded-lg bg-blue-950 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-blue-900 active:scale-95 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
+          className="whitespace-nowrap rounded-lg bg-blue-950 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-blue-900 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
         >
-          {updating ? "מעדכן..." : "עדכן כעת"}
+          עדכן כעת
         </button>
         <button
           type="button"
           onClick={() => setDismissed(true)}
-          disabled={updating}
           aria-label="סגור"
-          className="rounded-lg p-1.5 text-stone-400 transition hover:bg-stone-100 hover:text-stone-600 disabled:opacity-60 dark:hover:bg-stone-800 dark:hover:text-stone-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
+          className="rounded-lg p-1.5 text-stone-400 transition hover:bg-stone-100 hover:text-stone-600 dark:hover:bg-stone-800 dark:hover:text-stone-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
         >
           ✕
         </button>

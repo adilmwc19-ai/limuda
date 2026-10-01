@@ -9,7 +9,16 @@ import type { NextConfig } from "next";
 // files, untouched by Next's build-time asset hashing, so without this
 // sw.js's bytes never change between deploys and PwaUpdatePrompt.tsx never
 // sees an update to prompt for.
+// Next re-evaluates this config module more than once per build (separate
+// compiler passes, plus the "runtime startup" re-evaluation noted below).
+// Cache the id at module scope so every call within the process agrees on
+// the exact same string — otherwise the sw.js stamp and the client-bundled
+// NEXT_PUBLIC_BUILD_ID can drift apart and the update banner never clears.
+let cachedBuildId: string | undefined;
+
 function resolveBuildId(): string {
+  if (cachedBuildId) return cachedBuildId;
+
   let commit = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7);
   if (!commit) {
     try {
@@ -21,7 +30,8 @@ function resolveBuildId(): string {
     }
   }
   const stamp = Date.now().toString(36);
-  return commit ? `${commit}-${stamp}` : stamp;
+  cachedBuildId = commit ? `${commit}-${stamp}` : stamp;
+  return cachedBuildId;
 }
 
 export default function nextConfig(phase: string): NextConfig {
