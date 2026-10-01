@@ -7,6 +7,11 @@ import { RefreshCw } from "lucide-react";
 // switching tabs repeatedly doesn't flood the network with HEAD requests.
 const VISIBILITY_CHECK_THROTTLE_MS = 5 * 60 * 1000;
 
+// Baked in at build time (see next.config.ts). Registering with it in the
+// query string forces a distinct request per deploy, as a second line of
+// defense alongside sw.js's own no-cache headers and its embedded SW_VERSION.
+const SW_URL = `/sw.js?v=${process.env.NEXT_PUBLIC_BUILD_ID ?? "dev"}`;
+
 export default function PwaUpdatePrompt() {
   const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null);
   const [dismissed, setDismissed] = useState(false);
@@ -36,7 +41,7 @@ export default function PwaUpdatePrompt() {
     }
 
     navigator.serviceWorker
-      .register("/sw.js")
+      .register(SW_URL)
       .then((reg) => {
         if (cancelled) return;
         registration = reg;

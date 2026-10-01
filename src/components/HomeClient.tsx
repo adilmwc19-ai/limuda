@@ -48,7 +48,7 @@ interface UserProgress {
   tehillimBookmark?: { bookId: "tehillim"; day: number; psalmNumber: number } | null;
 }
 
-// Small Hebrew-letter numeral, e.g. 1 -> "א׳", 15 -> "ט״ו" (used for verse labels only).
+// Small Hebrew-letter numeral, e.g. 1 -> "א׳", 15 -> "ט״ו" (used for verse/day labels).
 function toHebrewVerseNumeral(n: number): string {
   if (n <= 0 || n > 999) return String(n);
   const hundreds = ["", "ק", "ר", "ש", "ת", "תק", "תר", "תש", "תת", "תתק"];
@@ -256,7 +256,7 @@ export default function HomeClient() {
             key={id}
             emoji="📖"
             title="תהלים יומי"
-            description={`לפי חלוקת ל' ימי החודש העברי — היום יום ${getCurrentHebrewDayOfMonth().day} בחודש`}
+            description={`לפי חלוקת ל' ימי החודש העברי — היום יום ${toHebrewVerseNumeral(getCurrentHebrewDayOfMonth().day)} בחודש`}
             currentDay={progress?.tehillimDay ?? 1}
             totalDays={TOTAL_TEHILLIM_DAYS}
             href="/study/tehillim"
