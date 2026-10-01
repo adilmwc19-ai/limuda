@@ -1,6 +1,17 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
+import { RefreshCw } from "lucide-react";
+
+// Only re-check for updates this often when the tab regains focus, so
+// switching tabs repeatedly doesn't flood the network with HEAD requests.
+const VISIBILITY_CHECK_THROTTLE_MS = 5 * 60 * 1000;
+
+// Matches Tailwind's `md` breakpoint. Desktop users tend to leave tabs open
+// for days, so they get a toast with a manual reload; below this width the
+// update just stays silent and takes effect on the browser's own schedule
+// (the waiting worker activates once no old tabs are left open).
+const DESKTOP_MEDIA_QUERY = "(min-width: 768px)";
 
 // Baked in at build time (see next.config.ts). Registering with it in the
 // query string forces a distinct request per deploy, as a second line of
@@ -8,34 +19,142 @@ import { useEffect } from "react";
 const SW_URL = `/sw.js?v=${process.env.NEXT_PUBLIC_BUILD_ID ?? "dev"}`;
 
 export default function PwaUpdatePrompt() {
+  const [isDesktop, setIsDesktop] = useState(false);
+  const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null);
+  const [dismissed, setDismissed] = useState(false);
+  const lastCheckRef = useRef(0);
+
+  useEffect(() => {
+    const mql = window.matchMedia(DESKTOP_MEDIA_QUERY);
+    setIsDesktop(mql.matches);
+    const onChange = (event: MediaQueryListEvent) => setIsDesktop(event.matches);
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
+
   useEffect(() => {
     if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
 
-    navigator.serviceWorker.register(SW_URL).catch(() => {
-      // Registration failing shouldn't break the app — the next visit will
-      // simply keep using whatever version is already running.
-    });
+    let cancelled = false;
+    let registration: ServiceWorkerRegistration | null = null;
+    let refreshing = false;
+
+    function handleWaitingWorker(worker: ServiceWorker | null) {
+      if (!cancelled && worker) setWaitingWorker(worker);
+    }
+
+    // A worker can sit in `reg.waiting` transiently while the browser is
+    // mid-handoff, or if it already won control before we got here. Only
+    // treat it as "an update is available" once there's an active
+    // controller that is a genuinely different worker.
+    function isGenuineUpdate(worker: ServiceWorker) {
+      const controller = navigator.serviceWorker.controller;
+      return !!controller && controller !== worker;
+    }
+
+    function trackInstallingWorker(worker: ServiceWorker) {
+      worker.addEventListener("statechange", () => {
+        // "installed" + an existing controller means this is an update to an
+        // already-active app, not the very first install — that's the only
+        // case worth prompting for.
+        if (worker.state === "installed" && navigator.serviceWorker.controller) {
+          handleWaitingWorker(worker);
+        }
+      });
+    }
+
+    navigator.serviceWorker
+      .register(SW_URL)
+      .then((reg) => {
+        if (cancelled) return;
+        registration = reg;
+
+        if (reg.waiting && isGenuineUpdate(reg.waiting)) handleWaitingWorker(reg.waiting);
+
+        reg.addEventListener("updatefound", () => {
+          if (reg.installing) trackInstallingWorker(reg.installing);
+        });
+      })
+      .catch(() => {
+        // Registration failing shouldn't break the app — it just means no
+        // update prompts, same as a browser without service worker support.
+      });
 
     // Force an immediate update check against the server for every worker
     // already registered for this origin, so a client sitting on a stale
     // worker from before this check existed doesn't have to wait for the
     // next visibilitychange to notice a new deploy.
     navigator.serviceWorker.getRegistrations().then((registrations) => {
-      registrations.forEach((registration) => registration.update());
+      registrations.forEach((reg) => reg.update());
     });
 
-    // Foregrounding the app (coming back from the background/another tab)
-    // doesn't otherwise trigger a fetch of sw.js, so without this a user who
-    // keeps the PWA open for days never sees registration.update() run.
-    const onVisibilityChange = () => {
-      if (document.visibilityState !== "visible") return;
-      navigator.serviceWorker.ready.then((registration) => {
-        registration.update();
-      });
+    function handleControllerChange() {
+      // Only the tab that actually triggered SKIP_WAITING should reload
+      // itself this way; without the flag a stray second firing would
+      // reload the page twice.
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    }
+    navigator.serviceWorker.addEventListener("controllerchange", handleControllerChange);
+
+    function handleVisibilityChange() {
+      if (document.visibilityState !== "visible" || !registration) return;
+      const now = Date.now();
+      if (now - lastCheckRef.current < VISIBILITY_CHECK_THROTTLE_MS) return;
+      lastCheckRef.current = now;
+      registration.update().catch(() => {});
+    }
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      cancelled = true;
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      navigator.serviceWorker.removeEventListener("controllerchange", handleControllerChange);
     };
-    document.addEventListener("visibilitychange", onVisibilityChange);
-    return () => document.removeEventListener("visibilitychange", onVisibilityChange);
   }, []);
 
-  return null;
+  // Mobile stays completely silent: the worker still updates in the
+  // background, it just never surfaces a toast here.
+  if (!isDesktop || !waitingWorker || dismissed) return null;
+
+  function handleUpdate() {
+    const worker = waitingWorker;
+    // Hide the toast immediately so it can't reappear from stale state —
+    // the actual reload is driven by the 'controllerchange' listener above.
+    setWaitingWorker(null);
+    worker?.postMessage({ type: "SKIP_WAITING" });
+  }
+
+  return (
+    <div
+      dir="rtl"
+      role="status"
+      className="fixed bottom-6 right-6 z-50 flex w-fit max-w-xs items-center gap-3 rounded-2xl border border-stone-200 bg-white/95 px-4 py-3 text-right shadow-2xl backdrop-blur-sm dark:border-stone-700 dark:bg-stone-900/95"
+    >
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200">
+        <RefreshCw className="h-4.5 w-4.5" aria-hidden="true" />
+      </span>
+
+      <span className="text-sm font-medium text-stone-700 dark:text-stone-200">גרסה חדשה זמינה</span>
+
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          onClick={handleUpdate}
+          className="whitespace-nowrap rounded-lg bg-blue-950 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-blue-900 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
+        >
+          רענן כעת
+        </button>
+        <button
+          type="button"
+          onClick={() => setDismissed(true)}
+          aria-label="סגור"
+          className="rounded-lg p-1.5 text-stone-400 transition hover:bg-stone-100 hover:text-stone-600 dark:hover:bg-stone-800 dark:hover:text-stone-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
+        >
+          ✕
+        </button>
+      </div>
+    </div>
+  );
 }
