@@ -29,6 +29,8 @@ interface TehillimChapterModalProps {
   currentChapterTo: number;
   /** Chapter numbers the reader has starred, for the "מועדפים" tab. */
   favorites: number[];
+  /** Which tab to open on — e.g. "favorites" when launched from a dedicated favorites button. */
+  initialTab?: ChapterTab;
   onSelect: (chapter: number) => void;
   onClose: () => void;
 }
@@ -37,12 +39,13 @@ export default function TehillimChapterModal({
   currentChapterFrom,
   currentChapterTo,
   favorites,
+  initialTab = "all",
   onSelect,
   onClose,
 }: TehillimChapterModalProps) {
   const [mounted, setMounted] = useState(false);
   const [filter, setFilter] = useState("");
-  const [tab, setTab] = useState<ChapterTab>("all");
+  const [tab, setTab] = useState<ChapterTab>(initialTab);
 
   useEffect(() => {
     setMounted(true);

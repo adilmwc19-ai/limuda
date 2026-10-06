@@ -196,6 +196,7 @@ export default function StudyTehillimClient() {
   const [setDayMsg, setSetDayMsg]   = useState<string | null>(null);
   const [tocOpen, setTocOpen]       = useState(false);
   const [chapterModalOpen, setChapterModalOpen] = useState(false);
+  const [chapterModalInitialTab, setChapterModalInitialTab] = useState<"all" | "favorites">("all");
   const [activeBookmark, setActiveBookmark] = useState<TehillimBookmark | null>(null);
   const [highlightedPsalm, setHighlightedPsalm] = useState<number | null>(null);
   const [initialized, setInitialized] = useState(false);
@@ -356,6 +357,11 @@ export default function StudyTehillimClient() {
   // ── Quick chapter selector ──────────────────────────────────────────────────
   // Selecting a specific psalm from the full 1–150 grid switches into
   // single-chapter mode, showing only that psalm — not its whole daily group.
+
+  function openChapterModal(tab: "all" | "favorites") {
+    setChapterModalInitialTab(tab);
+    setChapterModalOpen(true);
+  }
 
   function handleSelectChapter(psalmNumber: number) {
     resetScroll();
@@ -567,17 +573,35 @@ export default function StudyTehillimClient() {
       {/* ── Header ── */}
       <StudyHeader
         headerActions={
-          <button
-            onClick={() => setTocOpen(true)}
-            title="תוכן עניינים"
-            aria-label="תוכן עניינים"
-            className={HEADER_ICON_BUTTON_CLASS}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-              <line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" />
-              <line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" />
-            </svg>
-          </button>
+          <>
+            <button
+              onClick={() => openChapterModal("favorites")}
+              title="פרקים מועדפים"
+              aria-label={`פרקים מועדפים${favorites.length > 0 ? ` (${favorites.length})` : ""}`}
+              className={`relative ${HEADER_ICON_BUTTON_CLASS}`}
+            >
+              <Star width={16} height={16} strokeWidth={2} aria-hidden="true" />
+              {favorites.length > 0 && (
+                <span
+                  aria-hidden="true"
+                  className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-amber-400 px-1 text-[10px] font-bold leading-none text-blue-950"
+                >
+                  {favorites.length}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setTocOpen(true)}
+              title="תוכן עניינים"
+              aria-label="תוכן עניינים"
+              className={HEADER_ICON_BUTTON_CLASS}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                <line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" />
+                <line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" />
+              </svg>
+            </button>
+          </>
         }
       />
 
@@ -593,7 +617,7 @@ export default function StudyTehillimClient() {
               paceMode === "global" && <span className={HEADER_BADGE_CLASS}>לפי יום בחודש</span>
             )
           }
-          onTitleClick={() => setChapterModalOpen(true)}
+          onTitleClick={() => openChapterModal("all")}
           titleClickLabel="בחירת פרק"
           toolbar={
             viewMode === "day" && (
@@ -636,6 +660,31 @@ export default function StudyTehillimClient() {
             )
           }
         />
+
+        {favorites.length > 0 && (
+          <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50/60 p-4 dark:border-amber-800/60 dark:bg-amber-950/20">
+            <h2 className="mb-2.5 flex items-center justify-center gap-1.5 text-sm font-bold text-amber-800 dark:text-amber-300">
+              <Star width={14} height={14} strokeWidth={2} fill="currentColor" aria-hidden="true" />
+              פרקים מועדפים
+            </h2>
+            <div className="flex flex-wrap justify-center gap-2" role="list">
+              {favorites
+                .slice()
+                .sort((a, b) => a - b)
+                .map((n) => (
+                  <button
+                    key={n}
+                    role="listitem"
+                    onClick={() => handleSelectChapter(n)}
+                    aria-label={`קרא פרק ${toHebrewNumeral(n)}`}
+                    className="min-h-[36px] rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-sm font-medium text-amber-900 shadow-sm transition hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2 dark:border-amber-700 dark:bg-slate-900 dark:text-amber-200 dark:hover:bg-slate-800"
+                  >
+                    {toHebrewNumeral(n)}
+                  </button>
+                ))}
+            </div>
+          </div>
+        )}
 
         {viewMode === "day" && (
           <p className="-mt-4 mb-6 text-center text-sm text-slate-400">{dayModeLabel}</p>
@@ -733,6 +782,7 @@ export default function StudyTehillimClient() {
           currentChapterFrom={viewMode === "chapter" ? viewingChapter : info.fromPsalm}
           currentChapterTo={viewMode === "chapter" ? viewingChapter : info.toPsalm}
           favorites={favorites}
+          initialTab={chapterModalInitialTab}
           onSelect={handleSelectChapter}
           onClose={() => setChapterModalOpen(false)}
         />
