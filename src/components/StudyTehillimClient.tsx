@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { Star } from "lucide-react";
 import { auth, db } from "@/lib/firebase";
 import StudyHeader from "@/components/StudyHeader";
 import StudyTitleHeader, { StudyBottomNav } from "@/components/StudyTitleHeader";
@@ -30,6 +31,7 @@ import {
 } from "@/lib/sefaria";
 import { useScrollPositionRestore } from "@/hooks/useScrollPositionRestore";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
+import { useTehillimFavorites } from "@/hooks/useTehillimFavorites";
 
 // ─── Psalm 119 verse grouping (8 verses per letter of the alef-bet) ───────────
 
@@ -197,6 +199,7 @@ export default function StudyTehillimClient() {
   const [activeBookmark, setActiveBookmark] = useState<TehillimBookmark | null>(null);
   const [highlightedPsalm, setHighlightedPsalm] = useState<number | null>(null);
   const [initialized, setInitialized] = useState(false);
+  const { favorites, isFavorite, toggleFavorite } = useTehillimFavorites();
 
   // Derived "today" based on the Hebrew calendar (pure/synchronous — no network call)
   const currentHebrew = getCurrentHebrewDayOfMonth();
@@ -457,31 +460,50 @@ export default function StudyTehillimClient() {
       >
         <div className="mb-3 flex items-center justify-between gap-2">
           <h3 className="text-lg font-bold text-blue-900">תהלים פרק {toHebrewNumeral(psalm.number)}</h3>
-          {user && (
+          <div className="flex shrink-0 items-center gap-0.5">
             <button
-              onClick={() => toggleBookmark(psalm.number)}
-              title="עצרתי כאן"
-              aria-label={isBookmarked ? "בטל סימנייה" : "סמן כמקום שעצרתי"}
-              className={`flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-lg p-2.5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 ${
-                isBookmarked
-                  ? "text-blue-600 dark:text-blue-400"
-                  : "text-slate-300 hover:text-blue-400"
+              onClick={() => toggleFavorite(psalm.number)}
+              title={isFavorite(psalm.number) ? "הסר ממועדפים" : "הוסף למועדפים"}
+              aria-label={isFavorite(psalm.number) ? "הסר ממועדפים" : "הוסף למועדפים"}
+              className={`flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2.5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 ${
+                isFavorite(psalm.number)
+                  ? "text-amber-500 dark:text-amber-400"
+                  : "text-slate-300 hover:text-amber-400"
               }`}
             >
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill={isBookmarked ? "currentColor" : "none"}
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M6 3.75A1.75 1.75 0 0 1 7.75 2h8.5A1.75 1.75 0 0 1 18 3.75V21l-6-3.6L6 21V3.75Z" />
-              </svg>
+              <Star
+                width={18}
+                height={18}
+                strokeWidth={2}
+                fill={isFavorite(psalm.number) ? "currentColor" : "none"}
+              />
             </button>
-          )}
+            {user && (
+              <button
+                onClick={() => toggleBookmark(psalm.number)}
+                title="עצרתי כאן"
+                aria-label={isBookmarked ? "בטל סימנייה" : "סמן כמקום שעצרתי"}
+                className={`flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2.5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 ${
+                  isBookmarked
+                    ? "text-blue-600 dark:text-blue-400"
+                    : "text-slate-300 hover:text-blue-400"
+                }`}
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill={isBookmarked ? "currentColor" : "none"}
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M6 3.75A1.75 1.75 0 0 1 7.75 2h8.5A1.75 1.75 0 0 1 18 3.75V21l-6-3.6L6 21V3.75Z" />
+                </svg>
+              </button>
+            )}
+          </div>
         </div>
         {psalm.number === 119 ? (
           <div className="space-y-6">
@@ -710,6 +732,7 @@ export default function StudyTehillimClient() {
         <TehillimChapterModal
           currentChapterFrom={viewMode === "chapter" ? viewingChapter : info.fromPsalm}
           currentChapterTo={viewMode === "chapter" ? viewingChapter : info.toPsalm}
+          favorites={favorites}
           onSelect={handleSelectChapter}
           onClose={() => setChapterModalOpen(false)}
         />
