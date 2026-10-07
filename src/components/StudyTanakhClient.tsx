@@ -471,7 +471,7 @@ export default function StudyTanakhClient() {
               {!isCurrentDay && <span className={HEADER_BADGE_CLASS}>צפייה</span>}
             </div>
             <div className="mt-3 inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-xl font-semibold text-blue-700 dark:border-slate-700 dark:bg-slate-800/60 dark:text-blue-300">
-              פרק {dayInfo.chapter}
+              פרק {toHebrew(dayInfo.chapter)}
             </div>
             <p className="mt-2 text-sm text-slate-400">
               {dayInfo.book.sefariaName} {dayInfo.chapter} &bull; יום {viewingDay} מתוך {TOTAL_DAYS}
