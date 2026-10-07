@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { SlidersHorizontal } from "lucide-react";
+import { LogOut, SlidersHorizontal } from "lucide-react";
 import CalendarReminderModal, { CalendarReminderButton } from "@/components/CalendarReminderModal";
 import ShareButton from "@/components/ShareButton";
 import ReadingSettingsButton from "@/components/ReadingSettingsModal";
@@ -338,25 +338,30 @@ export default function HomeClient() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col bg-slate-50 dark:bg-slate-950">
+    <main className="flex min-h-screen w-full flex-col overflow-x-hidden bg-slate-50 dark:bg-slate-950">
       {/* Header */}
       <header
-        className={`sticky top-0 z-50 bg-blue-950 px-6 shadow-md transition-transform duration-300 ease-in-out dark:bg-slate-900 ${
+        className={`sticky top-0 z-50 w-full max-w-full overflow-x-hidden bg-blue-950 px-3 shadow-md transition-transform duration-300 ease-in-out dark:bg-slate-900 sm:px-6 ${
           headerHidden ? "-translate-y-full" : "translate-y-0"
         }`}
       >
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between md:h-16">
-          <h1 className="text-xl font-bold tracking-tight text-white md:text-2xl">לימודא</h1>
-          <div className="flex items-center gap-3">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 md:h-16">
+          <h1 className="shrink-0 text-xl font-bold tracking-tight text-white md:text-2xl">לימודא</h1>
+          <div className="flex min-w-0 shrink items-center gap-1 sm:gap-3">
             {user && (
               <>
                 <CalendarReminderButton onClick={() => setReminderOpen(true)} />
-                <span className="text-sm text-blue-200">{user.displayName}</span>
+                <span className="hidden max-w-[90px] truncate text-sm text-blue-200 sm:inline-block sm:max-w-[160px]">
+                  {user.displayName}
+                </span>
                 <button
                   onClick={handleSignOut}
-                  className="rounded-lg bg-blue-800 px-4 py-1.5 text-sm text-white transition hover:bg-blue-700 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+                  title="התנתק"
+                  aria-label="התנתק"
+                  className="inline-flex min-h-[36px] min-w-[36px] items-center justify-center gap-1.5 rounded-lg bg-blue-800 px-2 text-sm text-white transition hover:bg-blue-700 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 sm:px-4 sm:py-1.5"
                 >
-                  התנתק
+                  <LogOut className="h-4 w-4 sm:hidden" aria-hidden="true" />
+                  <span className="hidden sm:inline">התנתק</span>
                 </button>
               </>
             )}

@@ -88,7 +88,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
-      <body className="min-h-full flex flex-col bg-slate-50 font-sans text-slate-800 dark:bg-slate-900 dark:text-zinc-100">
+      <body className="min-h-full w-full flex flex-col overflow-x-hidden bg-slate-50 font-sans text-slate-800 dark:bg-slate-900 dark:text-zinc-100">
         <ReadingProvider>{children}</ReadingProvider>
         <PwaUpdatePrompt />
       </body>
