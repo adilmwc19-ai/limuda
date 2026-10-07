@@ -16,7 +16,14 @@ const SEG_ACTIVE = "bg-blue-900 text-white";
 const SEG_INACTIVE =
   "bg-white text-blue-900 hover:bg-blue-50 dark:bg-slate-800 dark:text-blue-200 dark:hover:bg-slate-700";
 
-export default function ReadingSettingsButton() {
+interface ReadingSettingsButtonProps {
+  /** Override the button's accessible name (defaults to "הגדרות תצוגה"). */
+  ariaLabel?: string;
+}
+
+export default function ReadingSettingsButton({
+  ariaLabel = "הגדרות תצוגה",
+}: ReadingSettingsButtonProps) {
   const { fontSize, fontFamily, theme, setFontSize, setFontFamily, setTheme } = useReading();
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -41,8 +48,8 @@ export default function ReadingSettingsButton() {
     <div ref={wrapperRef} className="relative">
       <button
         onClick={() => setOpen((o) => !o)}
-        title="הגדרות תצוגה"
-        aria-label="הגדרות תצוגה"
+        title={ariaLabel}
+        aria-label={ariaLabel}
         aria-expanded={open}
         className={`${HEADER_ICON_BUTTON_CLASS} text-base font-bold`}
       >

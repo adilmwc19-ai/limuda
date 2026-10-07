@@ -5,6 +5,7 @@ import Link from "next/link";
 import { SlidersHorizontal } from "lucide-react";
 import CalendarReminderModal, { CalendarReminderButton } from "@/components/CalendarReminderModal";
 import ShareButton from "@/components/ShareButton";
+import ReadingSettingsButton from "@/components/ReadingSettingsModal";
 import AboutModal from "@/components/AboutModal";
 import {
   signInWithPopup,
@@ -360,6 +361,7 @@ export default function HomeClient() {
               </>
             )}
             <ShareButton />
+            <ReadingSettingsButton ariaLabel="הגדרות תצוגה וגופן" />
           </div>
         </div>
       </header>
