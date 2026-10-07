@@ -18,13 +18,52 @@ const DESKTOP_MEDIA_QUERY = "(min-width: 768px)";
 // defense alongside sw.js's own no-cache headers and its embedded SW_VERSION.
 const SW_URL = `/sw.js?v=${process.env.NEXT_PUBLIC_BUILD_ID ?? "dev"}`;
 
+// iPadOS reports a Mac-like UA and a desktop-width viewport, so the media
+// query alone can't tell an iPad from an actual desktop browser. A touch
+// surface never belongs to a "real" desktop here, so it's excluded outright.
+const isTouchDevice = () =>
+  typeof window !== "undefined" && ("ontouchstart" in window || navigator.maxTouchPoints > 0);
+
+// If controllerchange doesn't fire promptly after SKIP_WAITING (observed on
+// iOS/iPadOS Safari), force the reload anyway rather than leaving the user
+// stuck on the old page with a toast that silently did nothing.
+const CONTROLLER_CHANGE_FALLBACK_MS = 500;
+
+// Once the user has acted on the prompt (updated or closed it) this tab
+// shouldn't ask again until it's closed — without this, a reload that lands
+// on a worker which is still (briefly) non-current would otherwise re-show
+// the same prompt in a loop.
+const SESSION_SUPPRESS_KEY = "pwa-update-prompt-handled";
+
+function readSuppressedFlag() {
+  try {
+    return sessionStorage.getItem(SESSION_SUPPRESS_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function writeSuppressedFlag() {
+  try {
+    sessionStorage.setItem(SESSION_SUPPRESS_KEY, "1");
+  } catch {
+    // Private browsing / storage disabled — worst case the prompt can
+    // reappear, which is no worse than not having the flag at all.
+  }
+}
+
 export default function PwaUpdatePrompt() {
   const [isDesktop, setIsDesktop] = useState(false);
   const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null);
-  const [dismissed, setDismissed] = useState(false);
+  const [dismissed, setDismissed] = useState(readSuppressedFlag);
   const lastCheckRef = useRef(0);
+  const refreshingRef = useRef(false);
 
   useEffect(() => {
+    if (isTouchDevice()) {
+      setIsDesktop(false);
+      return;
+    }
     const mql = window.matchMedia(DESKTOP_MEDIA_QUERY);
     setIsDesktop(mql.matches);
     const onChange = (event: MediaQueryListEvent) => setIsDesktop(event.matches);
@@ -37,7 +76,6 @@ export default function PwaUpdatePrompt() {
 
     let cancelled = false;
     let registration: ServiceWorkerRegistration | null = null;
-    let refreshing = false;
 
     function handleWaitingWorker(worker: ServiceWorker | null) {
       if (!cancelled && worker) setWaitingWorker(worker);
@@ -89,11 +127,12 @@ export default function PwaUpdatePrompt() {
     });
 
     function handleControllerChange() {
-      // Only the tab that actually triggered SKIP_WAITING should reload
-      // itself this way; without the flag a stray second firing would
-      // reload the page twice.
-      if (refreshing) return;
-      refreshing = true;
+      // Shared with the 500ms fallback timeout in handleUpdate() below —
+      // whichever fires first wins, and the other becomes a no-op. Without
+      // this guard a stray second firing (seen on iOS/iPadOS) would reload
+      // the page twice, which is what produced the infinite prompt loop.
+      if (refreshingRef.current) return;
+      refreshingRef.current = true;
       window.location.reload();
     }
     navigator.serviceWorker.addEventListener("controllerchange", handleControllerChange);
@@ -114,16 +153,31 @@ export default function PwaUpdatePrompt() {
     };
   }, []);
 
-  // Mobile stays completely silent: the worker still updates in the
-  // background, it just never surfaces a toast here.
+  // Mobile and touch devices (including iPad, which otherwise passes the
+  // desktop media query) stay completely silent: the worker still updates
+  // in the background, it just never surfaces a toast here.
   if (!isDesktop || !waitingWorker || dismissed) return null;
 
   function handleUpdate() {
     const worker = waitingWorker;
-    // Hide the toast immediately so it can't reappear from stale state —
-    // the actual reload is driven by the 'controllerchange' listener above.
+    // Hide the toast immediately so it can't reappear from stale state, and
+    // remember that this tab already acted so a reload landing mid-handoff
+    // doesn't re-show the same prompt.
     setWaitingWorker(null);
+    writeSuppressedFlag();
     worker?.postMessage({ type: "SKIP_WAITING" });
+    // Normally 'controllerchange' (registered above) drives the reload. If
+    // it doesn't fire promptly — seen on iOS/iPadOS — force it anyway.
+    window.setTimeout(() => {
+      if (refreshingRef.current) return;
+      refreshingRef.current = true;
+      window.location.reload();
+    }, CONTROLLER_CHANGE_FALLBACK_MS);
+  }
+
+  function handleDismiss() {
+    writeSuppressedFlag();
+    setDismissed(true);
   }
 
   return (
@@ -148,7 +202,7 @@ export default function PwaUpdatePrompt() {
         </button>
         <button
           type="button"
-          onClick={() => setDismissed(true)}
+          onClick={handleDismiss}
           aria-label="סגור"
           className="rounded-lg p-1.5 text-stone-400 transition hover:bg-stone-100 hover:text-stone-600 dark:hover:bg-stone-800 dark:hover:text-stone-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2"
         >
