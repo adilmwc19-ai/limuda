@@ -22,7 +22,7 @@ interface ReadingPrefs {
 export const READING_PREFS_STORAGE_KEY = "limuda-reading-prefs";
 
 const DEFAULT_PREFS: ReadingPrefs = {
-  fontSize: "normal",
+  fontSize: "xlarge",
   fontFamily: "modern",
   theme: "light",
 };

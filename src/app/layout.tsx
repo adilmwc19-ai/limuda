@@ -86,6 +86,9 @@ export default function RootLayout({
         {/* Legacy iOS Safari still looks for the apple-prefixed tag; Next's
             appleWebApp metadata field only emits mobile-web-app-capable. */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
+        {/* Google Translate otherwise rewrites Hebrew numerals/UI glyphs (e.g.
+            "Aa" -> "אא") and can mangle adjacent text nodes mid-sentence. */}
+        <meta name="google" content="notranslate" />
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body className="min-h-full w-full flex flex-col overflow-x-hidden bg-slate-50 font-sans text-slate-800 dark:bg-slate-900 dark:text-zinc-100">

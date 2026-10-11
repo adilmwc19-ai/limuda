@@ -7,6 +7,7 @@ import CalendarReminderModal, { CalendarReminderButton } from "@/components/Cale
 import ShareButton from "@/components/ShareButton";
 import ReadingSettingsButton from "@/components/ReadingSettingsModal";
 import AboutModal from "@/components/AboutModal";
+import PwaInstallPrompt from "@/components/PwaInstallPrompt";
 import {
   signInWithPopup,
   signOut,
@@ -478,6 +479,7 @@ export default function HomeClient() {
 
       <CalendarReminderModal open={reminderOpen} onClose={() => setReminderOpen(false)} />
       <AboutModal isOpen={aboutOpen} onClose={() => setAboutOpen(false)} />
+      <PwaInstallPrompt />
     </main>
   );
 }
