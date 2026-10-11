@@ -13,6 +13,7 @@ import { getDayInfo, getDayFromBookChapter, getNakhBooks, TOTAL_DAYS } from "@/l
 import { PARSHIYOT, getBookHebrewName } from "@/lib/tanakhStructure";
 import { fetchChapterWithCommentaries, type ChapterData } from "@/lib/sefaria";
 import { getCommentators } from "@/lib/commentators";
+import { useReading } from "@/context/ReadingContext";
 import { useScrollPositionRestore } from "@/hooks/useScrollPositionRestore";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 
@@ -264,6 +265,7 @@ function TocModal({ viewingDay, initialTab, initialParasha, initialBook, onSelec
 
 export default function StudyTanakhClient() {
   const router = useRouter();
+  const { fontSizeClass } = useReading();
   const [user, setUser] = useState<User | null>(null);
   const [activeDay, setActiveDay] = useState(0);
   const [viewingDay, setViewingDay] = useState(0);
@@ -536,8 +538,7 @@ export default function StudyTanakhClient() {
                         {toHebrew(verse.verseNumber)}
                       </span>
                       <p
-                        className="flex-1 text-right font-study font-normal text-slate-900 antialiased dark:text-slate-100"
-                        style={{ fontSize: "var(--reading-font-size, 38px)", lineHeight: "1.7" }}
+                        className={`flex-1 text-right font-study font-normal text-slate-900 antialiased dark:text-slate-100 ${fontSizeClass}`}
                         dir="rtl"
                         dangerouslySetInnerHTML={{ __html: verse.text }}
                       />

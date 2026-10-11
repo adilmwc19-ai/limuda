@@ -16,35 +16,9 @@ body {
 
 /* ─── Global reading settings overrides ──────────────────────────────── */
 
-/* fontSize drives this custom property, which the main reading text in each
-   study screen consumes directly via an inline style (fontSize: var(--reading-font-size,...)).
-   Inline styles win over any Tailwind utility class regardless of generated
-   stylesheet order, so this can never be shadowed by a stray text-xl/2xl/3xl
-   class on the same or a parent element. The md breakpoint is baked into the
-   variable itself (below) rather than into a separate Tailwind md: class, so
-   a single inline style handles both breakpoints. Scoping this way also means
-   the home page (which never references this variable) stays unaffected
-   without needing a separate container class. */
-html[data-font-size="normal"] {
-  --reading-font-size: 1.5rem;
-}
-html[data-font-size="large"] {
-  --reading-font-size: 1.875rem;
-}
-html[data-font-size="xlarge"] {
-  --reading-font-size: 2.375rem;
-}
-@media (min-width: 768px) {
-  html[data-font-size="normal"] {
-    --reading-font-size: 1.75rem;
-  }
-  html[data-font-size="large"] {
-    --reading-font-size: 2.25rem;
-  }
-  html[data-font-size="xlarge"] {
-    --reading-font-size: 2.875rem;
-  }
-}
+/* Font size is applied per-screen via Tailwind classes from
+   ReadingContext's FONT_SIZE_CLASSES map (see src/context/ReadingContext.tsx),
+   not via a global CSS variable or inline style. */
 
 html[data-font-family="traditional"] body,
 html[data-font-family="traditional"] p,

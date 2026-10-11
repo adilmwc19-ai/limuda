@@ -13,6 +13,14 @@ export type FontSize = "normal" | "large" | "xlarge";
 export type FontFamily = "modern" | "traditional";
 export type Theme = "light" | "dark";
 
+// Full, standard Tailwind utility classes per reading size — no inline
+// styles or custom CSS variables, so normal cascade/specificity rules apply.
+export const FONT_SIZE_CLASSES: Record<FontSize, string> = {
+  normal: "text-xl md:text-2xl leading-relaxed",
+  large: "text-2xl md:text-3xl leading-relaxed",
+  xlarge: "text-3xl md:text-4xl leading-relaxed",
+};
+
 interface ReadingPrefs {
   fontSize: FontSize;
   fontFamily: FontFamily;
@@ -47,6 +55,8 @@ function readStoredPrefs(): ReadingPrefs {
 }
 
 interface ReadingContextValue extends ReadingPrefs {
+  /** Tailwind classes for the current fontSize — apply directly as className. */
+  fontSizeClass: string;
   setFontSize: (size: FontSize) => void;
   setFontFamily: (family: FontFamily) => void;
   setTheme: (theme: Theme) => void;
@@ -97,7 +107,14 @@ export function ReadingProvider({ children }: { children: ReactNode }) {
 
   return (
     <ReadingContext.Provider
-      value={{ ...prefs, setFontSize, setFontFamily, setTheme, toggleTheme }}
+      value={{
+        ...prefs,
+        fontSizeClass: FONT_SIZE_CLASSES[prefs.fontSize],
+        setFontSize,
+        setFontFamily,
+        setTheme,
+        toggleTheme,
+      }}
     >
       {children}
     </ReadingContext.Provider>

@@ -22,6 +22,7 @@ import {
   type RambamLocation,
 } from "@/lib/rambamStructure";
 import { fetchRambamChapter, getDailyRambamRef, type RambamChapterData } from "@/lib/sefaria";
+import { useReading } from "@/context/ReadingContext";
 import { useScrollPositionRestore } from "@/hooks/useScrollPositionRestore";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 
@@ -209,6 +210,7 @@ interface RambamBookmark {
 }
 
 export default function StudyRambamClient() {
+  const { fontSizeClass } = useReading();
   const [user, setUser]                 = useState<User | null>(null);
   const [paceMode, setPaceMode]         = useState<PaceMode>("global");
   const [personalIndex, setPersonalIndex] = useState<number>(1); // Firestore rambamChapter
@@ -528,12 +530,11 @@ export default function StudyRambamClient() {
                     <div
                       key={h.number}
                       id={`rambam-halakhah-${h.number}`}
-                      className={`scroll-mt-24 flex items-start gap-2 rounded-xl border p-2 font-study font-normal text-slate-900 antialiased transition-colors dark:text-slate-100 ${
+                      className={`scroll-mt-24 flex items-start gap-2 rounded-xl border p-2 font-study font-normal text-slate-900 antialiased transition-colors dark:text-slate-100 ${fontSizeClass} ${
                         isBookmarked
                           ? "border-slate-200 border-r-4 border-r-blue-600 bg-blue-50/40 dark:border-r-blue-400 dark:bg-blue-950/30"
                           : "border-transparent"
                       } ${isHighlighted ? "study-highlight-pulse" : ""}`}
-                      style={{ fontSize: "var(--reading-font-size, 38px)", lineHeight: "1.7" }}
                     >
                       <p className="flex-1">
                         <span className="ml-2 font-bold text-blue-700 dark:text-blue-400">{toHebrew(h.number)}.</span>

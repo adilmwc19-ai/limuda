@@ -9,6 +9,7 @@ import { auth, db } from "@/lib/firebase";
 import StudyHeader from "@/components/StudyHeader";
 import DailyCompletionButton from "@/components/DailyCompletionButton";
 import { HEADER_BUTTON_CLASS, HEADER_ICON_BUTTON_CLASS, HEADER_BADGE_CLASS } from "@/components/studyHeaderStyles";
+import { useReading } from "@/context/ReadingContext";
 import {
   MASECHTOT,
   SEDARIM,
@@ -255,6 +256,7 @@ function TocModal({
 
 export default function StudyMishnahClient() {
   const router = useRouter();
+  const { fontSizeClass } = useReading();
   const [user, setUser] = useState<User | null>(null);
   const [activeDay, setActiveDay] = useState(0);
   const [viewingDay, setViewingDay] = useState(0);
@@ -518,8 +520,7 @@ export default function StudyMishnahClient() {
                         {toHebrew(mishnah.mishnahNumber)}
                       </span>
                       <p
-                        className="flex-1 text-right font-study font-normal text-slate-900 antialiased dark:text-slate-100"
-                        style={{ fontSize: "var(--reading-font-size, 38px)", lineHeight: "1.7" }}
+                        className={`flex-1 text-right font-study font-normal text-slate-900 antialiased dark:text-slate-100 ${fontSizeClass}`}
                         dir="rtl"
                         dangerouslySetInnerHTML={{ __html: mishnah.text }}
                       />
