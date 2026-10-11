@@ -24,16 +24,16 @@ body {
    Scoping this way also means the home page (which never references these
    variables) stays unaffected without needing a separate container class. */
 html[data-font-size="normal"] {
-  --reading-font-size: 1.25rem;
-  --reading-font-size-md: 1.5rem;
+  --reading-font-size: 1.5rem;
+  --reading-font-size-md: 1.75rem;
 }
 html[data-font-size="large"] {
-  --reading-font-size: 1.5rem;
-  --reading-font-size-md: 1.875rem;
-}
-html[data-font-size="xlarge"] {
   --reading-font-size: 1.875rem;
   --reading-font-size-md: 2.25rem;
+}
+html[data-font-size="xlarge"] {
+  --reading-font-size: 2.375rem;
+  --reading-font-size-md: 2.875rem;
 }
 
 html[data-font-family="traditional"] body,

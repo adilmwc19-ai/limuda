@@ -417,7 +417,7 @@ export default function StudyChofetzChaimClient() {
               ) : (
                 <div className="space-y-5">
                   {unitData.seifim.map((seif) => (
-                    <div key={seif.seif} className="space-y-2 font-study text-[length:var(--reading-font-size,1.5rem)] font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-[length:var(--reading-font-size-md,1.875rem)]">
+                    <div key={seif.seif} className="space-y-2 font-study text-[length:var(--reading-font-size,2.375rem)] font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-[length:var(--reading-font-size-md,2.875rem)]">
                       {seif.paragraphs.map((p, i) => (
                         <p key={i}>
                           {i === 0 && (
@@ -435,7 +435,7 @@ export default function StudyChofetzChaimClient() {
             ) : !unitData.paragraphs || unitData.paragraphs.length === 0 ? (
               <p className="py-8 text-center text-sm text-slate-400">אין טקסט זמין עבור יחידה זו</p>
             ) : (
-              <div className="space-y-4 font-study text-[length:var(--reading-font-size,1.5rem)] font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-[length:var(--reading-font-size-md,1.875rem)]">
+              <div className="space-y-4 font-study text-[length:var(--reading-font-size,2.375rem)] font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-[length:var(--reading-font-size-md,2.875rem)]">
                 {unitData.paragraphs.map((p, i) => (
                   <p key={i}>{p}</p>
                 ))}

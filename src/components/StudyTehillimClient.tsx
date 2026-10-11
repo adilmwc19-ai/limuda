@@ -518,7 +518,7 @@ export default function StudyTehillimClient() {
                 <h4 className="mb-2 text-center text-xs font-semibold tracking-wide text-blue-400">
                   — אות {group.letter}׳ —
                 </h4>
-                <div className="space-y-2 font-study text-[length:var(--reading-font-size,1.5rem)] font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-[length:var(--reading-font-size-md,1.875rem)]">
+                <div className="space-y-2 font-study text-[length:var(--reading-font-size,2.375rem)] font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-[length:var(--reading-font-size-md,2.875rem)]">
                   {group.verses.map((v) => (
                     <p key={v.verse}>
                       <span className="ml-2 text-xs font-bold text-blue-500 align-super">{v.verse}</span>
@@ -530,7 +530,7 @@ export default function StudyTehillimClient() {
             ))}
           </div>
         ) : (
-          <div className="space-y-2 font-study text-[length:var(--reading-font-size,1.5rem)] font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-[length:var(--reading-font-size-md,1.875rem)]">
+          <div className="space-y-2 font-study text-[length:var(--reading-font-size,2.375rem)] font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-[length:var(--reading-font-size-md,2.875rem)]">
             {psalm.verses.map((v) => (
               <p key={v.verse}>
                 <span className="ml-2 text-xs font-bold text-blue-500 align-super">{v.verse}</span>

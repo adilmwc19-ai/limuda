@@ -474,7 +474,7 @@ function AmudSection({ amud, label, commentator, displayMode, layoutMode }: Amud
   const tosafotComments = displayMode === "vilna" ? amud.tosafot.map(stripTalmudPunctuation) : amud.tosafot;
 
   const GemaraBlock = () => (
-    <div className="space-y-2 font-study text-[length:var(--reading-font-size,1.5rem)] font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-[length:var(--reading-font-size-md,1.875rem)]">
+    <div className="space-y-2 font-study text-[length:var(--reading-font-size,2.375rem)] font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-[length:var(--reading-font-size-md,2.875rem)]">
       {gemara.length === 0 ? (
         <p className="text-sm text-slate-400 text-center">הטקסט לא זמין</p>
       ) : (
