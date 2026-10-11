@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Heebo } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import { ReadingProvider, READING_PREFS_STORAGE_KEY } from "@/context/ReadingContext";
 import PwaUpdatePrompt from "@/components/PwaUpdatePrompt";
 
@@ -29,10 +30,22 @@ const taameyFrank = localFont({
   display: "swap",
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://limuda.vercel.app";
-const SITE_TITLE = "לימודא • מרחב לימוד יומי שקט";
+const SITE_URL = "https://limuda.co.il";
+const SITE_TITLE = 'לימודא | לימוד תורה יומי – דף יומי, תנ"ך 929, משנה ורמב"ם';
 const SITE_DESCRIPTION =
-  "לימוד יומי ללא רעשי רקע, בקצב שלך: תנ״ך, משנה, גמרא, רמב״ם, תהילים ועוד.";
+  "פלטפורמה נקייה ומהירה לקריאה ולימוד יומי: דף יומי, תנ\"ך 929, משנה יומית, ספר המצוות לרמב\"ם ותהילים. מותאם למובייל ולמחשב ללא הסחות דעת.";
+const SITE_KEYWORDS = [
+  "דף יומי",
+  "לימוד יומי",
+  "תנך 929",
+  "929",
+  "משנה יומית",
+  "רמבם יומי",
+  "הלכה יומית",
+  "תהילים יומי",
+  "פרק שירה",
+  "לימודא",
+];
 
 export const metadata: Metadata = {
   title: {
@@ -40,6 +53,7 @@ export const metadata: Metadata = {
     template: "%s | לימודא",
   },
   description: SITE_DESCRIPTION,
+  keywords: SITE_KEYWORDS,
   metadataBase: new URL(SITE_URL),
   openGraph: {
     title: SITE_TITLE,
@@ -95,6 +109,7 @@ export default function RootLayout({
         <ReadingProvider>{children}</ReadingProvider>
         <PwaUpdatePrompt />
       </body>
+      <GoogleAnalytics gaId="G-HM7TPZK6KK" />
     </html>
   );
 }
