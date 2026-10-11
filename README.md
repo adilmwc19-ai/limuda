@@ -1,5 +1,7 @@
 # לימודא (Limuda)
 
+> 🇮🇱 **לגרסה בעברית של מסמך זה, ראו [README.he.md](README.he.md)**
+
 ![Version](https://img.shields.io/badge/version-2.0.0-blue) ![Next.js](https://img.shields.io/badge/Next.js-16-black) ![PWA](https://img.shields.io/badge/PWA-ready-5A0FC8) ![License](https://img.shields.io/badge/license-MIT-green)
 
 **Limuda (לימודא)** is a modern Progressive Web App for daily Jewish text study — bringing Tanakh 929, Daily Mishnah, Daf Yomi, the Rambam's Mishneh Torah, Sefer HaMitzvot, Daily Tehillim, and more into a single distraction-free, fully accessible reading experience.
