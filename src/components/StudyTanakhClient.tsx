@@ -474,7 +474,7 @@ export default function StudyTanakhClient() {
               פרק {toHebrew(dayInfo.chapter)}
             </div>
             <p className="mt-2 text-sm text-slate-400">
-              {dayInfo.book.sefariaName} {dayInfo.chapter} &bull; יום {viewingDay} מתוך {TOTAL_DAYS}
+              יום {viewingDay} מתוך {TOTAL_DAYS}
             </p>
             <button
               onClick={handleOpenToc}
