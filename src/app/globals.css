@@ -16,9 +16,15 @@ body {
 
 /* ─── Global reading settings overrides ──────────────────────────────── */
 
-/* Font size is applied per-screen via Tailwind classes from
-   ReadingContext's FONT_SIZE_CLASSES map (see src/context/ReadingContext.tsx),
-   not via a global CSS variable or inline style. */
+html[data-font-size="normal"] {
+  font-size: 100%;
+}
+html[data-font-size="large"] {
+  font-size: 115%;
+}
+html[data-font-size="xlarge"] {
+  font-size: 130%;
+}
 
 html[data-font-family="traditional"] body,
 html[data-font-family="traditional"] p,

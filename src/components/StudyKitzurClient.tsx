@@ -10,7 +10,6 @@ import DailyCompletionButton from "@/components/DailyCompletionButton";
 import { HEADER_ICON_BUTTON_CLASS, CHIP_PRIMARY_CLASS, CHIP_SECONDARY_CLASS } from "@/components/studyHeaderStyles";
 import { TOTAL_KITZUR_SIMANIM, getKitzurSimanInfo } from "@/lib/kitzurStructure";
 import { fetchKitzurSiman, type KitzurSimanData } from "@/lib/sefaria";
-import { useReading } from "@/context/ReadingContext";
 import { useScrollPositionRestore } from "@/hooks/useScrollPositionRestore";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 
@@ -87,7 +86,6 @@ function TocModal({ currentSiman, onSelect, onClose }: TocModalProps) {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function StudyKitzurClient() {
-  const { fontSizeClass } = useReading();
   const [user, setUser]                   = useState<User | null>(null);
   const [authLoading, setAuthLoading]     = useState(true);
   const [personalSiman, setPersonalSiman] = useState<number>(DEFAULT_SIMAN); // Firestore kitzurSiman
@@ -335,9 +333,7 @@ export default function StudyKitzurClient() {
                           : "border-transparent"
                       }`}
                     >
-                      <p
-                        className={`flex-1 font-study font-normal text-slate-900 antialiased dark:text-slate-100 ${fontSizeClass}`}
-                      >
+                      <p className="flex-1 font-study text-2xl font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-3xl">
                         <span className="ml-1.5 font-bold text-blue-900">{i + 1}.</span> {p}
                       </p>
                       <button

@@ -27,7 +27,6 @@ import {
   type TalmudDafData,
   type TalmudAmudData,
 } from "@/lib/sefaria";
-import { useReading } from "@/context/ReadingContext";
 import { useScrollPositionRestore } from "@/hooks/useScrollPositionRestore";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 
@@ -468,7 +467,6 @@ interface AmudSectionProps {
 }
 
 function AmudSection({ amud, label, commentator, displayMode, layoutMode }: AmudSectionProps) {
-  const { fontSizeClass } = useReading();
   const gemara = displayMode === "vilna"
     ? amud.text.map(stripTalmudPunctuation)
     : amud.text;
@@ -476,9 +474,7 @@ function AmudSection({ amud, label, commentator, displayMode, layoutMode }: Amud
   const tosafotComments = displayMode === "vilna" ? amud.tosafot.map(stripTalmudPunctuation) : amud.tosafot;
 
   const GemaraBlock = () => (
-    <div
-      className={`space-y-2 font-study font-normal text-slate-900 antialiased dark:text-slate-100 ${fontSizeClass}`}
-    >
+    <div className="space-y-2 font-study text-2xl font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-3xl">
       {gemara.length === 0 ? (
         <p className="text-sm text-slate-400 text-center">הטקסט לא זמין</p>
       ) : (

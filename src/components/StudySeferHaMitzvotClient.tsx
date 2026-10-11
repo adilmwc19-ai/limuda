@@ -26,7 +26,6 @@ import {
   getDailySeferHaMitzvotRef,
   type SeferHaMitzvotItemData,
 } from "@/lib/sefaria";
-import { useReading } from "@/context/ReadingContext";
 import { useScrollPositionRestore } from "@/hooks/useScrollPositionRestore";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 
@@ -156,7 +155,6 @@ function TocModal({ currentGlobalIndex, initialSection, onSelect, onClose }: Toc
 type PaceMode = "global" | "personal";
 
 export default function StudySeferHaMitzvotClient() {
-  const { fontSizeClass } = useReading();
   const [user, setUser]                     = useState<User | null>(null);
   const [authLoading, setAuthLoading]       = useState(true);
   const [paceMode, setPaceMode]             = useState<PaceMode>("personal");
@@ -406,9 +404,7 @@ export default function StudySeferHaMitzvotClient() {
             {itemData.paragraphs.length === 0 ? (
               <p className="py-8 text-center text-sm text-slate-400">אין טקסט זמין עבור פריט זה</p>
             ) : (
-              <div
-                className={`space-y-4 font-study font-normal text-slate-900 antialiased dark:text-slate-100 ${fontSizeClass}`}
-              >
+              <div className="space-y-4 font-study text-2xl font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-3xl">
                 {itemData.paragraphs.map((p, i) => (
                   <p key={i}>{p}</p>
                 ))}

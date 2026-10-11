@@ -29,7 +29,6 @@ import {
   type TehillimPsalmData,
   type TehillimVerse,
 } from "@/lib/sefaria";
-import { useReading } from "@/context/ReadingContext";
 import { useScrollPositionRestore } from "@/hooks/useScrollPositionRestore";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 import { useTehillimFavorites } from "@/hooks/useTehillimFavorites";
@@ -179,7 +178,6 @@ interface TehillimBookmark {
 }
 
 export default function StudyTehillimClient() {
-  const { fontSizeClass } = useReading();
   const [user, setUser]             = useState<User | null>(null);
   const [paceMode, setPaceMode]     = useState<PaceMode>("global");
   const [personalDay, setPersonalDay] = useState<number>(1); // Firestore tehillimDay
@@ -520,9 +518,7 @@ export default function StudyTehillimClient() {
                 <h4 className="mb-2 text-center text-xs font-semibold tracking-wide text-blue-400">
                   — אות {group.letter}׳ —
                 </h4>
-                <div
-                  className={`space-y-2 font-study font-normal text-slate-900 antialiased dark:text-slate-100 ${fontSizeClass}`}
-                >
+                <div className="space-y-2 font-study text-2xl font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-3xl">
                   {group.verses.map((v) => (
                     <p key={v.verse}>
                       <span className="ml-2 text-xs font-bold text-blue-500 align-super">{v.verse}</span>
@@ -534,9 +530,7 @@ export default function StudyTehillimClient() {
             ))}
           </div>
         ) : (
-          <div
-            className={`space-y-2 font-study font-normal text-slate-900 antialiased dark:text-slate-100 ${fontSizeClass}`}
-          >
+          <div className="space-y-2 font-study text-2xl font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-3xl">
             {psalm.verses.map((v) => (
               <p key={v.verse}>
                 <span className="ml-2 text-xs font-bold text-blue-500 align-super">{v.verse}</span>

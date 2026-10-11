@@ -8,7 +8,6 @@ import StudyHeader from "@/components/StudyHeader";
 import StudyTitleHeader from "@/components/StudyTitleHeader";
 import { PEREK_SHIRAH_SECTIONS } from "@/lib/perekShirahStructure";
 import { fetchFullPerekShirah, type PerekShirahData } from "@/lib/sefaria";
-import { useReading } from "@/context/ReadingContext";
 import { useScrollPositionRestore } from "@/hooks/useScrollPositionRestore";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 
@@ -82,7 +81,6 @@ const NAV_BTN_WORD = "h-10 px-4 md:h-11 md:px-5";
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function StudyPerekShirahClient() {
-  const { fontSizeClass } = useReading();
   const [user, setUser]                     = useState<User | null>(null);
   const [loading, setLoading]               = useState(true);
   const [perekData, setPerekData]           = useState<PerekShirahData | null>(null);
@@ -273,9 +271,7 @@ export default function StudyPerekShirahClient() {
                 {section.lines.length === 0 ? (
                   <p className="py-4 text-center text-sm text-slate-400">אין טקסט זמין</p>
                 ) : (
-                  <div
-                    className={`space-y-4 font-study font-normal text-slate-900 antialiased dark:text-slate-100 ${fontSizeClass}`}
-                  >
+                  <div className="space-y-4 font-study text-2xl font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-3xl">
                     {section.lines.map((line, i) => (
                       <p key={i}>{formatPerekLine(line)}</p>
                     ))}

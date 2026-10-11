@@ -26,7 +26,6 @@ import {
   type ChofetzChaimUnit,
 } from "@/lib/chofetzChaimStructure";
 import { fetchChofetzChaimUnit, type ChofetzChaimUnitData } from "@/lib/sefaria";
-import { useReading } from "@/context/ReadingContext";
 import { useScrollPositionRestore } from "@/hooks/useScrollPositionRestore";
 import { useSwipeNavigation } from "@/hooks/useSwipeNavigation";
 
@@ -189,7 +188,6 @@ function TocModal({ currentUnitIndex, initialGate, onSelect, onClose }: TocModal
 type PaceMode = "daily" | "personal";
 
 export default function StudyChofetzChaimClient() {
-  const { fontSizeClass } = useReading();
   const [user, setUser]                   = useState<User | null>(null);
   const [authLoading, setAuthLoading]     = useState(true);
   const [paceMode, setPaceMode]           = useState<PaceMode>("daily");
@@ -419,10 +417,7 @@ export default function StudyChofetzChaimClient() {
               ) : (
                 <div className="space-y-5">
                   {unitData.seifim.map((seif) => (
-                    <div
-                      key={seif.seif}
-                      className={`space-y-2 font-study font-normal text-slate-900 antialiased dark:text-slate-100 ${fontSizeClass}`}
-                    >
+                    <div key={seif.seif} className="space-y-2 font-study text-2xl font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-3xl">
                       {seif.paragraphs.map((p, i) => (
                         <p key={i}>
                           {i === 0 && (
@@ -440,9 +435,7 @@ export default function StudyChofetzChaimClient() {
             ) : !unitData.paragraphs || unitData.paragraphs.length === 0 ? (
               <p className="py-8 text-center text-sm text-slate-400">אין טקסט זמין עבור יחידה זו</p>
             ) : (
-              <div
-                className={`space-y-4 font-study font-normal text-slate-900 antialiased dark:text-slate-100 ${fontSizeClass}`}
-              >
+              <div className="space-y-4 font-study text-2xl font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-3xl">
                 {unitData.paragraphs.map((p, i) => (
                   <p key={i}>{p}</p>
                 ))}
