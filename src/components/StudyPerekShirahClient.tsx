@@ -271,7 +271,10 @@ export default function StudyPerekShirahClient() {
                 {section.lines.length === 0 ? (
                   <p className="py-4 text-center text-sm text-slate-400">אין טקסט זמין</p>
                 ) : (
-                  <div className="space-y-4 font-study text-[length:var(--reading-font-size,2.375rem)] font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-[length:var(--reading-font-size-md,2.875rem)]">
+                  <div
+                    className="space-y-4 font-study font-normal text-slate-900 antialiased dark:text-slate-100"
+                    style={{ fontSize: "var(--reading-font-size, 38px)", lineHeight: "1.7" }}
+                  >
                     {section.lines.map((line, i) => (
                       <p key={i}>{formatPerekLine(line)}</p>
                     ))}

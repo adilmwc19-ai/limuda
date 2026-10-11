@@ -333,7 +333,10 @@ export default function StudyKitzurClient() {
                           : "border-transparent"
                       }`}
                     >
-                      <p className="flex-1 font-study text-[length:var(--reading-font-size,2.375rem)] font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-[length:var(--reading-font-size-md,2.875rem)]">
+                      <p
+                        className="flex-1 font-study font-normal text-slate-900 antialiased dark:text-slate-100"
+                        style={{ fontSize: "var(--reading-font-size, 38px)", lineHeight: "1.7" }}
+                      >
                         <span className="ml-1.5 font-bold text-blue-900">{i + 1}.</span> {p}
                       </p>
                       <button
