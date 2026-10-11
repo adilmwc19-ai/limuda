@@ -278,7 +278,7 @@ export default function StudyTalmudClient() {
 
   return (
     <main
-      className="flex min-h-screen flex-col bg-slate-50"
+      className="reading-scale flex min-h-screen flex-col bg-slate-50"
       dir="rtl"
       onTouchStart={swipeHandlers.onTouchStart}
       onTouchEnd={swipeHandlers.onTouchEnd}

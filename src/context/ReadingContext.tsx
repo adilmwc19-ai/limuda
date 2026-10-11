@@ -19,7 +19,7 @@ interface ReadingPrefs {
   theme: Theme;
 }
 
-export const READING_PREFS_STORAGE_KEY = "limuda-reading-prefs";
+export const READING_PREFS_STORAGE_KEY = "limuda_reading_prefs_v2";
 
 const DEFAULT_PREFS: ReadingPrefs = {
   fontSize: "xlarge",

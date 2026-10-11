@@ -401,7 +401,7 @@ export default function StudyMishnahClient() {
 
   return (
     <main
-      className="min-h-screen bg-slate-50"
+      className="reading-scale min-h-screen bg-slate-50"
       onTouchStart={swipeHandlers.onTouchStart}
       onTouchEnd={swipeHandlers.onTouchEnd}
       onTouchCancel={swipeHandlers.onTouchCancel}

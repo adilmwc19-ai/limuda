@@ -16,13 +16,15 @@ body {
 
 /* ─── Global reading settings overrides ──────────────────────────────── */
 
-html[data-font-size="normal"] {
+/* fontSize only scales study-screen content (.reading-scale); the home
+   page's root font-size must stay fixed so its compact layout is unaffected. */
+html[data-font-size="normal"] .reading-scale {
   font-size: 100%;
 }
-html[data-font-size="large"] {
+html[data-font-size="large"] .reading-scale {
   font-size: 115%;
 }
-html[data-font-size="xlarge"] {
+html[data-font-size="xlarge"] .reading-scale {
   font-size: 130%;
 }
 
