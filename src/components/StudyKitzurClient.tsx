@@ -244,7 +244,7 @@ export default function StudyKitzurClient() {
 
   return (
     <main
-      className="reading-scale flex min-h-screen flex-col bg-slate-50"
+      className="flex min-h-screen flex-col bg-slate-50"
       dir="rtl"
       onTouchStart={swipeHandlers.onTouchStart}
       onTouchEnd={swipeHandlers.onTouchEnd}
@@ -333,7 +333,7 @@ export default function StudyKitzurClient() {
                           : "border-transparent"
                       }`}
                     >
-                      <p className="flex-1 font-study text-2xl font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-3xl">
+                      <p className="flex-1 font-study text-[length:var(--reading-font-size,1.5rem)] font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-[length:var(--reading-font-size-md,1.875rem)]">
                         <span className="ml-1.5 font-bold text-blue-900">{i + 1}.</span> {p}
                       </p>
                       <button

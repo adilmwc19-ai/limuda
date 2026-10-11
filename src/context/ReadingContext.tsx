@@ -109,19 +109,3 @@ export function useReading(): ReadingContextValue {
   if (!ctx) throw new Error("useReading must be used within a ReadingProvider");
   return ctx;
 }
-
-// ─── Text scaling helper ───────────────────────────────────────────────────
-// A study screen passes the Tailwind text-size class it normally renders its
-// content at; this shifts it up by 1-2 steps per the user's fontSize choice,
-// and appends the traditional font-family class when selected.
-
-const SIZE_STEPS = ["text-sm", "text-base", "text-lg", "text-xl", "text-2xl", "text-3xl"] as const;
-type SizeStep = (typeof SIZE_STEPS)[number];
-
-export function useReadingTextClass(baseClass: SizeStep): string {
-  const { fontSize, fontFamily } = useReading();
-  const shift = fontSize === "xlarge" ? 2 : fontSize === "large" ? 1 : 0;
-  const idx = Math.min(SIZE_STEPS.length - 1, SIZE_STEPS.indexOf(baseClass) + shift);
-  const sizeClass = SIZE_STEPS[idx];
-  return fontFamily === "traditional" ? `${sizeClass} font-traditional` : sizeClass;
-}

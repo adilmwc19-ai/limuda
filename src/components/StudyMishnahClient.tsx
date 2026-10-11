@@ -401,7 +401,7 @@ export default function StudyMishnahClient() {
 
   return (
     <main
-      className="reading-scale min-h-screen bg-slate-50"
+      className="min-h-screen bg-slate-50"
       onTouchStart={swipeHandlers.onTouchStart}
       onTouchEnd={swipeHandlers.onTouchEnd}
       onTouchCancel={swipeHandlers.onTouchCancel}
@@ -518,7 +518,7 @@ export default function StudyMishnahClient() {
                         {toHebrew(mishnah.mishnahNumber)}
                       </span>
                       <p
-                        className="flex-1 text-right font-study text-2xl font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-3xl"
+                        className="flex-1 text-right font-study text-[length:var(--reading-font-size,1.5rem)] font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-[length:var(--reading-font-size-md,1.875rem)]"
                         dir="rtl"
                         dangerouslySetInnerHTML={{ __html: mishnah.text }}
                       />

@@ -429,7 +429,7 @@ export default function StudyRambamClient() {
 
   return (
     <main
-      className="reading-scale flex min-h-screen flex-col bg-slate-50"
+      className="flex min-h-screen flex-col bg-slate-50"
       dir="rtl"
       onTouchStart={swipeHandlers.onTouchStart}
       onTouchEnd={swipeHandlers.onTouchEnd}
@@ -528,7 +528,7 @@ export default function StudyRambamClient() {
                     <div
                       key={h.number}
                       id={`rambam-halakhah-${h.number}`}
-                      className={`scroll-mt-24 flex items-start gap-2 rounded-xl border p-2 font-study text-2xl font-normal leading-[1.7] text-slate-900 antialiased transition-colors dark:text-slate-100 md:text-3xl ${
+                      className={`scroll-mt-24 flex items-start gap-2 rounded-xl border p-2 font-study text-[length:var(--reading-font-size,1.5rem)] font-normal leading-[1.7] text-slate-900 antialiased transition-colors dark:text-slate-100 md:text-[length:var(--reading-font-size-md,1.875rem)] ${
                         isBookmarked
                           ? "border-slate-200 border-r-4 border-r-blue-600 bg-blue-50/40 dark:border-r-blue-400 dark:bg-blue-950/30"
                           : "border-transparent"

@@ -16,16 +16,24 @@ body {
 
 /* ─── Global reading settings overrides ──────────────────────────────── */
 
-/* fontSize only scales study-screen content (.reading-scale); the home
-   page's root font-size must stay fixed so its compact layout is unaffected. */
-html[data-font-size="normal"] .reading-scale {
-  font-size: 100%;
+/* fontSize drives these two custom properties, which the main reading text
+   in each study screen consumes directly via arbitrary-value Tailwind
+   classes (text-[length:var(--reading-font-size,...)]). A percentage
+   font-size on an ancestor wouldn't work here: Tailwind's text-* utilities
+   are rem-based, so they ignore an ancestor's computed font-size entirely.
+   Scoping this way also means the home page (which never references these
+   variables) stays unaffected without needing a separate container class. */
+html[data-font-size="normal"] {
+  --reading-font-size: 1.25rem;
+  --reading-font-size-md: 1.5rem;
 }
-html[data-font-size="large"] .reading-scale {
-  font-size: 115%;
+html[data-font-size="large"] {
+  --reading-font-size: 1.5rem;
+  --reading-font-size-md: 1.875rem;
 }
-html[data-font-size="xlarge"] .reading-scale {
-  font-size: 130%;
+html[data-font-size="xlarge"] {
+  --reading-font-size: 1.875rem;
+  --reading-font-size-md: 2.25rem;
 }
 
 html[data-font-family="traditional"] body,

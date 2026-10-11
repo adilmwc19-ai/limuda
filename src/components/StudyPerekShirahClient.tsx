@@ -202,7 +202,7 @@ export default function StudyPerekShirahClient() {
 
   return (
     <main
-      className="reading-scale flex min-h-screen flex-col bg-slate-50"
+      className="flex min-h-screen flex-col bg-slate-50"
       dir="rtl"
       onTouchStart={swipeHandlers.onTouchStart}
       onTouchEnd={swipeHandlers.onTouchEnd}
@@ -271,7 +271,7 @@ export default function StudyPerekShirahClient() {
                 {section.lines.length === 0 ? (
                   <p className="py-4 text-center text-sm text-slate-400">אין טקסט זמין</p>
                 ) : (
-                  <div className="space-y-4 font-study text-2xl font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-3xl">
+                  <div className="space-y-4 font-study text-[length:var(--reading-font-size,1.5rem)] font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-[length:var(--reading-font-size-md,1.875rem)]">
                     {section.lines.map((line, i) => (
                       <p key={i}>{formatPerekLine(line)}</p>
                     ))}

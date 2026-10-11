@@ -518,7 +518,7 @@ export default function StudyTehillimClient() {
                 <h4 className="mb-2 text-center text-xs font-semibold tracking-wide text-blue-400">
                   — אות {group.letter}׳ —
                 </h4>
-                <div className="space-y-2 font-study text-2xl font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-3xl">
+                <div className="space-y-2 font-study text-[length:var(--reading-font-size,1.5rem)] font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-[length:var(--reading-font-size-md,1.875rem)]">
                   {group.verses.map((v) => (
                     <p key={v.verse}>
                       <span className="ml-2 text-xs font-bold text-blue-500 align-super">{v.verse}</span>
@@ -530,7 +530,7 @@ export default function StudyTehillimClient() {
             ))}
           </div>
         ) : (
-          <div className="space-y-2 font-study text-2xl font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-3xl">
+          <div className="space-y-2 font-study text-[length:var(--reading-font-size,1.5rem)] font-normal leading-[1.7] text-slate-900 antialiased dark:text-slate-100 md:text-[length:var(--reading-font-size-md,1.875rem)]">
             {psalm.verses.map((v) => (
               <p key={v.verse}>
                 <span className="ml-2 text-xs font-bold text-blue-500 align-super">{v.verse}</span>
@@ -564,7 +564,7 @@ export default function StudyTehillimClient() {
 
   return (
     <main
-      className="reading-scale flex min-h-screen flex-col bg-slate-50"
+      className="flex min-h-screen flex-col bg-slate-50"
       dir="rtl"
       onTouchStart={swipeHandlers.onTouchStart}
       onTouchEnd={swipeHandlers.onTouchEnd}
