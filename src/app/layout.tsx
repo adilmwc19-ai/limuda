@@ -31,7 +31,7 @@ const taameyFrank = localFont({
 });
 
 const SITE_URL = "https://limuda.co.il";
-const SITE_TITLE = 'לימודא | לימוד תורה יומי – דף יומי, תנ"ך 929, משנה ורמב"ם';
+const SITE_TITLE = 'לימודא | לימוד תורה יומי – דף יומי, תנ"ך , משנה ורמב"ם';
 const SITE_DESCRIPTION =
   "פלטפורמה נקייה ומהירה לקריאה ולימוד יומי: דף יומי, תנ\"ך 929, משנה יומית, ספר המצוות לרמב\"ם ותהילים. מותאם למובייל ולמחשב ללא הסחות דעת.";
 const SITE_KEYWORDS = [
