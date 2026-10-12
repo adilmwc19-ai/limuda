@@ -3,6 +3,8 @@
  * either as a Google Calendar link or a standard .ics (iCalendar) file.
  */
 
+import { SITE_URL } from "@/lib/site";
+
 export const REMINDER_TITLE = "לימודא - זמן לימוד יומי";
 export const DEFAULT_REMINDER_TIME = "20:30";
 export const DEFAULT_REMINDER_DURATION_MINUTES = 15;
@@ -44,8 +46,7 @@ function formatUTCDateTime(d: Date): string {
 }
 
 function getReminderDescription(): string {
-  const origin = typeof window !== "undefined" ? window.location.origin : "";
-  return `זמן ללמוד בקצב שלך בלימודא: ${origin}`;
+  return `זמן ללמוד בקצב שלך בלימודא: ${SITE_URL}`;
 }
 
 function escapeICSText(text: string): string {

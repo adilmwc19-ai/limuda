@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const SITE_URL = "https://limuda.co.il";
+import { SITE_URL } from "@/lib/site";
 
 const STUDY_ROUTES = [
   "talmud",

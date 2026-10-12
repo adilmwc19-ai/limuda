@@ -4,7 +4,7 @@
 
 ![Version](https://img.shields.io/badge/version-2.0.0-blue) ![Next.js](https://img.shields.io/badge/Next.js-16-black) ![PWA](https://img.shields.io/badge/PWA-ready-5A0FC8) ![License](https://img.shields.io/badge/license-MIT-green)
 
-**Limuda (לימודא)** is a modern Progressive Web App for daily Jewish text study — bringing Tanakh 929, Daily Mishnah, Daf Yomi, the Rambam's Mishneh Torah, Sefer HaMitzvot, Daily Tehillim, and more into a single distraction-free, fully accessible reading experience.
+**Limuda (לימודא)** is a modern Progressive Web App for daily Jewish text study — bringing Tanakh, Daily Mishnah, Daf Yomi, the Rambam's Mishneh Torah, Sefer HaMitzvot, Daily Tehillim, and more into a single distraction-free, fully accessible reading experience.
 
 Built for learners who want their daily study to open instantly, work offline, and feel native on any device — desktop, Android, or iOS.
 
@@ -13,7 +13,7 @@ Built for learners who want their daily study to open instantly, work offline, a
 ## Key Features
 
 ### 📖 Diverse Study Tracks
-- **Tanakh 929**, **Daily Mishnah**, **Daf Yomi**, **Mishneh Torah (Rambam)**, **Sefer HaMitzvot**, **Daily Tehillim**, and additional tracks (Chofetz Chaim, Kitzur Shulchan Aruch, Perek Shirah)
+- **Tanakh**, **Daily Mishnah**, **Daf Yomi**, **Mishneh Torah (Rambam)**, **Sefer HaMitzvot**, **Daily Tehillim**, and additional tracks (Chofetz Chaim, Kitzur Shulchan Aruch, Perek Shirah)
 - Texts and translations synced directly from the [Sefaria API](https://www.sefaria.org/), with graceful fallbacks for offline reading
 
 ### 🎨 Personalized Reading Experience

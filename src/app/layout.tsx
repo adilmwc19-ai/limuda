@@ -5,6 +5,7 @@ import "./globals.css";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { ReadingProvider, READING_PREFS_STORAGE_KEY } from "@/context/ReadingContext";
 import PwaUpdatePrompt from "@/components/PwaUpdatePrompt";
+import { SITE_URL } from "@/lib/site";
 
 const heebo = Heebo({
   subsets: ["hebrew", "latin"],
@@ -30,15 +31,14 @@ const taameyFrank = localFont({
   display: "swap",
 });
 
-const SITE_URL = "https://limuda.co.il";
 const SITE_TITLE = 'לימודא | לימוד תורה יומי – דף יומי, תנ"ך , משנה ורמב"ם';
 const SITE_DESCRIPTION =
-  "פלטפורמה נקייה ומהירה לקריאה ולימוד יומי: דף יומי, תנ\"ך 929, משנה יומית, ספר המצוות לרמב\"ם ותהילים. מותאם למובייל ולמחשב ללא הסחות דעת.";
+  "פלטפורמה נקייה ומהירה לקריאה ולימוד יומי: דף יומי, תנ\"ך, משנה יומית, ספר המצוות לרמב\"ם ותהילים. מותאם למובייל ולמחשב ללא הסחות דעת.";
 const SITE_KEYWORDS = [
   "דף יומי",
   "לימוד יומי",
-  "תנך 929",
-  "929",
+  "תנך",
+  "תנ\"ך יומי",
   "משנה יומית",
   "רמבם יומי",
   "הלכה יומית",

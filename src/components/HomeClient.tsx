@@ -172,7 +172,7 @@ export default function HomeClient() {
           <StudyCard
             key={id}
             emoji="📖"
-            title='תנ"ך (929)'
+            title='תנ"ך'
             description='פרק יומי עם שכבות מקראות גדולות ומפרשים'
             currentDay={progress?.tanakh929Day ?? 1}
             totalDays={TOTAL_DAYS}
@@ -624,7 +624,7 @@ const TRACKS = [
   {
     id: "tanakh",
     emoji: "📖",
-    title: 'תנ"ך (929)',
+    title: 'תנ"ך',
     description: "פרק יומי עם מקראות גדולות ומפרשים",
   },
   {

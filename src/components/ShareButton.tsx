@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Share2 } from "lucide-react";
 import { HEADER_ICON_BUTTON_CLASS } from "@/components/studyHeaderStyles";
+import { SITE_URL, canonicalUrl } from "@/lib/site";
 
 /**
  * Quiet native-share button, styled to match the Aa button in the sticky
@@ -28,7 +29,7 @@ export default function ShareButton({ className = HEADER_ICON_BUTTON_CLASS }: Sh
     const shareData: ShareData = {
       title: document.title || "לימודא",
       text: "לימוד יומי בלימודא",
-      url: window.location.href,
+      url: canonicalUrl(window.location.pathname + window.location.search),
     };
 
     if (navigator.share) {
@@ -41,7 +42,7 @@ export default function ShareButton({ className = HEADER_ICON_BUTTON_CLASS }: Sh
     }
 
     try {
-      await navigator.clipboard.writeText(shareData.url ?? window.location.href);
+      await navigator.clipboard.writeText(shareData.url ?? SITE_URL);
       setCopied(true);
     } catch {
       // clipboard unavailable — nothing to do
