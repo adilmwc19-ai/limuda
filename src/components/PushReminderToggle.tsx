@@ -1,0 +1,109 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { onAuthStateChanged, type User } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import {
+  disableDailyReminders,
+  enableDailyReminders,
+  getDailyReminderStatus,
+  getPermissionState,
+  isPushSupported,
+} from "@/lib/notifications";
+
+const ERROR_MESSAGES: Record<string, string> = {
+  unsupported: "הדפדפן שלך אינו תומך בהתראות.",
+  denied: "ההתראות חסומות. ניתן לאפשר אותן בהגדרות הדפדפן.",
+  "no-token": "לא ניתן היה להפעיל התראות במכשיר זה.",
+  error: "אירעה שגיאה. נסה שוב מאוחר יותר.",
+};
+
+export default function PushReminderToggle() {
+  const [user, setUser] = useState<User | null>(null);
+  const [supported, setSupported] = useState<boolean | null>(null);
+  const [enabled, setEnabled] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => onAuthStateChanged(auth, setUser), []);
+
+  useEffect(() => {
+    let cancelled = false;
+    isPushSupported().then((ok) => {
+      if (!cancelled) setSupported(ok);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!user || !supported) return;
+    let cancelled = false;
+    getDailyReminderStatus(user.uid)
+      .then((on) => {
+        if (!cancelled) setEnabled(on);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [user, supported]);
+
+  if (!user || supported === null) return null;
+
+  async function handleToggle() {
+    if (!user || busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      if (enabled) {
+        await disableDailyReminders(user.uid);
+        setEnabled(false);
+      } else {
+        const result = await enableDailyReminders(user.uid);
+        if (result.ok) setEnabled(true);
+        else setError(ERROR_MESSAGES[result.reason]);
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const blocked = supported && getPermissionState() === "denied" && !enabled;
+
+  return (
+    <div className="mb-4 rounded-xl border border-blue-100 bg-blue-50/60 p-3 dark:border-slate-600 dark:bg-slate-900/40">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="text-sm font-semibold text-blue-950 dark:text-blue-200">התראת לימוד יומית</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            תזכורת בערב אם עוד לא סימנת שסיימת את הלימוד להיום.
+          </p>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={enabled}
+          aria-label="התראת לימוד יומית"
+          disabled={!supported || busy || blocked}
+          onClick={handleToggle}
+          className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 focus-visible:ring-offset-2 ${
+            enabled ? "bg-blue-900" : "bg-slate-300 dark:bg-slate-600"
+          }`}
+        >
+          <span
+            className={`inline-block h-5 w-5 rounded-full bg-white shadow transition-all ${
+              enabled ? "right-0.5" : "right-[1.375rem]"
+            } absolute`}
+          />
+        </button>
+      </div>
+      {(!supported || blocked || error) && (
+        <p className="mt-2 text-xs text-amber-700 dark:text-amber-400">
+          {error ?? ERROR_MESSAGES[supported ? "denied" : "unsupported"]}
+        </p>
+      )}
+    </div>
+  );
+}

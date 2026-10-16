@@ -1,7 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { isTrackCompletedToday, toggleTrackCompletionToday } from "@/lib/progress";
+import { doc, setDoc } from "firebase/firestore";
+import { auth, db } from "@/lib/firebase";
+import { isTrackCompletedToday, toggleTrackCompletionToday, todayDateString } from "@/lib/progress";
+
+// Mirrors the localStorage completion into Firestore so the server-side daily
+// reminder can skip users who already studied. Best-effort: never blocks or
+// breaks the button, and is a no-op when signed out.
+function recordCompletionForReminders(completed: boolean) {
+  const uid = auth.currentUser?.uid;
+  if (!uid) return;
+  setDoc(
+    doc(db, "users", uid),
+    { lastCompletionDate: completed ? todayDateString() : null },
+    { merge: true }
+  ).catch(() => {});
+}
 
 interface DailyCompletionButtonProps {
   trackId: string;
@@ -21,6 +36,7 @@ export default function DailyCompletionButton({ trackId, onAdvance }: DailyCompl
     const wasCompleted = completed;
     toggleTrackCompletionToday(trackId);
     setCompleted(!wasCompleted);
+    recordCompletionForReminders(!wasCompleted);
 
     if (!wasCompleted && onAdvance) {
       setAdvancing(true);

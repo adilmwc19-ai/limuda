@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Bell } from "lucide-react";
+import PushReminderToggle from "@/components/PushReminderToggle";
 import {
   DEFAULT_REMINDER_TIME,
   downloadICSReminder,
@@ -82,6 +83,8 @@ export default function CalendarReminderModal({
             ✕
           </button>
         </div>
+
+        <PushReminderToggle />
 
         <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">
           קבל תזכורת יומית קבועה ביומן שלך, בשעה שנוחה לך.
