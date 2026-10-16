@@ -4,11 +4,15 @@ import { useEffect, useState } from "react";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import {
+  DEFAULT_REMINDER_HOUR,
+  REMINDER_HOURS,
   disableDailyReminders,
   enableDailyReminders,
   getDailyReminderStatus,
   getPermissionState,
+  getReminderHour,
   isPushSupported,
+  setReminderHour,
 } from "@/lib/notifications";
 
 const ERROR_MESSAGES: Record<string, string> = {
@@ -24,6 +28,7 @@ export default function PushReminderToggle() {
   const [enabled, setEnabled] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hour, setHour] = useState(DEFAULT_REMINDER_HOUR);
 
   useEffect(() => onAuthStateChanged(auth, setUser), []);
 
@@ -45,6 +50,11 @@ export default function PushReminderToggle() {
         if (!cancelled) setEnabled(on);
       })
       .catch(() => {});
+    getReminderHour(user.uid)
+      .then((h) => {
+        if (!cancelled) setHour(h);
+      })
+      .catch(() => {});
     return () => {
       cancelled = true;
     };
@@ -61,7 +71,7 @@ export default function PushReminderToggle() {
         await disableDailyReminders(user.uid);
         setEnabled(false);
       } else {
-        const result = await enableDailyReminders(user.uid);
+        const result = await enableDailyReminders(user.uid, hour);
         if (result.ok) setEnabled(true);
         else setError(ERROR_MESSAGES[result.reason]);
       }
@@ -70,7 +80,20 @@ export default function PushReminderToggle() {
     }
   }
 
-  const blocked = supported && getPermissionState() === "denied" && !enabled;
+  async function handleHourChange(next: number) {
+    if (!user) return;
+    const previous = hour;
+    setHour(next);
+    setError(null);
+    try {
+      await setReminderHour(user.uid, next);
+    } catch {
+      setHour(previous);
+      setError(ERROR_MESSAGES.error);
+    }
+  }
+
+  const blocked =supported && getPermissionState() === "denied" && !enabled;
 
   return (
     <div className="mb-4 rounded-xl border border-blue-100 bg-blue-50/60 p-3 dark:border-slate-600 dark:bg-slate-900/40">
@@ -99,6 +122,25 @@ export default function PushReminderToggle() {
           />
         </button>
       </div>
+      {enabled && (
+        <div className="mt-3 flex items-center justify-between gap-3">
+          <label htmlFor="reminder-hour" className="text-xs text-slate-600 dark:text-slate-300">
+            שעת התזכורת
+          </label>
+          <select
+            id="reminder-hour"
+            value={hour}
+            onChange={(e) => handleHourChange(Number(e.target.value))}
+            className="rounded-lg border border-blue-200 bg-white px-2 py-1 text-sm text-blue-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+          >
+            {REMINDER_HOURS.map((h) => (
+              <option key={h} value={h}>
+                {String(h).padStart(2, "0")}:00
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
       {(!supported || blocked || error) && (
         <p className="mt-2 text-xs text-amber-700 dark:text-amber-400">
           {error ?? ERROR_MESSAGES[supported ? "denied" : "unsupported"]}

@@ -1,8 +1,11 @@
 import { FieldValue } from "firebase-admin/firestore";
 import { adminDb, adminMessaging } from "@/lib/firebase-admin";
 
-// Invoked daily by Vercel Cron (see vercel.json), which sends
-// `Authorization: Bearer $CRON_SECRET`.
+// Invoked hourly by an external scheduler (webhook) sending
+// `Authorization: Bearer $CRON_SECRET`. Only users whose chosen reminderHour
+// matches the current Israel hour are notified.
+
+const DEFAULT_REMINDER_HOUR = 20;
 
 const TITLE = "לימודא | זמן לימוד יומי";
 const BODY = "זה הזמן להמשיך את רצף הלימוד שלך להיום!";
@@ -29,14 +32,29 @@ export async function GET(request: Request) {
     const db = adminDb();
     const today = israelToday();
 
+    const currentIsraelHour = parseInt(
+      new Intl.DateTimeFormat("en-US", {
+        timeZone: "Asia/Jerusalem",
+        hour: "numeric",
+        hour12: false,
+      }).format(new Date()),
+      10
+    ) % 24; // some runtimes render midnight as "24"
+
+    // Firestore equality can't match a missing field, so users without a
+    // reminderHour (legacy) are fetched via the enabled flag and defaulted to 20.
     const snapshot = await db.collection("users").where("dailyReminderEnabled", "==", true).get();
 
     // token -> owning user ref, so stale tokens can be removed afterwards.
     const tokenOwners = new Map<string, FirebaseFirestore.DocumentReference>();
     let skippedCompleted = 0;
+    let usersDue = 0;
 
     for (const userDoc of snapshot.docs) {
       const data = userDoc.data();
+      const userHour = Number.isInteger(data.reminderHour) ? data.reminderHour : DEFAULT_REMINDER_HOUR;
+      if (userHour !== currentIsraelHour) continue;
+      usersDue++;
       if (data.lastCompletionDate === today || data.lastPerekShirahDate === today) {
         skippedCompleted++;
         continue;
@@ -88,7 +106,9 @@ export async function GET(request: Request) {
     return Response.json({
       ok: true,
       date: today,
+      hour: currentIsraelHour,
       usersEnabled: snapshot.size,
+      usersDue,
       skippedCompleted,
       sent,
       failed,

@@ -9,6 +9,20 @@ import { db } from "@/lib/firebase";
 
 const SW_URL = "/firebase-messaging-sw.js";
 
+export const DEFAULT_REMINDER_HOUR = 20;
+export const REMINDER_HOURS = Array.from({ length: 19 }, (_, i) => i + 5); // 05:00–23:00
+
+/** The user's saved reminder hour (Israel time), or the default when unset. */
+export async function getReminderHour(uid: string): Promise<number> {
+  const snap = await getDoc(doc(db, "users", uid));
+  const hour = snap.data()?.reminderHour;
+  return Number.isInteger(hour) && hour >= 0 && hour <= 23 ? hour : DEFAULT_REMINDER_HOUR;
+}
+
+export async function setReminderHour(uid: string, hour: number): Promise<void> {
+  await setDoc(doc(db, "users", uid), { reminderHour: hour }, { merge: true });
+}
+
 export type EnableResult =
   | { ok: true }
   | { ok: false; reason: "unsupported" | "denied" | "no-token" | "error" };
@@ -65,7 +79,10 @@ async function getDeviceToken(): Promise<string | null> {
  * user's document with dailyReminderEnabled: true. Must be called from a user
  * gesture (click) so the permission prompt is allowed.
  */
-export async function enableDailyReminders(uid: string): Promise<EnableResult> {
+export async function enableDailyReminders(
+  uid: string,
+  reminderHour: number = DEFAULT_REMINDER_HOUR
+): Promise<EnableResult> {
   if (!(await isPushSupported())) return { ok: false, reason: "unsupported" };
 
   try {
@@ -77,7 +94,7 @@ export async function enableDailyReminders(uid: string): Promise<EnableResult> {
 
     await setDoc(
       doc(db, "users", uid),
-      { fcmTokens: arrayUnion(token), dailyReminderEnabled: true },
+      { fcmTokens: arrayUnion(token), dailyReminderEnabled: true, reminderHour },
       { merge: true }
     );
     return { ok: true };
