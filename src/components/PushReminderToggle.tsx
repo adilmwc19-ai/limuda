@@ -29,6 +29,7 @@ export default function PushReminderToggle() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hour, setHour] = useState(DEFAULT_REMINDER_HOUR);
+  const [showHelp, setShowHelp] = useState(false);
 
   useEffect(() => onAuthStateChanged(auth, setUser), []);
 
@@ -101,7 +102,7 @@ export default function PushReminderToggle() {
         <div>
           <p className="text-sm font-semibold text-blue-950 dark:text-blue-200">התראת לימוד יומית</p>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            תזכורת בערב אם עוד לא סימנת שסיימת את הלימוד להיום.
+            תזכורת יומית בשעה שנבחרה אם עוד לא סיימת את הלימוד להיום.
           </p>
         </div>
         <button
@@ -141,10 +142,40 @@ export default function PushReminderToggle() {
           </select>
         </div>
       )}
-      {(!supported || blocked || error) && (
-        <p className="mt-2 text-xs text-amber-700 dark:text-amber-400">
-          {error ?? ERROR_MESSAGES[supported ? "denied" : "unsupported"]}
-        </p>
+      {blocked ? (
+        <div className="mt-2">
+          <p className="text-xs text-amber-700 dark:text-amber-400">
+            ההתראות חסומות במכשיר ולכן לא נוכל לשלוח תזכורת.
+          </p>
+          <button
+            type="button"
+            aria-expanded={showHelp}
+            aria-controls="push-help"
+            onClick={() => setShowHelp((v) => !v)}
+            className="mt-1 text-xs font-semibold text-blue-900 underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 dark:text-blue-300"
+          >
+            איך מתקנים את זה? 💡
+          </button>
+          {showHelp && (
+            <ol
+              id="push-help"
+              className="mt-2 list-inside list-decimal space-y-1 rounded-lg border border-blue-200 bg-white/70 p-3 text-xs text-slate-700 dark:border-slate-600 dark:bg-slate-800/60 dark:text-slate-200"
+            >
+              <li>לחצו על סמל ה-ⓘ או המנעול בשורת הכתובת למעלה.</li>
+              <li>בחרו ב&quot;הרשאות&quot; (Permissions) או &quot;הגדרות אתר&quot;.</li>
+              <li>שנו את &quot;התראות&quot; ל-מאופשר (Allow) ורעננו את הדף.</li>
+            </ol>
+          )}
+          {error && error !== ERROR_MESSAGES.denied && (
+            <p className="mt-2 text-xs text-amber-700 dark:text-amber-400">{error}</p>
+          )}
+        </div>
+      ) : (
+        (!supported || error) && (
+          <p className="mt-2 text-xs text-amber-700 dark:text-amber-400">
+            {error ?? ERROR_MESSAGES.unsupported}
+          </p>
+        )
       )}
     </div>
   );
