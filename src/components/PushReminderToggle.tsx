@@ -74,8 +74,10 @@ export default function PushReminderToggle() {
       } else {
         const result = await enableDailyReminders(user.uid, hour);
         if (result.ok) setEnabled(true);
-        else setError(ERROR_MESSAGES[result.reason]);
+        else setError(result.message ?? ERROR_MESSAGES[result.reason]);
       }
+    } catch (err) {
+      setError((err instanceof Error && err.message) || String(err));
     } finally {
       setBusy(false);
     }
@@ -88,9 +90,9 @@ export default function PushReminderToggle() {
     setError(null);
     try {
       await setReminderHour(user.uid, next);
-    } catch {
+    } catch (err) {
       setHour(previous);
-      setError(ERROR_MESSAGES.error);
+      setError((err instanceof Error && err.message) || String(err));
     }
   }
 

@@ -25,7 +25,8 @@ export async function setReminderHour(uid: string, hour: number): Promise<void> 
 
 export type EnableResult =
   | { ok: true }
-  | { ok: false; reason: "unsupported" | "denied" | "no-token" | "error" };
+  | { ok: false; reason: "unsupported" | "denied" | "no-token"; message?: undefined }
+  | { ok: false; reason: "error"; message: string };
 
 /** True when the browser can do Web Push (Notification + Service Worker + FCM). */
 export async function isPushSupported(): Promise<boolean> {
@@ -98,8 +99,12 @@ export async function enableDailyReminders(
       { merge: true }
     );
     return { ok: true };
-  } catch {
-    return { ok: false, reason: "error" };
+  } catch (err) {
+    return {
+      ok: false,
+      reason: "error",
+      message: (err instanceof Error && err.message) || String(err),
+    };
   }
 }
 
