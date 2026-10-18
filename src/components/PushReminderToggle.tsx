@@ -95,6 +95,10 @@ export default function PushReminderToggle() {
   }
 
   const blocked =supported && getPermissionState() === "denied" && !enabled;
+  const isStandalone =
+    typeof window !== "undefined" &&
+    (window.matchMedia("(display-mode: standalone)").matches ||
+      (window.navigator as unknown as { standalone?: boolean }).standalone === true);
 
   return (
     <div className="mb-4 rounded-xl border border-blue-100 bg-blue-50/60 p-3 dark:border-slate-600 dark:bg-slate-900/40">
@@ -161,9 +165,19 @@ export default function PushReminderToggle() {
               id="push-help"
               className="mt-2 list-inside list-decimal space-y-1 rounded-lg border border-blue-200 bg-white/70 p-3 text-xs text-slate-700 dark:border-slate-600 dark:bg-slate-800/60 dark:text-slate-200"
             >
-              <li>לחצו על סמל ה-ⓘ או המנעול בשורת הכתובת למעלה.</li>
-              <li>בחרו ב&quot;הרשאות&quot; (Permissions) או &quot;הגדרות אתר&quot;.</li>
-              <li>שנו את &quot;התראות&quot; ל-מאופשר (Allow) ורעננו את הדף.</li>
+              {isStandalone ? (
+                <>
+                  <li>צאו למסך הבית של הטלפון.</li>
+                  <li>לחצו לחיצה ארוכה על סמל האפליקציה לימודא ובחרו בפרטי יישום (סמל ⓘ).</li>
+                  <li>היכנסו ל&quot;התראות&quot;, אפשרו אותן ופתחו מחדש את האפליקציה.</li>
+                </>
+              ) : (
+                <>
+                  <li>לחצו על סמל המנעול או ההגדרות בשורת הכתובת למעלה.</li>
+                  <li>בחרו ב&quot;הרשאות&quot; או &quot;הגדרות אתר&quot;.</li>
+                  <li>שנו את &quot;התראות&quot; ל-מאופשר (Allow) ורעננו את הדף.</li>
+                </>
+              )}
             </ol>
           )}
           {error && error !== ERROR_MESSAGES.denied && (
