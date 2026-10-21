@@ -4,16 +4,21 @@ import { useEffect, useState } from "react";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import {
+  DEFAULT_REMINDER_DAYS,
   DEFAULT_REMINDER_HOUR,
   REMINDER_HOURS,
   disableDailyReminders,
   enableDailyReminders,
   getDailyReminderStatus,
   getPermissionState,
+  getReminderDays,
   getReminderHour,
   isPushSupported,
+  setReminderDays,
   setReminderHour,
 } from "@/lib/notifications";
+
+const DAY_LABELS = ["א", "ב", "ג", "ד", "ה", "ו", "ש"];
 
 const ERROR_MESSAGES: Record<string, string> = {
   unsupported: "הדפדפן שלך אינו תומך בהתראות.",
@@ -29,6 +34,7 @@ export default function PushReminderToggle() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hour, setHour] = useState(DEFAULT_REMINDER_HOUR);
+  const [days, setDays] = useState<number[]>(DEFAULT_REMINDER_DAYS);
   const [showHelp, setShowHelp] = useState(false);
 
   useEffect(() => onAuthStateChanged(auth, setUser), []);
@@ -56,6 +62,11 @@ export default function PushReminderToggle() {
         if (!cancelled) setHour(h);
       })
       .catch(() => {});
+    getReminderDays(user.uid)
+      .then((d) => {
+        if (!cancelled) setDays(d);
+      })
+      .catch(() => {});
     return () => {
       cancelled = true;
     };
@@ -72,7 +83,7 @@ export default function PushReminderToggle() {
         await disableDailyReminders(user.uid);
         setEnabled(false);
       } else {
-        const result = await enableDailyReminders(user.uid, hour);
+        const result = await enableDailyReminders(user.uid, hour, days);
         if (result.ok) setEnabled(true);
         else setError(result.message ?? ERROR_MESSAGES[result.reason]);
       }
@@ -92,6 +103,23 @@ export default function PushReminderToggle() {
       await setReminderHour(user.uid, next);
     } catch (err) {
       setHour(previous);
+      setError((err instanceof Error && err.message) || String(err));
+    }
+  }
+
+  async function handleDayToggle(day: number) {
+    if (!user) return;
+    const previous = days;
+    const next = previous.includes(day)
+      ? previous.filter((d) => d !== day)
+      : [...previous, day].sort((a, b) => a - b);
+    if (next.length === 0) return;
+    setDays(next);
+    setError(null);
+    try {
+      await setReminderDays(user.uid, next);
+    } catch (err) {
+      setDays(previous);
       setError((err instanceof Error && err.message) || String(err));
     }
   }
@@ -130,6 +158,7 @@ export default function PushReminderToggle() {
         </button>
       </div>
       {enabled && (
+        <>
         <div className="mt-3 flex items-center justify-between gap-3">
           <label htmlFor="reminder-hour" className="text-xs text-slate-600 dark:text-slate-300">
             שעת התזכורת
@@ -147,6 +176,32 @@ export default function PushReminderToggle() {
             ))}
           </select>
         </div>
+        <div className="mt-3 flex items-center justify-between gap-3">
+          <span id="reminder-days-label" className="text-xs text-slate-600 dark:text-slate-300">
+            ימי התזכורת
+          </span>
+          <div role="group" aria-labelledby="reminder-days-label" className="flex gap-1">
+            {DAY_LABELS.map((label, day) => {
+              const selected = days.includes(day);
+              return (
+                <button
+                  key={day}
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() => handleDayToggle(day)}
+                  className={`h-7 w-7 rounded-full text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/50 ${
+                    selected
+                      ? "bg-blue-900 text-white"
+                      : "border border-blue-200 bg-white text-slate-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                  }`}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        </>
       )}
       {blocked ? (
         <div className="mt-2">

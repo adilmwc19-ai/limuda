@@ -10,6 +10,7 @@ import { db } from "@/lib/firebase";
 const SW_URL = "/firebase-messaging-sw.js";
 
 export const DEFAULT_REMINDER_HOUR = 20;
+export const DEFAULT_REMINDER_DAYS = [0, 1, 2, 3, 4, 5]; // Sunday–Friday, no Shabbat
 export const REMINDER_HOURS = Array.from({ length: 19 }, (_, i) => i + 5); // 05:00–23:00
 
 /** The user's saved reminder hour (Israel time), or the default when unset. */
@@ -21,6 +22,17 @@ export async function getReminderHour(uid: string): Promise<number> {
 
 export async function setReminderHour(uid: string, hour: number): Promise<void> {
   await setDoc(doc(db, "users", uid), { reminderHour: hour }, { merge: true });
+}
+
+/** The user's saved reminder days (0 = Sunday … 6 = Saturday), or Sunday–Friday when unset. */
+export async function getReminderDays(uid: string): Promise<number[]> {
+  const snap = await getDoc(doc(db, "users", uid));
+  const days = snap.data()?.reminderDays;
+  return Array.isArray(days) ? days : [...DEFAULT_REMINDER_DAYS];
+}
+
+export async function setReminderDays(uid: string, days: number[]): Promise<void> {
+  await setDoc(doc(db, "users", uid), { reminderDays: days }, { merge: true });
 }
 
 export type EnableResult =
@@ -82,7 +94,8 @@ async function getDeviceToken(): Promise<string | null> {
  */
 export async function enableDailyReminders(
   uid: string,
-  reminderHour: number = DEFAULT_REMINDER_HOUR
+  reminderHour: number = DEFAULT_REMINDER_HOUR,
+  reminderDays: number[] = DEFAULT_REMINDER_DAYS
 ): Promise<EnableResult> {
   if (!(await isPushSupported())) return { ok: false, reason: "unsupported" };
 
@@ -95,7 +108,7 @@ export async function enableDailyReminders(
 
     await setDoc(
       doc(db, "users", uid),
-      { fcmTokens: arrayUnion(token), dailyReminderEnabled: true, reminderHour },
+      { fcmTokens: arrayUnion(token), dailyReminderEnabled: true, reminderHour, reminderDays },
       { merge: true }
     );
     return { ok: true };

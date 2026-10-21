@@ -6,6 +6,7 @@ import { adminDb, adminMessaging } from "@/lib/firebase-admin";
 // matches the current Israel hour are notified.
 
 const DEFAULT_REMINDER_HOUR = 20;
+const DEFAULT_REMINDER_DAYS = [0, 1, 2, 3, 4, 5]; // Sunday–Friday, no Shabbat
 
 const TITLE = "לימודא | זמן לימוד יומי";
 const BODY = "זה הזמן להמשיך את רצף הלימוד שלך להיום!";
@@ -41,6 +42,13 @@ export async function GET(request: Request) {
       10
     ) % 24; // some runtimes render midnight as "24"
 
+    const currentIsraelDayStr = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Jerusalem",
+      weekday: "short",
+    }).format(new Date());
+    const dayMap: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+    const currentIsraelDay = dayMap[currentIsraelDayStr];
+
     // Firestore equality can't match a missing field, so users without a
     // reminderHour (legacy) are fetched via the enabled flag and defaulted to 20.
     const snapshot = await db.collection("users").where("dailyReminderEnabled", "==", true).get();
@@ -54,6 +62,8 @@ export async function GET(request: Request) {
       const data = userDoc.data();
       const userHour = Number.isInteger(data.reminderHour) ? data.reminderHour : DEFAULT_REMINDER_HOUR;
       if (userHour !== currentIsraelHour) continue;
+      const userDays: number[] = Array.isArray(data.reminderDays) ? data.reminderDays : DEFAULT_REMINDER_DAYS;
+      if (!userDays.includes(currentIsraelDay)) continue;
       usersDue++;
       if (data.lastCompletionDate === today || data.lastPerekShirahDate === today) {
         skippedCompleted++;
