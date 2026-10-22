@@ -42,7 +42,9 @@ interface UserProgress {
   perekShirahStreak: number;
   activeTracks: string[];
   createdAt: string;
-  tanakhBookmark?: { day: number; verse: number } | null;
+  tanakhViewingDay?: number;
+  mishnahViewingDay?: number;
+  tanakhBookmark?:{ day: number; verse: number } | null;
   mishnahBookmark?: { day: number; mishnahIndex: number } | null;
   kitzurBookmark?: { siman: number | string; seifIndex: number } | null;
   rambamBookmark?: { bookId: "rambam"; chapterIndex: number; halakhahNumber: number } | null;
@@ -168,17 +170,18 @@ export default function HomeClient() {
     switch (id) {
       case "tanakh": {
         const bookmark = progress?.tanakhBookmark;
+        const tanakhDay = progress?.tanakhViewingDay ?? progress?.tanakh929Day ?? 1;
         return (
           <StudyCard
             key={id}
             emoji="📖"
             title='תנ"ך'
             description='פרק יומי עם שכבות מקראות גדולות ומפרשים'
-            currentDay={progress?.tanakh929Day ?? 1}
+            currentDay={tanakhDay}
             totalDays={TOTAL_DAYS}
             href="/study/tanakh"
             bookmarkLabel={
-              bookmark ? `המשך מפסוק ${toHebrewVerseNumeral(bookmark.verse)}` : undefined
+              bookmark && bookmark.day === tanakhDay ? `המשך מפסוק ${toHebrewVerseNumeral(bookmark.verse)}` : undefined
             }
             completedToday={completedToday.has(id)}
           />
@@ -186,17 +189,18 @@ export default function HomeClient() {
       }
       case "mishnah": {
         const mishnahBookmark = progress?.mishnahBookmark;
+        const mishnahDay = progress?.mishnahViewingDay ?? progress?.mishnah525Day ?? 1;
         return (
           <StudyCard
             key={id}
             emoji="📜"
             title="משנה יומית"
             description='פרק ביום מתוך ששת סדרי משנה עם ביאור ברטנורא ורמב"ם'
-            currentDay={progress?.mishnah525Day ?? 1}
+            currentDay={mishnahDay}
             totalDays={TOTAL_MISHNAH_DAYS}
             href="/study/mishnah"
             bookmarkLabel={
-              mishnahBookmark
+              mishnahBookmark && mishnahBookmark.day === mishnahDay
                 ? `המשך ממשנה ${toHebrewVerseNumeral(mishnahBookmark.mishnahIndex)}`
                 : undefined
             }
