@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronDown, Menu } from "lucide-react";
 import { onAuthStateChanged, type User } from "firebase/auth";
@@ -267,6 +267,7 @@ export default function StudyTanakhClient() {
   const [user, setUser] = useState<User | null>(null);
   const [activeDay, setActiveDay] = useState(0);
   const [viewingDay, setViewingDay] = useState(0);
+  const lastSavedViewingDay = useRef(0);
   const [chapterData, setChapterData] = useState<ChapterData | null>(null);
   const [pageLoading, setPageLoading] = useState(true);
   const [chapterLoading, setChapterLoading] = useState(false);
@@ -292,12 +293,27 @@ export default function StudyTanakhClient() {
       const savedBookmark = snap.data()?.tanakhBookmark as { day: number; verse: number } | undefined;
       setUser(fbUser);
       setActiveDay(userDay);
-      setViewingDay(userDay);
+      const savedViewing = snap.data()?.tanakhViewingDay as number | undefined;
+      const startDay =
+        typeof savedViewing === "number" && Number.isInteger(savedViewing) && savedViewing >= 1 && savedViewing <= TOTAL_DAYS
+          ? savedViewing
+          : userDay;
+      lastSavedViewingDay.current = startDay;
+      setViewingDay(startDay);
       setActiveBookmark(savedBookmark ?? null);
       setPageLoading(false);
     });
     return () => { cancelled = true; unsub(); };
   }, [router]);
+
+  // Persist the currently viewed book/chapter so it survives leaving the app
+  useEffect(() => {
+    if (!user || viewingDay === 0 || lastSavedViewingDay.current === viewingDay) return;
+    lastSavedViewingDay.current = viewingDay;
+    updateDoc(doc(db, "users", user.uid), { tanakhViewingDay: viewingDay }).catch((err: unknown) => {
+      console.error("[study] viewing position save failed:", err instanceof Error ? err.message : err);
+    });
+  }, [user, viewingDay]);
 
   // Auto-scroll to the bookmarked verse once its chapter has finished loading
   useEffect(() => {

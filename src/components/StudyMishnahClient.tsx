@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronDown, Menu } from "lucide-react";
 import { onAuthStateChanged, type User } from "firebase/auth";
@@ -258,6 +258,7 @@ export default function StudyMishnahClient() {
   const [user, setUser] = useState<User | null>(null);
   const [activeDay, setActiveDay] = useState(0);
   const [viewingDay, setViewingDay] = useState(0);
+  const lastSavedViewingDay = useRef(0);
   const [chapterData, setChapterData] = useState<MishnahChapterData | null>(null);
   const [pageLoading, setPageLoading] = useState(true);
   const [chapterLoading, setChapterLoading] = useState(false);
@@ -282,12 +283,27 @@ export default function StudyMishnahClient() {
       const savedBookmark = snap.data()?.mishnahBookmark as { day: number; mishnahIndex: number } | undefined;
       setUser(fbUser);
       setActiveDay(userDay);
-      setViewingDay(userDay);
+      const savedViewing = snap.data()?.mishnahViewingDay as number | undefined;
+      const startDay =
+        typeof savedViewing === "number" && Number.isInteger(savedViewing) && savedViewing >= 1 && savedViewing <= TOTAL_MISHNAH_DAYS
+          ? savedViewing
+          : userDay;
+      lastSavedViewingDay.current = startDay;
+      setViewingDay(startDay);
       setActiveBookmark(savedBookmark ?? null);
       setPageLoading(false);
     });
     return () => { cancelled = true; unsub(); };
   }, [router]);
+
+  // Persist the currently viewed masechet/chapter so it survives leaving the app
+  useEffect(() => {
+    if (!user || viewingDay === 0 || lastSavedViewingDay.current === viewingDay) return;
+    lastSavedViewingDay.current = viewingDay;
+    updateDoc(doc(db, "users", user.uid), { mishnahViewingDay: viewingDay }).catch((err: unknown) => {
+      console.error("[study] viewing position save failed:", err instanceof Error ? err.message : err);
+    });
+  }, [user, viewingDay]);
 
   // Auto-scroll to the bookmarked mishnah once its chapter has finished loading
   useEffect(() => {
