@@ -140,7 +140,7 @@ export default function TehillimChapterModal({
           <>
             <input
               type="text"
-              inputMode="numeric"
+              inputMode="search"
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
               placeholder="חיפוש לפי מספר או אות (למשל 119 או קיט)"
