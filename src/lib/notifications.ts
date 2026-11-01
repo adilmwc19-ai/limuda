@@ -145,3 +145,24 @@ export async function getDailyReminderStatus(uid: string): Promise<boolean> {
   const data = snap.data();
   return !!data?.dailyReminderEnabled && Array.isArray(data.fcmTokens) && data.fcmTokens.length > 0;
 }
+
+/**
+ * Silent recovery: if reminders are enabled for this user and the browser still
+ * has notification permission, re-fetch this device's FCM token (FCM returns a
+ * fresh one if the old one expired or was dropped) and make sure it is stored
+ * in `fcmTokens`. Never prompts; does nothing when permission isn't granted.
+ */
+export async function syncDailyReminderToken(uid: string): Promise<void> {
+  if (getPermissionState() !== "granted") return;
+  if (!(await isPushSupported())) return;
+
+  const ref = doc(db, "users", uid);
+  const data = (await getDoc(ref)).data();
+  if (!data?.dailyReminderEnabled) return;
+
+  const token = await getDeviceToken();
+  if (!token) return;
+  if (Array.isArray(data.fcmTokens) && data.fcmTokens.includes(token)) return;
+
+  await setDoc(ref, { fcmTokens: arrayUnion(token) }, { merge: true });
+}

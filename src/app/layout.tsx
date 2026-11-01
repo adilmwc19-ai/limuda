@@ -5,6 +5,7 @@ import "./globals.css";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { ReadingProvider, READING_PREFS_STORAGE_KEY } from "@/context/ReadingContext";
 import PwaUpdatePrompt from "@/components/PwaUpdatePrompt";
+import PushTokenSync from "@/components/PushTokenSync";
 import { SITE_URL } from "@/lib/site";
 
 const heebo = Heebo({
@@ -108,6 +109,7 @@ export default function RootLayout({
       <body className="min-h-full w-full flex flex-col overflow-x-hidden bg-slate-50 font-sans text-slate-800 dark:bg-slate-900 dark:text-zinc-100">
         <ReadingProvider>{children}</ReadingProvider>
         <PwaUpdatePrompt />
+        <PushTokenSync />
       </body>
       <GoogleAnalytics gaId="G-HM7TPZK6KK" />
     </html>
